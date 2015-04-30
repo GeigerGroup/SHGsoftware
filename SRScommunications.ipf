@@ -12,10 +12,6 @@ function openSRS()
 	sendSRS("")
 	string wasteChar
 	VDTRead2 /O=0.3 /Q  wasteChar
-	sendSRS("")
-	sendSRS("")
-	sendSRS("")
-	sendSRS("")
 	checkSRS()
 	
 	NewDataFolder/O/S root:SRSParameters
@@ -40,7 +36,7 @@ function checkSRS()
 	sendSRS("")
 	sendSRS("")
 	sendSRS("")
-	sendSRS("SS")
+	sendSRS("SS6")
 
 	variable responseNum = receiveSRS()
 	if (responseNum == 0)
