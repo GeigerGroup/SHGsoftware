@@ -5,6 +5,7 @@ Function startScan(fixedCont)
 	NVAR scanLength = $("root:SRSParameters:scanLength") //declare global variable for scanlength
 	NVAR recordA = $("root:SRSParameters:recordA") 
 	NVAR recordB = $("root:SRSParameters:recordB")
+	NVAR measurePower = $("root:SRSParameters:measurePower")
 	
 	if (fixedCont)
 		scanLength = INF
@@ -29,6 +30,7 @@ Function startScan(fixedCont)
 	
 
 	string AB = "B" //default channel
+	string power = "No"
 	
 	if (fixedCont == 0) 
 		Prompt localScanLength, "Set number of counts (must be integer): "
@@ -36,10 +38,11 @@ Function startScan(fixedCont)
 	Prompt tSet, "Set length of each count (must be between 0.02 and 90000s): "
 	Prompt dwellTime, "Set dwell time (must be between 0.002 and 60s): "
 	Prompt AB, "Choose A; B; or A and B:", popup "A;B;AB"
+	Prompt power, "Measure Power?", popup "Yes;No"
 	if (fixedCont == 0)
-		DoPrompt "Enter Scan Parameters", localScanLength, tSet, dwellTime,AB
+		DoPrompt "Enter Scan Parameters", localScanLength, tSet, dwellTime,AB,power
 	else
-		DoPrompt "Enter Scan Parameters", tSet,dwellTime,AB
+		DoPrompt "Enter Scan Parameters", tSet,dwellTime,AB,power
 	endif
 	if (V_flag)
 		return -1
@@ -81,6 +84,12 @@ Function startScan(fixedCont)
 	elseif(stringmatch(AB,"AB"))
 		recordA = 1
 		recordB = 1
+	endif
+	
+	if (stringmatch(power,"No"))
+		measurePower = 0
+	elseif (stringmatch(power,"Yes"))
+		measurePower = 1
 	endif
 		
 	startRecordingData()	
