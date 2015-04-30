@@ -4,6 +4,7 @@ function openSRS()
 	
 	VDT2/P=COM1 baud=19200,stopbits=2,databits=8,parity=0
 	VDTOperationsPort2 COM1
+	VDT2 KillIO
 	print "Communication with photon counter opened."
 	sendSRS("")
 	sendSRS("")
@@ -34,7 +35,7 @@ function openSRS()
 end
 	
 function checkSRS()
-	
+	VDT2 KillIO
 	sendSRS("")
 	sendSRS("")
 	sendSRS("")
@@ -63,7 +64,7 @@ end
 	 
 function receiveSRS()
 	String response
-	VDTRead2/T="\r\n" response
+	VDTRead2/O=3/T="\r\n" response
 	variable responseNum = str2num(response)
 	return responseNum	
 end
