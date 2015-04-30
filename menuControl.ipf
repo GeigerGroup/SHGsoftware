@@ -9,8 +9,8 @@ Menu "Photon Counter"
 	End
 	
 	Submenu "Scan"
-		"Start Fixed Length", startFixedLengthScan()
-		"Start Continuous", startContinuousScan()
+		"Start Fixed Length", startScan(0)
+		"Start Continuous", startScan(1)
 		"Pause", stopScan()
 		"Resume", resumeScan()
 		"Stop and Reset", resetScan()

@@ -65,8 +65,7 @@ function receiveSRS()
 	String response
 	VDTRead2/T="\r\n" response
 	variable responseNum = str2num(response)
-	return responseNum
-	
+	return responseNum	
 end
 
 
