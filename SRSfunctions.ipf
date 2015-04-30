@@ -3,6 +3,8 @@
 Function startScan(fixedCont)
 	variable fixedCont //variable to determine fixed or continuous. fixed = 0, continuous = 1
 	NVAR scanLength = $("root:SRSParameters:scanLength") //declare global variable for scanlength
+	NVAR recordA = $("root:SRSParameters:recordA") 
+	NVAR recordB = $("root:SRSParameters:recordB")
 	
 	if (fixedCont)
 		scanLength = INF
@@ -69,8 +71,19 @@ Function startScan(fixedCont)
 	
 	command = "CP2," + num2str(tSet/timeFactor)
 	sendSRS(command)
+	
+	if (stringmatch(AB,"A"))
+		recordA = 1
+		recordB = 0
+	elseif(stringmatch(AB,"B"))
+		recordA = 0
+		recordB = 1
+	elseif(stringmatch(AB,"AB"))
+		recordA = 1
+		recordB = 1
+	endif
 		
-	startRecordingData(AB)	
+	startRecordingData()	
 	sendSRS("CR")
 	sendSRS("CS")
 	

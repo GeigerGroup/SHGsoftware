@@ -29,10 +29,10 @@ function openSRS()
 	string/G timeInput
 	sendSRS("NP2000")	
 	sendSRS("NE1")
-		
-	SetDataFolder root:
-end
 
+	SetDataFolder root:	
+end
+	
 function checkSRS()
 	
 	sendSRS("")
