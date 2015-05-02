@@ -1,10 +1,14 @@
+function COMMSRS()
+	VDT2/P=COM1 baud=19200,stopbits=2,databits=8,parity=0
+	VDTOperationsPort2 COM1
+	VDT2 KillIO
+end
+
 function openSRS()
 	//initialize port
 	Init_NIDAQmx()
 	
-	VDT2/P=COM1 baud=19200,stopbits=2,databits=8,parity=0
-	VDTOperationsPort2 COM1
-	VDT2 KillIO
+	COMMSRS()
 	print "Communication with photon counter opened."
 	sendSRS("")
 	sendSRS("")
@@ -21,6 +25,7 @@ function openSRS()
 	variable/G recordB = 0
 	variable/G timeInterval = 1
 	variable/G measurePower = 0
+	variable/G powerScale = 1
 	string/G waveAname = "waveA"
 	string/G waveBname = "waveB"
 	string/G timeInput
@@ -69,6 +74,7 @@ function recallGPCParameters(saveNum)
 	variable saveNum
 	string command = "RC" + num2str(saveNum)
 	sendSRS(command)
+	sendSRS("CK10") //return to main menu
 end
 	
 

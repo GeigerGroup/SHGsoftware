@@ -6,6 +6,7 @@ Function startScan(fixedCont)
 	NVAR recordA = $("root:SRSParameters:recordA") 
 	NVAR recordB = $("root:SRSParameters:recordB")
 	NVAR measurePower = $("root:SRSParameters:measurePower")
+	NVAR powerScale = $("root:SRSParameters:powerScale")
 	
 	if (fixedCont)
 		scanLength = INF
@@ -23,7 +24,7 @@ Function startScan(fixedCont)
 	if (timeResponse == 0)
 		timeFactor = 1e-7
 	elseif (timeResponse == 3)
-		timeFactor = 1/(3e3) //trig time factor
+		timeFactor = 1/(4e3) //trig time factor
 	endif
 	sendSRS("CP2")
 	variable tSet = timeFactor*receiveSRS() //get tSet from last scan
@@ -38,7 +39,7 @@ Function startScan(fixedCont)
 	Prompt tSet, "Set length of each count (must be between 0.02 and 90000s): "
 	Prompt dwellTime, "Set dwell time (must be between 0.002 and 60s): "
 	Prompt AB, "Choose A; B; or A and B:", popup "A;B;AB"
-	Prompt power, "Measure Power?", popup "Yes;No"
+	Prompt power, "Measure Power?", popup "No;NIDAQ;OPAEPM"
 	if (fixedCont == 0)
 		DoPrompt "Enter Scan Parameters", localScanLength, tSet, dwellTime,AB,power
 	else
@@ -88,8 +89,17 @@ Function startScan(fixedCont)
 	
 	if (stringmatch(power,"No"))
 		measurePower = 0
-	elseif (stringmatch(power,"Yes"))
+	elseif (stringmatch(power,"NIDAQ"))
 		measurePower = 1
+		variable localPowerScale = powerScale
+		Prompt localPowerScale, "Enter Power Meter Range (in W): "
+		DoPrompt "Adjust Power Scale:", localPowerScale
+		if (V_flag)
+			return -1
+		endif
+		powerScale = localPowerScale
+	elseif (stringmatch(power,"OPAEPM"))
+		measurePower = 2
 	endif
 		
 	startRecordingData()	
@@ -105,18 +115,29 @@ Function startScan(fixedCont)
 end
 
 function resumeScan()
+	NVAR measurePower = $("root:SRSParameters:measurePower")
 	resumeRecordingData()
+	
+	if (measurePower == 1)
+	setupFastReadDAQ()
+	endif
+	
 	sendSRS("CS")
 
 end
 	 
 
 function stopScan()
+	NVAR measurePower = $("root:SRSParameters:measurePower")
 	sendSRS("CH")
 	stopRecordingdata()
+	if (measurePower == 1)
+	fDAQmx_ScanStop("Dev1")
+	endif
 end
 
 function resetScan()
+	NVAR measurePower = $("root:SRSParameters:measurePower")
 	string yesNo = "Yes"
 	Prompt yesNo, "Are you sure you want to stop and reset?", popup "Yes;No"
 	DoPrompt "Stop and Reset", yesNo
@@ -124,8 +145,13 @@ function resetScan()
 		return -1
 	endif
 	
+	
 	if (stringmatch(yesNo,"Yes"))
 		sendSRS("CR")
 		stopRecordingData()
+	endif
+	
+	if (measurePower == 1)
+	fDAQmx_ScanStop("Dev1") //default name change if multiple device or different name
 	endif
 end	

@@ -1,6 +1,10 @@
 #pragma rtGlobals=1 //use modern global access method
 //code partially from bart mcguyer, princeton university
 
+//######################################################################
+// Static Variables					(allow easy dynamic changes of code, but ONLY work for functions - not Macros!)
+Static strconstant ksNIDAQmxPath = "root:System:NIDAQmx"		//NIDAQ MX data folder location
+Static strconstant ksNIDAQmxPathParent = "root:System"			//Parent folder of data folder location
 
 Function setupFastReadDAQ()
 	
@@ -13,9 +17,9 @@ End
 Function getFastReadDAQ()
 	
 	SVAR DevName = $(ksNIDAQmxPath + ":mxDevName") //global device name
-	wave/N=1 waveTemp; //set up wave to hold one reading
+	make/O/N=1 waveTemp; //set up wave to hold one reading
 	
 	fDAQmx_AI_GetReader(DevName,waveTemp) //call NIDAQ function to get data in wave
 
-	return waveTemp[0] return value
+	return waveTemp[0] 
 End

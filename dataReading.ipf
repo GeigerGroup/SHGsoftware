@@ -5,6 +5,7 @@ function readDataSRS(s)
 	NVAR recordA = $("root:SRSParameters:recordA") 
 	NVAR recordB = $("root:SRSParameters:recordB")
 	NVAR measurePower = $("root:SRSParameters:measurePower")
+	NVAR powerScale = $("root:SRSParameters:powerScale")
 	NVAR scanLength = $("root:SRSParameters:scanLength")
 	NVAR pointNumber = $("root:SRSParameters:pointNumber")
 	NVAR timeInterval = $("root:SRSParameters:timeInterval") 
@@ -20,19 +21,25 @@ function readDataSRS(s)
 		if (recordB)
 			timeName = waveAname + waveBname + "_time"
 			wave timeWave = $(timeName)
+			if (measurePower > 0)
 			powerName = waveAname + waveBname + "_power"
 			wave powerWave = $(powerName)
+			endif
 		else
 			timeName = waveAname + "_time"
 			wave timeWave = $(timeName)
+			if (measurePower >0)
 			powerName = waveAname +  "_power"
 			wave powerWave = $(powerName)
+			endif
 		endif
 	elseif (recordB)
 		timeName = waveBname + "_time"
 		wave timeWave = $(timeName)
+		if (measurePower>0)
 		powerName = waveBname + "_power"
 		wave powerWave = $(powerName)
+		endif
 	endif
 	
 	sendSRS("SS1")
@@ -50,14 +57,21 @@ function readDataSRS(s)
 		make/n=1 tempTime = timeInterval*pointNumber
 		concatenate /NP/KILL{tempTime},timeWave
 		
-		if (measurePower)
-			make /n=50 tempPowerArray
+		if (measurePower > 0)
+			if (measurePower == 1)
+			make /n=200 tempPowerArray
 			variable ii;
-			for (ii = 0; ii<50;ii+=1)
-					tempPowerArray[ii] = nidaqRead(0)
+			for (ii = 0; ii<200;ii+=1)
+					tempPowerArray[ii] = getFastReadDAQ()
 			endfor
-			make /n=1 tempPower = mean(tempPowerArray)
+			make /n=1 tempPower = powerScale*mean(tempPowerArray)
 			KillWaves tempPowerArray
+			endif
+			if (measurePower == 2)
+			COMMPowerMeter()
+			make /n=1 tempPower = queryPowerMeter("ch query")
+			COMMSRS()
+			endif
 			concatenate /NP/KILL{tempPower},powerWave
 		endif
 
@@ -66,6 +80,10 @@ function readDataSRS(s)
 	
 	if (pointNumber > scanLength)
 		sendSRS("CH")
+		
+		if (measurePower == 1)
+		fDAQmx_ScanStop("Dev1") //default name change if multiple device or different name
+		endif
 		return -1
 	endif
 	
@@ -154,7 +172,7 @@ function startRecordingData()
 			Edit waveBothtime,waveA,waveB
 			Display waveA, waveB vs waveBothtime
 			
-			if (measurePower)
+			if (measurePower > 0)
 				powerName = waveAname + waveBname + "_power"
 				make /O/N=0 $(powerName)
 				wave waveBothpower = $(powerName)
@@ -174,12 +192,12 @@ function startRecordingData()
 			Edit waveAtime, waveA
 			Display waveA vs waveAtime
 			
-			if (measurePower)
+			if (measurePower > 0)
 				powerName = waveAname + "_power"
 				make /O/N=0 $(powerName)
 				wave waveApower = $(powerName)
 				AppendtoTable waveApower
-				AppendtoGraph/R waveApower vs waveBothtime
+				AppendtoGraph/R waveApower vs waveAtime
 			endif
 			print "Data from Channel A recorded in " + localAname
 		endif
@@ -191,12 +209,12 @@ function startRecordingData()
 		Edit waveBtime, waveB
 		Display waveB vs waveBtime
 		
-		if (measurePower)
+		if (measurePower > 0)
 			powerName = waveBname + "_power"
 			make /O/N=0 $(powerName)
 			wave waveBpower = $(powerName)
 			AppendtoTable waveBpower
-			AppendtoGraph/R waveBpower vs waveBothtime
+			AppendtoGraph/R waveBpower vs waveBtime
 		endif
 		
 		print "Data from Channel B recorded in " + localBname	
@@ -211,7 +229,7 @@ function startRecordingData()
 	if (timeResponse == 0)
 		timeFactor = 1e-7
 	elseif (timeResponse == 3)
-		timeFactor = 1/(3e3) //trig time factor
+		timeFactor = 1/(4e3) //trig time factor
 	endif
 	sendSRS("CP2")
 	variable tSet = timeFactor*receiveSRS()
@@ -222,6 +240,9 @@ function startRecordingData()
 		timeInterval = tSet + dwellTime
 	endif
 		
+	if (measurePower == 1)
+		setupFastReadDAQ()
+	endif
 	
 	pointNumber = 1
 	

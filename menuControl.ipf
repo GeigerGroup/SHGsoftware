@@ -8,6 +8,13 @@ Menu "Photon Counter"
 	"Close", closeSRS()
 	End
 	
+	Submenu "Stored Photon Counter Settings"
+	"GEO4: OPA- Juli, Alicia, Mavis?", recallGPCParameters(1)
+	"MHZ- Paul and Sarah", recallGPCParameters(2)
+	"LIQAIR2", recallGPCParameters(3)
+	"GEOMHZ", recallGPCParameters(4)
+	End	
+	
 	Submenu "Scan"
 		"Start Fixed Length", startScan(0)
 		"Start Continuous", startScan(1)
