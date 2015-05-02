@@ -65,6 +65,12 @@ function receiveSRS()
 	return responseNum	
 end
 
+function recallGPCParameters(saveNum)
+	variable saveNum
+	string command = "RC" + num2str(saveNum)
+	sendSRS(command)
+end
+	
 
 	 
 	 
