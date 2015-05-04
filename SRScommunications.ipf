@@ -5,11 +5,8 @@ function COMMSRS()
 end
 
 function openSRS()
-	//initialize port
-	Init_NIDAQmx()
 	
 	COMMSRS()
-	print "Communication with photon counter opened."
 	sendSRS("")
 	sendSRS("")
 	sendSRS("")
@@ -29,6 +26,9 @@ function openSRS()
 	string/G waveAname = "waveA"
 	string/G waveBname = "waveB"
 	string/G timeInput
+	//initialize NIDAQ
+	initNIDAQ()
+	
 	sendSRS("NP2000")	
 	sendSRS("NE1")
 
@@ -52,7 +52,7 @@ function checkSRS()
 		
 end
 
-function closeSRS()
+function closeSRS() //not necessary
 	VDTClosePort2 COM1
 	print "Communication with photon counter closed."	
 end
@@ -69,6 +69,17 @@ function receiveSRS()
 	variable responseNum = str2num(response)
 	return responseNum	
 end
+
+function querySRS(command)
+	string command
+	command = command + "\r\n"
+	VDTWrite2 command
+	string response
+	VDTRead2/O=3/T="\r\n" response
+	variable responseNum = str2num(response)
+	return responseNum
+end	
+	
 
 function recallGPCParameters(saveNum)
 	variable saveNum

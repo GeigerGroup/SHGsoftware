@@ -10,6 +10,18 @@ function COMMPowerMeter()
 	VDT2 KillIO
 end
 
+function sendPM(command)
+	string command
+	command = command + "\r\n"
+	VDTWrite2 command
+end
+
+function/s receivePM()
+	string response
+	VDTRead2/O=3/T=",\t\r"  response
+	return response
+end
+
 function queryPowerMeter(command)
 	string command
 	command = command + "\r\n"

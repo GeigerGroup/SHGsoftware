@@ -129,15 +129,17 @@ end
 
 function stopScan()
 	NVAR measurePower = $("root:SRSParameters:measurePower")
+	SVAR devName = $("root:SRSParameters:devName")
 	sendSRS("CH")
 	stopRecordingdata()
 	if (measurePower == 1)
-	fDAQmx_ScanStop("Dev1")
+	fDAQmx_ScanStop(devName)
 	endif
 end
 
 function resetScan()
 	NVAR measurePower = $("root:SRSParameters:measurePower")
+	SVAR devName = $("root:SRSParameters:devName")
 	string yesNo = "Yes"
 	Prompt yesNo, "Are you sure you want to stop and reset?", popup "Yes;No"
 	DoPrompt "Stop and Reset", yesNo
@@ -145,13 +147,12 @@ function resetScan()
 		return -1
 	endif
 	
-	
 	if (stringmatch(yesNo,"Yes"))
 		sendSRS("CR")
 		stopRecordingData()
 	endif
 	
 	if (measurePower == 1)
-	fDAQmx_ScanStop("Dev1") //default name change if multiple device or different name
+	fDAQmx_ScanStop(devName) 
 	endif
 end	

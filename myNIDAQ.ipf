@@ -1,25 +1,28 @@
 #pragma rtGlobals=1 //use modern global access method
-//code partially from bart mcguyer, princeton university
+//code partially inspired by bart mcguyer, princeton university
 
-//######################################################################
-// Static Variables					(allow easy dynamic changes of code, but ONLY work for functions - not Macros!)
-Static strconstant ksNIDAQmxPath = "root:System:NIDAQmx"		//NIDAQ MX data folder location
-Static strconstant ksNIDAQmxPathParent = "root:System"			//Parent folder of data folder location
+function initNIDAQ()
+	 
+	variable/G devName = StringFromList(0,fDAQmx_DeviceNames());
+	
+	If(stringmatch(devName,""))
+		//if no boards, quit
+		print "Error initializing NIDAQ, there are no boards connected."
+	else
+		fDAQmx_ResetDevice(devName) //do a reset of the board
+		Print "Board " + devName + "Initialized."
+	endif
+end
 
 Function setupFastReadDAQ()
-	
-	SVAR DevName = $(ksNIDAQmxPath + ":mxDevName") //global device name
+	SVAR devName = $("root:SRSParameters:devName")
 	string param = "0/DIFF,0,1;"  //sets up reading analog channel 0 from 0-1V
-
-	DAQmx_AI_SetupReader/DEV=DevName param //call NIDAQ function
+	DAQmx_AI_SetupReader/DEV=devName param //call NIDAQ function
 End
 
 Function getFastReadDAQ()
-	
-	SVAR DevName = $(ksNIDAQmxPath + ":mxDevName") //global device name
+	SVAR devName = $("root:SRSParameters:devName") //global device name
 	make/O/N=1 waveTemp; //set up wave to hold one reading
-	
-	fDAQmx_AI_GetReader(DevName,waveTemp) //call NIDAQ function to get data in wave
-
-	return waveTemp[0] 
+	fDAQmx_AI_GetReader(devName,waveTemp) //call NIDAQ function to get data in wave
+	return waveTemp[0] //return value
 End
