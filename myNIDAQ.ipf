@@ -3,7 +3,7 @@
 
 function initNIDAQ()
 	 
-	variable/G devName = StringFromList(0,fDAQmx_DeviceNames());
+	string/G devName = StringFromList(0,fDAQmx_DeviceNames());
 	
 	If(stringmatch(devName,""))
 		//if no boards, quit

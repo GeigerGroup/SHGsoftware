@@ -76,31 +76,45 @@ Function startScan(fixedCont)
 	command = "CP2," + num2str(tSet/timeFactor)
 	sendSRS(command)
 	
-	if (stringmatch(AB,"A"))
-		recordA = 1
-		recordB = 0
-	elseif(stringmatch(AB,"B"))
-		recordA = 0
-		recordB = 1
-	elseif(stringmatch(AB,"AB"))
-		recordA = 1
-		recordB = 1
-	endif
-	
-	if (stringmatch(power,"No"))
-		measurePower = 0
-	elseif (stringmatch(power,"NIDAQ"))
-		measurePower = 1
-		variable localPowerScale = powerScale
-		Prompt localPowerScale, "Enter Power Meter Range (in W): "
-		DoPrompt "Adjust Power Scale:", localPowerScale
-		if (V_flag)
-			return -1
-		endif
-		powerScale = localPowerScale
-	elseif (stringmatch(power,"OPAEPM"))
-		measurePower = 2
-	endif
+	strswitch(AB) //set global variables to control which channel(s) the data is read from
+		case "A":
+			recordA = 1
+			recordB = 0
+			break
+		case "B":
+			recordA = 0
+			recordB = 1
+			break
+		case "AB":
+			recordA = 1
+			recordB = 1
+			break
+		default:
+			Print "Problem with recording selection."
+			break
+	endswitch
+
+	strswitch(power) //set global variables to control how power is measured
+		case "No":
+			measurePower = 0
+			break
+		case "NIDAQ":
+			measurePower = 1
+			variable localPowerScale = powerScale
+			Prompt localPowerScale, "Enter Power Meter Range (in W): "
+			DoPrompt "Adjust Power Scale:", localPowerScale
+			if (V_flag)
+				return -1
+			endif
+			powerScale = localPowerScale
+			break
+		case "OPAEPM":
+			measurePower = 2
+			break
+		default:
+			Print "Error with power measure control."
+			break
+	endswitch
 		
 	startRecordingData()	
 	sendSRS("CR")
