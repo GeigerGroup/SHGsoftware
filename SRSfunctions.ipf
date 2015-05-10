@@ -3,10 +3,14 @@
 Function startScan(fixedCont)
 	variable fixedCont //variable to determine fixed or continuous. fixed = 0, continuous = 1
 	NVAR scanLength = $("root:SRSParameters:scanLength") //declare global variable for scanlength
+	NVAR pointNumber = $("root:SRSParameters:pointNumber")
+	NVAR timeInterval = $("root:SRSParameters:timeInterval") 
 	NVAR recordA = $("root:SRSParameters:recordA") 
 	NVAR recordB = $("root:SRSParameters:recordB")
 	NVAR measurePower = $("root:SRSParameters:measurePower")
 	NVAR powerScale = $("root:SRSParameters:powerScale")
+	SVAR waveAname = $("root:SRSParameters:waveAname")
+	SVAR waveBname = $("root:SRSParameters:waveBname")
 	
 	if (fixedCont)
 		scanLength = INF
@@ -66,7 +70,7 @@ Function startScan(fixedCont)
 	endif
 	
 	if (fixedCont == 0)
-	scanLength = localScanLength
+		scanLength = localScanLength
 	endif
 	
 	string command
@@ -116,15 +120,145 @@ Function startScan(fixedCont)
 			break
 	endswitch
 		
+	string localAname
+	string localBname
+	string timeControl
+	string timeName
+	string powerName
+	
+	if (recordA)
+		Prompt localAname, "Set name of wave to store data from Channel A:"
+	endif
+	if (recordB)
+		Prompt localBname, "Set name of wave to store data from Channel B:"
+	endif
+	
+	Prompt timeControl, "Choose time interval is tSet or tSet + dwell time:",popup "tSet;tSetDT"	
+	
+	if (recordA)
+		if (recordB)
+			DoPrompt "Enter Wave Parameters", localAname,localBname,timeControl
+		else
+			DoPrompt "Enter Wave Parameters", localAname,timeControl
+		endif
+	else
+		DoPrompt "Enter Wave Parameters", localBname,timeControl
+	endif
+	
+	if (V_flag)
+		return -1
+	endif
+	
+	if (recordA)
+		if (waveExists($(localAname)))
+			Prompt localAname, "Enter alternate name or press OK to overwrite: "
+			DoPrompt "Channel A name already exists. Do you want to overwrite?", localAname
+			if (V_flag)
+				return -1
+			endif
+		endif
+	endif
+	
+	if (recordB)
+		if (waveExists($(localBname)))
+			Prompt localBname, "Enter alternate name or press OK to overwrite: "
+			DoPrompt "Channel B name already exists. Do you want to overwrite?", localBname
+			if (V_flag)
+				return -1
+			endif
+		endif
+	endif
+	
+	if (recordA)
+		waveAname = localAname
+		make /O/N=0 $(waveAname)
+		wave waveA = $(waveAname)
+	endif
+	if (recordB)
+		waveBname = localBname
+		make /O/N=0 $(waveBname)
+		wave waveB = $(waveBname)
+	endif
+	
+	if (recordA)
+		if (recordB)
+			timeName = waveAname + waveBname + "_time"
+			make /O/N=0 $(timeName)
+			wave waveBothtime = $(timeName)
+			
+			Edit waveBothtime,waveA,waveB
+			Display waveA, waveB vs waveBothtime
+			
+			if (measurePower > 0)
+				powerName = waveAname + waveBname + "_power"
+				make /O/N=0 $(powerName)
+				wave waveBothpower = $(powerName)
+				AppendtoTable waveBothpower
+				AppendtoGraph/R waveBothpower vs waveBothtime
+			endif
+			
+			print "Data from Channel A recorded in " + localAname
+			print "Data from Channel B recorded in " + localBname
+			
+		else
+		
+			timeName = waveAname + "_time"
+			make /O/N=0 $(timeName)
+			wave waveAtime = $(timeName)
+			
+			Edit waveAtime, waveA
+			Display waveA vs waveAtime
+			
+			if (measurePower > 0)
+				powerName = waveAname + "_power"
+				make /O/N=0 $(powerName)
+				wave waveApower = $(powerName)
+				AppendtoTable waveApower
+				AppendtoGraph/R waveApower vs waveAtime
+			endif
+			print "Data from Channel A recorded in " + localAname
+		endif
+	else
+		timeName = waveBname + "_time"
+		make /O/N=0 $(timeName)
+		wave waveBtime = $(timeName)
+		
+		Edit waveBtime, waveB
+		Display waveB vs waveBtime
+		
+		if (measurePower > 0)
+			powerName = waveBname + "_power"
+			make /O/N=0 $(powerName)
+			wave waveBpower = $(powerName)
+			AppendtoTable waveBpower
+			AppendtoGraph/R waveBpower vs waveBtime
+		endif
+		
+		print "Data from Channel B recorded in " + localBname	
+	endif
+	
+	if (stringmatch(timeControl,"tSet"))
+		timeInterval = tSet
+	elseif(stringmatch(timeControl,"tSetDT"))
+		timeInterval = tSet + dwellTime
+	endif
+		
+	if (measurePower == 1)
+		setupFastReadDAQ()
+	endif
+	
+	pointNumber = 1
 	
 	sendSRS("CR")
 	sendSRS("CS")
-	startRecordingData()
+	sendSRS("SS1") //make data ready status bit is reset so don't start with 0
+	variable waste = receiveSRS()
+	startRecordingData()	
 	
 	if (fixedCont == 0)
-	Print "Fixed length scan started with Scan Length = " +num2str(scanLength) + ", tSet = " + num2str(tSet) + ", and dwellTime = " + num2str(dwellTime) + "."
+		Print "Fixed length scan started with Scan Length = " +num2str(scanLength) + ", tSet = " + num2str(tSet) + ", and dwellTime = " + num2str(dwellTime) + "."
 	else
-	Print "Continous scan started with tSet = " + num2str(tSet) + " and dwellTime = " + num2str(dwellTime) + "."
+		Print "Continous scan started with tSet = " + num2str(tSet) + " and dwellTime = " + num2str(dwellTime) + "."
 	endif
 	
 end
@@ -134,7 +268,7 @@ function resumeScan()
 	resumeRecordingData()
 	
 	if (measurePower == 1)
-	setupFastReadDAQ()
+		setupFastReadDAQ()
 	endif
 	
 	sendSRS("CS")
@@ -148,7 +282,7 @@ function stopScan()
 	sendSRS("CH")
 	stopRecordingdata()
 	if (measurePower == 1)
-	fDAQmx_ScanStop(devName)
+		fDAQmx_ScanStop(devName)
 	endif
 end
 
@@ -168,6 +302,6 @@ function resetScan()
 	endif
 	
 	if (measurePower == 1)
-	fDAQmx_ScanStop(devName) 
+		fDAQmx_ScanStop(devName) 
 	endif
 end	
