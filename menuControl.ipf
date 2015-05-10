@@ -24,6 +24,7 @@ Menu "Photon Counter"
 	End
 	Submenu "Wave Analysis"
 		"Find Average", findAverage()
+		"Segment Means", FindSegmentMeans()
 	End
 		
 end
