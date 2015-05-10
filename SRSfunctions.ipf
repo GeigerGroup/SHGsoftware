@@ -116,9 +116,10 @@ Function startScan(fixedCont)
 			break
 	endswitch
 		
-	startRecordingData()	
+	
 	sendSRS("CR")
 	sendSRS("CS")
+	startRecordingData()
 	
 	if (fixedCont == 0)
 	Print "Fixed length scan started with Scan Length = " +num2str(scanLength) + ", tSet = " + num2str(tSet) + ", and dwellTime = " + num2str(dwellTime) + "."

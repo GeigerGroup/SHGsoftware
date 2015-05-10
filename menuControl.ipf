@@ -18,8 +18,8 @@ Menu "Photon Counter"
 	Submenu "Scan"
 		"Start Fixed Length", startScan(0)
 		"Start Continuous", startScan(1)
-		"Pause", stopScan()
-		"Resume", resumeScan()
+		"Pause/F2", stopScan()
+		"Resume/F3", resumeScan()
 		"Stop and Reset", resetScan()
 	End
 	Submenu "Wave Analysis"
