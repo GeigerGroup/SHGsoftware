@@ -9,8 +9,10 @@ function readDataSRS(s)
 	NVAR scanLength = $("root:SRSParameters:scanLength")
 	NVAR pointNumber = $("root:SRSParameters:pointNumber")
 	NVAR timeInterval = $("root:SRSParameters:timeInterval") 
+	NVAR autoPause = $("root:SRSParameters:autoPause") 
 	SVAR waveAname = $("root:SRSParameters:waveAname")
 	SVAR waveBname = $("root:SRSParameters:waveBname")
+	
 	
 	wave waveA = $(waveAname)
 	wave waveB = $(waveBname)
@@ -74,9 +76,21 @@ function readDataSRS(s)
 			endif
 			concatenate /NP/KILL{tempPower},powerWave
 		endif
+			
 
 		pointNumber = pointNumber + 1
+		
+		if (autoPause > 0)
+			if (pointNumber > 1)
+				if (mod(pointNumber-1,autoPause)==0)
+					stopScan()
+				endif
+			endif
+		endif
+		 
 	endif
+	
+
 	
 	if (pointNumber > scanLength)
 		sendSRS("CH")

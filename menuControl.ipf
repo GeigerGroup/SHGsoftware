@@ -18,13 +18,12 @@ Menu "Photon Counter"
 	Submenu "Scan"
 		"Start Fixed Length", startScan(0)
 		"Start Continuous", startScan(1)
-		"Pause/F2", stopScan()
-		"Resume/F3", resumeScan()
+		"Pause/F4", stopScan()
+		"Resume/F5", resumeScan()
 		"Stop and Reset", resetScan()
 	End
 	Submenu "Wave Analysis"
 		"Find Average", findAverage()
-		"Segment Means", FindSegmentMeans()
 	End
 		
 end

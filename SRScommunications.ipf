@@ -23,6 +23,7 @@ function openSRS()
 	variable/G timeInterval = 1
 	variable/G measurePower = 0
 	variable/G powerScale = 1
+	variable/G autoPause = 0
 	string/G waveAname = "waveA"
 	string/G waveBname = "waveB"
 	string/G timeInput
