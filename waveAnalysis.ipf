@@ -48,6 +48,7 @@ Function FindSegmentMeans()
 	DoPrompt "Find Segment Means", source,n
 	SegmentMeans($source, n)
 End
+
 Function/S SegmentMeans(source, n)
 	Wave source
 	Variable n
@@ -71,4 +72,4 @@ Function/S SegmentMeans(source, n)
 		destw[segment] = mean(source, startX, endX)
 	endfor
 	return GetWavesDataFolder(destw,2) // string is full path to wave 
-	End
+End

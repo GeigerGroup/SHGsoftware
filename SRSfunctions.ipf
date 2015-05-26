@@ -1,16 +1,18 @@
 #pragma rtGlobals=1		// Use modern global access method.
 
+
 Function startScan(fixedCont)
 	variable fixedCont //variable to determine fixed or continuous. fixed = 0, continuous = 1
-	NVAR scanLength = $("root:SRSParameters:scanLength") //declare global variable for scanlength
-	NVAR pointNumber = $("root:SRSParameters:pointNumber")
-	NVAR timeInterval = $("root:SRSParameters:timeInterval") 
-	NVAR recordA = $("root:SRSParameters:recordA") 
-	NVAR recordB = $("root:SRSParameters:recordB")
-	NVAR measurePower = $("root:SRSParameters:measurePower")
-	NVAR powerScale = $("root:SRSParameters:powerScale")
-	SVAR waveAname = $("root:SRSParameters:waveAname")
-	SVAR waveBname = $("root:SRSParameters:waveBname")
+	NVAR scanLength = $(SRSVar("scanLength")) //global variable for scanlength
+	NVAR pointNumber =  $(SRSVar("pointNumber")) //global variable to track point number
+	NVAR timeInterval =  $(SRSVar("timeInterval")) //global variable for time spacing
+	NVAR recordA =  $(SRSVar("recordA")) //global variable to tell if recording channel a
+	NVAR recordB =  $(SRSVar("recordB")) //global variable to tell if recording channel b
+	NVAR measurePower =  $(SRSVar("measurePower")) //global variable to control power recording
+	NVAR powerScale =  $(SRSVar("powerScale")) //global variable that stores power meter range
+	NVAR autoPause = $(SRSVar("autoPause")) //global variable that controls autopausing
+	SVAR waveAname =  $(SRSVar("waveAname")) //global variable that stores name of waveA
+	SVAR waveBname =  $(SRSVar("waveBname")) //global variable that stores name of waveB
 	
 	if (fixedCont)
 		scanLength = INF
@@ -18,21 +20,18 @@ Function startScan(fixedCont)
 		variable localScanLength = 2000 //default scan length
 	endif
 	
-	sendSRS("DT")  //get dwellTime from last scan
-	variable dwellTime = receiveSRS()
+	variable dwellTime = querySRS("DT") //get dwellTime from last scan
 	
 	variable timeFactor //create variable to store different time factors for what T is
-	
-	sendSRS("CI2") //determine this time factor
-	variable timeResponse = receiveSRS()
+	variable timeResponse = querySRS("CI2") //determine this time factor
 	if (timeResponse == 0)
 		timeFactor = 1e-7
 	elseif (timeResponse == 3)
 		timeFactor = 1/(4e3) //trig time factor
 	endif
-	sendSRS("CP2")
-	variable tSet = timeFactor*receiveSRS() //get tSet from last scan
 	
+	variable tSet = timeFactor*querySRS("CP2") //get tSet from last scan
+	variable localAutoPause = 0
 
 	string AB = "B" //default channel
 	string power = "No"
@@ -44,14 +43,17 @@ Function startScan(fixedCont)
 	Prompt dwellTime, "Set dwell time (must be between 0.002 and 60s): "
 	Prompt AB, "Choose A; B; or A and B:", popup "A;B;AB"
 	Prompt power, "Measure Power?", popup "No;NIDAQ;OPAEPM"
+	Prompt localAutoPause, "Autopause? 0 turns off feature, or enter # counts to pause after"
 	if (fixedCont == 0)
-		DoPrompt "Enter Scan Parameters", localScanLength, tSet, dwellTime,AB,power
+		DoPrompt "Enter Scan Parameters", localScanLength, tSet, dwellTime,AB,power,localAutoPause
 	else
-		DoPrompt "Enter Scan Parameters", tSet,dwellTime,AB,power
+		DoPrompt "Enter Scan Parameters", tSet,dwellTime,AB,power,localAutoPause
 	endif
 	if (V_flag)
 		return -1
 	endif
+	
+	autoPause = localAutoPause //control autopause
 	
 	if ((tSet < 1e-7) || (tSet > 90000))
 		Prompt tSet, "tSet must be between 1e-7 and 90000"
@@ -123,8 +125,6 @@ Function startScan(fixedCont)
 	string localAname
 	string localBname
 	string timeControl
-	string timeName
-	string powerName
 	
 	if (recordA)
 		Prompt localAname, "Set name of wave to store data from Channel A:"
@@ -182,17 +182,15 @@ Function startScan(fixedCont)
 	
 	if (recordA)
 		if (recordB)
-			timeName = waveAname + waveBname + "_time"
-			make /O/N=0 $(timeName)
-			wave waveBothtime = $(timeName)
+			make /O/N=0 $(waveAname + waveBname + "_time")
+			wave waveBothtime = $(waveAname + waveBname + "_time")
 			
 			Edit waveBothtime,waveA,waveB
 			Display waveA, waveB vs waveBothtime
 			
 			if (measurePower > 0)
-				powerName = waveAname + waveBname + "_power"
-				make /O/N=0 $(powerName)
-				wave waveBothpower = $(powerName)
+				make /O/N=0 $(waveAname + waveBname + "_power")
+				wave waveBothpower = $(waveAname + waveBname + "_power")
 				AppendtoTable waveBothpower
 				AppendtoGraph/R waveBothpower vs waveBothtime
 			endif
@@ -202,34 +200,30 @@ Function startScan(fixedCont)
 			
 		else
 		
-			timeName = waveAname + "_time"
-			make /O/N=0 $(timeName)
-			wave waveAtime = $(timeName)
+			make /O/N=0 $(waveAname + "_time")
+			wave waveAtime = $(waveAname + "_time")
 			
 			Edit waveAtime, waveA
 			Display waveA vs waveAtime
 			
 			if (measurePower > 0)
-				powerName = waveAname + "_power"
-				make /O/N=0 $(powerName)
-				wave waveApower = $(powerName)
+				make /O/N=0 $(waveAname + "_power")
+				wave waveApower = $(waveAname + "_power")
 				AppendtoTable waveApower
 				AppendtoGraph/R waveApower vs waveAtime
 			endif
 			print "Data from Channel A recorded in " + localAname
 		endif
 	else
-		timeName = waveBname + "_time"
-		make /O/N=0 $(timeName)
-		wave waveBtime = $(timeName)
+		make /O/N=0 $(waveBname + "_time")
+		wave waveBtime = $(waveBname + "_time")
 		
 		Edit waveBtime, waveB
 		Display waveB vs waveBtime
 		
 		if (measurePower > 0)
-			powerName = waveBname + "_power"
-			make /O/N=0 $(powerName)
-			wave waveBpower = $(powerName)
+			make /O/N=0 $(waveBname + "_power")
+			wave waveBpower = $(waveBname + "_power")
 			AppendtoTable waveBpower
 			AppendtoGraph/R waveBpower vs waveBtime
 		endif
@@ -249,10 +243,11 @@ Function startScan(fixedCont)
 	
 	pointNumber = 1
 	
+	sendSRS("NE1")
 	sendSRS("CR")
 	sendSRS("CS")
-	sendSRS("SS1") //make data ready status bit is reset so don't start with 0
-	variable waste = receiveSRS()
+	
+	variable waste = querySRS("SS1") //make sure data ready status bit is reset so don't start with 0
 	startRecordingData()	
 	
 	if (fixedCont == 0)
@@ -263,33 +258,35 @@ Function startScan(fixedCont)
 	
 end
 
+
+//restart paused scan
 function resumeScan()
-	NVAR measurePower = $("root:SRSParameters:measurePower")
-	resumeRecordingData()
+	NVAR measurePower =  $(SRSVar("measurePower")) //global variable saying if power is recorded
+	resumeRecordingData() //start asking if there is new data again
 	
-	if (measurePower == 1)
+	if (measurePower == 1) //check if recording with NIDAQ, restart fast scan if so
 		setupFastReadDAQ()
 	endif
 	
-	sendSRS("CS")
-
+	sendSRS("CS") //tell GPC to start scan
 end
 	 
-
+//pause scan
 function stopScan()
-	NVAR measurePower = $("root:SRSParameters:measurePower")
-	SVAR devName = $("root:SRSParameters:devName")
-	sendSRS("CH")
-	stopRecordingdata()
+	NVAR measurePower =  $(SRSVar("measurePower")) //global variable controlling power recording
+	
+	sendSRS("CH")  //stop scan
+	stopRecordingdata() //stop asking if there is new data
+	
 	if (measurePower == 1)
-		fDAQmx_ScanStop(devName)
+		stopFastReadDAQ() //if recording with NIDAQ, stop it reading power
 	endif
 end
 
 function resetScan()
-	NVAR measurePower = $("root:SRSParameters:measurePower")
-	SVAR devName = $("root:SRSParameters:devName")
-	string yesNo = "Yes"
+	NVAR measurePower =  $(SRSVar("measurePower")) //global variable controlling power recording
+
+	string yesNo = "Yes" //make sure want to restart
 	Prompt yesNo, "Are you sure you want to stop and reset?", popup "Yes;No"
 	DoPrompt "Stop and Reset", yesNo
 	if (V_flag)
@@ -297,11 +294,11 @@ function resetScan()
 	endif
 	
 	if (stringmatch(yesNo,"Yes"))
-		sendSRS("CR")
-		stopRecordingData()
-	endif
-	
-	if (measurePower == 1)
-		fDAQmx_ScanStop(devName) 
+		sendSRS("CR") //stop and reset
+		stopRecordingData() //stop asking if there is new data
+		
+		if (measurePower == 1)
+			stopFastReadDAQ() //if recording with NIDAQ, stop it reading power
+		endif	
 	endif
 end	
