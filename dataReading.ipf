@@ -1,12 +1,12 @@
 #pragma rtGlobals=1		// Use modern global access method.
 
+
 //background process for checking if SRS has data and reading it in
 function readDataSRS(s)
 	STRUCT WMBackgroundStruct &s //line required for background structures
 	NVAR recordA = $SRSVar("recordA") 
 	NVAR recordB = $SRSVar("recordB")
 	NVAR measurePower = $SRSVar("measurePower")
-	NVAR powerScale = $SRSVar("powerScale")
 	NVAR scanLength = $SRSVar("scanLength")
 	NVAR pointNumber = $SRSVar("pointNumber")
 	NVAR timeInterval = $SRSVar("timeInterval")
@@ -15,42 +15,26 @@ function readDataSRS(s)
 	SVAR waveBname = $SRSVar("waveBname")
 	SVAR devName = $SRSVar("devName")
 	
-	
 	if (querySRS("SS1")) //check if data is ready
-		if (recordA)  
-			wave waveA = $waveAname //access wave for A in memory
-			make /n=1 temp = querySRS("QA")
-			concatenate /NP/KILL {temp}, waveA //append data from a if recording it
-		endif
-		if (recordB)
-			wave waveB = $waveBname //access wave for B in memory
-			make /n=1 temp = querySRS("QB")
-			concatenate /NP/KILL {temp}, waveB //append data from b if recording it
-		endif
+		appendSRSDataPoint(recordA,waveAname,"QA") //add a data points if recording
+		appendSRSDataPoint(recordB,waveBname,"QB") //add b data points if recording
+
+		//add time points
 		string timeName = includeName(waveAname,recordA) + includeName(waveBname,recordB) + "_time"
 		wave timeWave = $timeName  //access timeWave in memory
 		make/n=1 tempTime = timeInterval*pointNumber //append time data
 		concatenate /NP/KILL{tempTime},timeWave //append time data
 		
-		if (measurePower > 0)   //if measuring power
+		 //add power points if measuring
+		if (measurePower > 0)  
 			string powerName = includeName(waveAname,recordA) + includeName(waveBname,recordB) + "_power"
 			wave powerWave = $powerName
+								
 			if (measurePower == 1) //if using NIDAQ
-				make /n=200 tempPowerArray //create array to hold data
-				variable ii;
-				for (ii = 0; ii<200;ii+=1)
-					tempPowerArray[ii] = getFastReadDAQ() //read in all the points
-				endfor
-				
-				make /n=1 tempPower = powerScale*mean(tempPowerArray) //average and scale power
-				KillWaves tempPowerArray //destroy temp array
-			endif
-			if (measurePower == 2) //if using EPM
-				COMMPowerMeter() //start talking to power meter
-				make /n=1 tempPower = queryPowerMeter("ch query") //get value
-				COMMSRS() //return to talking to SRS
-			endif
-			
+				make /n=1 tempPower = getNIDAQpower()
+			elseif(measurePower == 2) //if using EPM
+				make /n=1 tempPower = getEPMPower()
+			endif		
 			concatenate /NP/KILL{tempPower},powerWave //append power data
 		endif
 		
@@ -62,21 +46,57 @@ function readDataSRS(s)
 					stopScan()
 				endif
 			endif
-		endif
-		 
-	endif
-	
-	if (pointNumber > scanLength) //check if at end of scan
-		sendSRS("CH") //stop scan
+		endif	
 		
-		if (measurePower == 1)
-			fDAQmx_ScanStop(devName) //if you're measuring power with NIDAQ, stop it
-		endif
-		return -1
+		if (pointNumber > scanLength) //check if at end of scan
+			sendSRS("CH") //if so, stop scan
+		
+			if (measurePower == 1)
+				fDAQmx_ScanStop(devName) //if you're measuring power with NIDAQ, stop it
+			endif
+			return -1
+		endif	 	
 	endif
-	
+
 	return 0 //for background processes
 end
+
+//append data to dataWave
+function appendSRSDataPoint(onOff,waveNameAppend,query)
+	variable onOff
+	string waveNameAppend
+	string query
+		
+	if (onOff)
+		wave waveToAppend = $waveNameAppend //does this get thrown away after function returns?
+		make /n=1 temp = querySRS(query)
+		concatenate /NP/KILL{temp},waveToAppend
+	endif
+end
+
+//get power if using NIDAQ
+function getNIDAQpower()
+	NVAR powerScale = $SRSVar("powerScale")
+				
+	variable meanPower
+	make/n = 200 tempPowerArray //create array to hold data
+	variable ii;
+	for (ii = 0; ii<200;ii+=1)
+		tempPowerArray[ii] = getFastReadDAQ() //read in all the points
+	endfor
+	meanPower = powerScale*mean(tempPowerArray) //average and scale power
+	KillWaves tempPowerArray //destroy temp array
+	return meanPower
+end
+
+//get power if using EPM			
+function getEPMPower()
+	COMMPowerMeter() //start talking to power meter
+	variable power = queryPowerMeter("ch query") //get value
+	COMMSRS() //return to talking to SRS
+	return power
+end
+
 
 //start the background process described above
 function startRecordingData()	
