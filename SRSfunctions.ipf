@@ -2,10 +2,10 @@
 
 Function startScan(fixedCont)
 	variable fixedCont //variable to determine fixed or continuous. fixed = 0, continuous = 1
-	NVAR scanLength = $(SRSVar("scanLength")) //global variable for scanlength
-	NVAR pointNumber =  $(SRSVar("pointNumber")) //global variable to track point number
-	NVAR measurePower =  $(SRSVar("measurePower")) //global variable to control power recording
-	NVAR autoPause = $(SRSVar("autoPause")) //global variable that controls autopausing
+	NVAR scanLength = $SRSVar("scanLength") //global variable for scanlength
+	NVAR pointNumber =  $SRSVar("pointNumber") //global variable to track point number
+	NVAR measurePower =  $SRSVar("measurePower") //global variable to control power recording
+	NVAR autoPause = $SRSVar("autoPause") //global variable that controls autopausing
 
 	//choose scan parameters
 	if (chooseScanParameters(fixedCont) == -1)
@@ -38,8 +38,8 @@ end
 
 function chooseScanParameters(fixedCont)
 	variable fixedCont
-	NVAR autoPause = $(SRSVar("autoPause")) //global variable that controls autopausing
-	NVAR scanLength = $(SRSVar("scanLength")) //global variable for scanlength
+	NVAR autoPause = $SRSVar("autoPause") //global variable that controls autopausing
+	NVAR scanLength = $SRSVar("scanLength") //global variable for scanlength
 	
 	//set defaults before prompt
 	variable localAutoPause = 0
@@ -90,17 +90,19 @@ function chooseScanParameters(fixedCont)
 end
 
 function chooseWaveNames()
-	NVAR measurePower =  $(SRSVar("measurePower")) //global variable to control power recording
-	NVAR recordA =  $(SRSVar("recordA")) //global variable to tell if recording channel a
-	NVAR recordB =  $(SRSVar("recordB")) //global variable to tell if recording channel b
-	NVAR timeInterval =  $(SRSVar("timeInterval")) //global variable for time spacing
-	SVAR waveAname =  $(SRSVar("waveAname")) //global variable that stores name of waveA
-	SVAR waveBname =  $(SRSVar("waveBname")) //global variable that stores name of waveB
+	NVAR measurePower =  $SRSVar("measurePower") //global variable to control power recording
+	NVAR recordA =  $SRSVar("recordA") //global variable to tell if recording channel a
+	NVAR recordB =  $SRSVar("recordB") //global variable to tell if recording channel b
+	NVAR timeInterval =  $SRSVar("timeInterval") //global variable for time spacing
+	SVAR waveAname =  $SRSVar("waveAname") //global variable that stores name of waveA
+	SVAR waveBname =  $SRSVar("waveBname") //global variable that stores name of waveB
 	
-	string localAname
-	string localBname
+	string localAname = "A"
+	string localBname = "B"
 	string timeControl
+	string promptParam = "timeControl"
 	
+
 	if (recordA)
 		Prompt localAname, "Set name of wave to store data from Channel A:"
 	endif
@@ -108,7 +110,7 @@ function chooseWaveNames()
 		Prompt localBname, "Set name of wave to store data from Channel B:"
 	endif	
 	Prompt timeControl, "Choose time interval is tSet or tSet + dwell time:",popup "tSet;tSetDT"	
-	
+		
 	if (recordA)
 		if (recordB)
 			DoPrompt "Enter Wave Parameters", localAname,localBname,timeControl
@@ -178,7 +180,7 @@ end
 
 //restart paused scan
 function resumeScan()
-	NVAR measurePower =  $(SRSVar("measurePower")) //global variable saying if power is recorded
+	NVAR measurePower =  $SRSVar("measurePower") //global variable saying if power is recorded
 	resumeRecordingData() //start asking if there is new data again
 	
 	if (measurePower == 1) //check if recording with NIDAQ, restart fast scan if so
@@ -190,7 +192,7 @@ end
 	 
 //pause scan
 function stopScan()
-	NVAR measurePower =  $(SRSVar("measurePower")) //global variable controlling power recording
+	NVAR measurePower =  $SRSVar("measurePower") //global variable controlling power recording
 	
 	sendSRS("CH")  //stop scan
 	stopRecordingdata() //stop asking if there is new data
@@ -202,7 +204,7 @@ end
 
 //reset scan
 function resetScan()
-	NVAR measurePower =  $(SRSVar("measurePower")) //global variable controlling power recording
+	NVAR measurePower =  $SRSVar("measurePower") //global variable controlling power recording
 
 	string yesNo = "Yes" //make sure want to restart
 	Prompt yesNo, "Are you sure you want to stop and reset?", popup "Yes;No"
@@ -224,8 +226,8 @@ end
  //set global variables to control which channel(s) the data is read from
 function setRecordVar(AB)
 	string AB
-	NVAR recordA =  $(SRSVar("recordA")) //global variable to tell if recording channel a
-	NVAR recordB =  $(SRSVar("recordB")) //global variable to tell if recording channel b
+	NVAR recordA =  $SRSVar("recordA") //global variable to tell if recording channel a
+	NVAR recordB =  $SRSVar("recordB") //global variable to tell if recording channel b
 	
 	strswitch(AB)
 		case "A":
@@ -248,8 +250,8 @@ end
 
 //check global variables to for default value on scans
 function/s setDefaultRecordOption()	
-	NVAR recordA =  $(SRSVar("recordA")) //global variable to tell if recording channel a
-	NVAR recordB =  $(SRSVar("recordB")) //global variable to tell if recording channel b
+	NVAR recordA =  $SRSVar("recordA") //global variable to tell if recording channel a
+	NVAR recordB =  $SRSVar("recordB") //global variable to tell if recording channel b
 	
 	string  AB
 	if (recordA)
@@ -272,8 +274,8 @@ end
  //set global variables to control how power is measured
 function setPowerVar(power)
 	string power
-	NVAR measurePower =  $(SRSVar("measurePower")) //global variable to control power recording
-	NVAR powerScale =  $(SRSVar("powerScale")) //global variable that stores power meter range
+	NVAR measurePower =  $SRSVar("measurePower") //global variable to control power recording
+	NVAR powerScale =  $SRSVar("powerScale") //global variable that stores power meter range
 	
 	strswitch(power)
 		case "No":
@@ -297,7 +299,7 @@ end
 
 //check global variables for default value on scans
 function/s SetDefaultPower()
-	NVAR measurePower =  $(SRSVar("measurePower")) //global variable to control power recording
+	NVAR measurePower =  $SRSVar("measurePower") //global variable to control power recording
 	
 	string power
 	if (measurePower == 0)
@@ -313,7 +315,7 @@ end
 //check so you don't overwrite a wave
 function/s checkWaveName(name)
 	string name
-	if (waveExists($(name)))
+	if (waveExists($name))
 		Prompt name, "Enter altername name or proceed to overwrite: "
 		DoPrompt "Wave with the following name already exisits. Do you want to overwrite?", name
 	endif
