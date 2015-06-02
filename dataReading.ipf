@@ -3,53 +3,38 @@
 //background process for checking if SRS has data and reading it in
 function readDataSRS(s)
 	STRUCT WMBackgroundStruct &s //line required for background structures
-	NVAR recordA = $(SRSVar("recordA")) 
-	NVAR recordB = $(SRSVar("recordB"))
-	NVAR measurePower = $(SRSVar("measurePower"))
-	NVAR powerScale = $(SRSVar("powerScale"))
-	NVAR scanLength = $(SRSVar("scanLength"))
-	NVAR pointNumber = $(SRSVar("pointNumber"))
-	NVAR timeInterval = $(SRSVar("timeInterval"))
-	NVAR autoPause = $(SRSVar("autoPause"))
-	SVAR waveAname = $(SRSVar("waveAname"))
-	SVAR waveBname = $(SRSVar("waveBname"))
-	SVAR devName = $(SRSVar("devName"))
+	NVAR recordA = $SRSVar("recordA") 
+	NVAR recordB = $SRSVar("recordB")
+	NVAR measurePower = $SRSVar("measurePower")
+	NVAR powerScale = $SRSVar("powerScale")
+	NVAR scanLength = $SRSVar("scanLength")
+	NVAR pointNumber = $SRSVar("pointNumber")
+	NVAR timeInterval = $SRSVar("timeInterval")
+	NVAR autoPause = $SRSVar("autoPause")
+	SVAR waveAname = $SRSVar("waveAname")
+	SVAR waveBname = $SRSVar("waveBname")
+	SVAR devName = $SRSVar("devName")
 	
-	wave waveA = $(waveAname)
-	wave waveB = $(waveBname)
-		
-	if (recordA) //tell this function where the waves holding the data are
-		if (recordB)
-			wave timeWave = $(waveAname + waveBname + "_time")
-			if (measurePower > 0)
-				wave powerWave = $(waveAname + waveBname + "_power")
-			endif
-		else
-			wave timeWave = $(waveAname + "_time")
-			if (measurePower > 0)
-				wave powerWave = $(waveAname + "_power")
-			endif
-		endif
-	elseif (recordB)
-		wave timeWave = $(waveBname + "_time")	
-		if (measurePower > 0)
-			wave powerWave = $(waveBname + "_power")
-		endif
-	endif
 	
 	if (querySRS("SS1")) //check if data is ready
-		if (recordA) 
+		if (recordA)  
+			wave waveA = $waveAname //access wave for A in memory
 			make /n=1 temp = querySRS("QA")
 			concatenate /NP/KILL {temp}, waveA //append data from a if recording it
 		endif
 		if (recordB)
+			wave waveB = $waveBname //access wave for B in memory
 			make /n=1 temp = querySRS("QB")
 			concatenate /NP/KILL {temp}, waveB //append data from b if recording it
 		endif
+		string timeName = includeName(waveAname,recordA) + includeName(waveBname,recordB) + "_time"
+		wave timeWave = $timeName  //access timeWave in memory
 		make/n=1 tempTime = timeInterval*pointNumber //append time data
-		concatenate /NP/KILL{tempTime},timeWave
+		concatenate /NP/KILL{tempTime},timeWave //append time data
 		
 		if (measurePower > 0)   //if measuring power
+			string powerName = includeName(waveAname,recordA) + includeName(waveBname,recordB) + "_power"
+			wave powerWave = $powerName
 			if (measurePower == 1) //if using NIDAQ
 				make /n=200 tempPowerArray //create array to hold data
 				variable ii;

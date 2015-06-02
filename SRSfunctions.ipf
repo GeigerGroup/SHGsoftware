@@ -1,6 +1,5 @@
 #pragma rtGlobals=1		// Use modern global access method.
 
-
 Function startScan(fixedCont)
 	variable fixedCont //variable to determine fixed or continuous. fixed = 0, continuous = 1
 	NVAR scanLength = $(SRSVar("scanLength")) //global variable for scanlength
@@ -8,30 +7,49 @@ Function startScan(fixedCont)
 	NVAR measurePower =  $(SRSVar("measurePower")) //global variable to control power recording
 	NVAR autoPause = $(SRSVar("autoPause")) //global variable that controls autopausing
 
+	//choose scan parameters
+	if (chooseScanParameters(fixedCont) == -1)
+		return -1
+	endif
+		
+	//function to choose wavenames
+	if (chooseWaveNames()	== -1)
+		return -1
+	endif
 	
-	//set length to INF if continuous or create local variable for scan length prompt
-	if (fixedCont)
-		scanLength = INF
+	//start setup NIDAQ if using it	
+	if (measurePower == 1)
+		setupFastReadDAQ()
+	endif	
+	pointNumber = 1 //reset point counter
+	sendSRS("NE1") //continuous mode for GPC
+	sendSRS("CR") //reset scan
+	variable waste = querySRS("SS1") //make sure data ready status bit is reset so don't start with 0
+	startRecordingData() //start querying for data
+	sendSRS("CS")	//start scan
+	
+	//print what was chosen
+	if (fixedCont == 0)
+		Print "Fixed length scan."
 	else
-		variable localScanLength = 2000 //default scan length
+		Print "Continuous scan started."
 	endif
-	
-	variable dwellTime = querySRS("DT") //get dwellTime from last scan
-	
-	variable timeFactor //create variable to store different time factors for what T is
-	variable timeResponse = querySRS("CI2") //determine this time factor
-	if (timeResponse == 0)
-		timeFactor = 1e-7
-	elseif (timeResponse == 3)
-		timeFactor = 1/(4e3) //trig time factor
-	endif
-	
-	variable tSet = timeFactor*querySRS("CP2") //get tSet from last scan
-	variable localAutoPause = 0
+end
 
-	string AB = "B" //default channel
-	string power = "No"
+function chooseScanParameters(fixedCont)
+	variable fixedCont
+	NVAR autoPause = $(SRSVar("autoPause")) //global variable that controls autopausing
+	NVAR scanLength = $(SRSVar("scanLength")) //global variable for scanlength
 	
+	//set defaults before prompt
+	variable localAutoPause = 0
+	string AB = setDefaultRecordOption()
+	string power = setDefaultPower()
+	variable localScanLength = 2000 //default scan length	
+	variable dwellTime = querySRS("DT") //get dwellTime from last scan
+	variable tSet = gettSetTimeFactor()*querySRS("CP2") //get tSet from last scan
+	
+	//do the prompt
 	if (fixedCont == 0) 
 		Prompt localScanLength, "Set number of counts (must be integer): "
 	endif
@@ -39,7 +57,7 @@ Function startScan(fixedCont)
 	Prompt dwellTime, "Set dwell time (must be between 0.002 and 60s): "
 	Prompt AB, "Choose A; B; or A and B:", popup "A;B;AB"
 	Prompt power, "Measure Power?", popup "No;NIDAQ;OPAEPM"
-	Prompt localAutoPause, "Autopause? 0 turns off feature, or enter # counts to pause after"
+	Prompt localAutoPause, "Autopause? 0 = no, or enter # counts to pause after"
 	if (fixedCont == 0)
 		DoPrompt "Enter Scan Parameters", localScanLength, tSet, dwellTime,AB,power,localAutoPause
 	else
@@ -49,64 +67,114 @@ Function startScan(fixedCont)
 		return -1
 	endif
 	
-	//make sure variables are acceptable values
-	if ((tSet < 1e-7) || (tSet > 90000))
-		Prompt tSet, "tSet must be between 1e-7 and 90000"
-		DoPrompt "Reset tSet", tSet
-		if (V_flag)
-			return -1
-		endif
-	endif
-	
-	if ((dwellTime < 0.002) || (dwellTime > 60))
-		Prompt dwellTime, "Dwell time must be between 0.002 and 60 s: "
-		DoPrompt "Reset Dwell Time", dwellTime 
-		if (V_flag)
-			return -1
-		endif
-	endif
-	
+	//make sure variables fall within specified values
+	checkValues("tSet",tSet,1e-7,90000)
+	checkValues("dwellTime",dwellTime,0.002,60)
+
 	//set global variables from local prompts
-	autoPause = localAutoPause 
-	if (fixedCont == 0)
+	autoPause = localAutoPause 	//autopause
+	if (fixedCont == 0) //scan length
 		scanLength = localScanLength
-	endif	
-
-	//set dwelll time and tSet
-	sendSRS("DT" + num2str(dwellTime)) 
-	sendSRS( "CP2," + num2str(tSet/timeFactor))
-	
-	//set global variables to control which channel(s) the data is read from
-	setRecordVar(AB)
-	
-	 //set global variables to control how power is measured
-	setPowerVar(power)
-
-	//function to choose wavenames
-	chooseWaveNames(tSet,dwellTime)
-
-		
-	if (measurePower == 1)
-		setupFastReadDAQ()
-	endif
-	
-	pointNumber = 1
-	
-	sendSRS("NE1")
-	sendSRS("CR")
-	sendSRS("CS")
-	
-	variable waste = querySRS("SS1") //make sure data ready status bit is reset so don't start with 0
-	startRecordingData()	
-	
-	if (fixedCont == 0)
-		Print "Fixed length scan started with Scan Length = " +num2str(scanLength) + ", tSet = " + num2str(tSet) + ", and dwellTime = " + num2str(dwellTime) + "."
 	else
-		Print "Continous scan started with tSet = " + num2str(tSet) + " and dwellTime = " + num2str(dwellTime) + "."
+		scanLength = INF
 	endif
+	setRecordVar(AB) // control which channel(s) the data is read from
+	setPowerVar(power) //control how power is measured
 	
+	//set dwelll time and tSet on GPC
+	sendSRS("DT" + num2str(dwellTime)) 
+	sendSRS( "CP2," + num2str(tSet/gettSetTimeFactor()))
+	
+	//print what was chosen
+	Print "tSet = " + num2str(tSet) + " and dwellTime = " + num2str(dwellTime) + "."
 end
 
+function chooseWaveNames()
+	NVAR measurePower =  $(SRSVar("measurePower")) //global variable to control power recording
+	NVAR recordA =  $(SRSVar("recordA")) //global variable to tell if recording channel a
+	NVAR recordB =  $(SRSVar("recordB")) //global variable to tell if recording channel b
+	NVAR timeInterval =  $(SRSVar("timeInterval")) //global variable for time spacing
+	SVAR waveAname =  $(SRSVar("waveAname")) //global variable that stores name of waveA
+	SVAR waveBname =  $(SRSVar("waveBname")) //global variable that stores name of waveB
+	
+	string localAname
+	string localBname
+	string timeControl
+	
+	if (recordA)
+		Prompt localAname, "Set name of wave to store data from Channel A:"
+	endif
+	if (recordB)
+		Prompt localBname, "Set name of wave to store data from Channel B:"
+	endif	
+	Prompt timeControl, "Choose time interval is tSet or tSet + dwell time:",popup "tSet;tSetDT"	
+	
+	if (recordA)
+		if (recordB)
+			DoPrompt "Enter Wave Parameters", localAname,localBname,timeControl
+		else
+			DoPrompt "Enter Wave Parameters", localAname,timeControl
+		endif
+	else
+		DoPrompt "Enter Wave Parameters", localBname,timeControl
+	endif	
+	if (V_flag)
+		return -1
+	endif
+	
+	if (recordA)
+		localAname = checkWaveName(localAname)
+		waveAname = localAname
+		make /O/N=0 $(waveAname)
+		wave waveA = $(waveAname)
+		print "Data from Channel A recorded in " + waveAname
+	endif
+	
+	if (recordB)
+		localBname = checkWaveName(localBname)
+		waveBname = localBname
+		make /O/N=0 $(waveBname)
+		wave waveB = $(waveBname)
+		print "Data from Channel B recorded in " + waveBname
+	endif
+	
+	string timeName = includeName(waveAname,recordA) + includeName(waveBname,recordB) + "_time"
+	string powerName = includeName(waveAname,recordA) + includeName(waveBname,recordB) + "_power"
+	
+	make/O/N=0 $timeName
+	wave timeWave = $timeName
+	Edit timeWave
+	
+	if (recordA)
+		if (recordB)
+			AppendtoTable waveA, waveB
+			Display waveA, waveB vs timeWave
+		else
+			AppendtoTable waveA
+			Display waveA vs timeWave
+		endif
+	else
+		AppendtoTable waveB
+		Display waveB vs timeWave
+	endif
+
+	if (measurePower > 0)
+		make /O/N=0 $powerName
+		wave powerWave = $powerName
+		AppendtoTable powerWave
+		AppendtoGraph/R powerWave vs timeWave
+	endif
+		
+	variable dwellTime = querySRS("DT") //get dwellTime
+	variable tSet = gettSetTimeFactor()*querySRS("CP2") //get tSet	
+	
+	//set time interval according to choice and parameters
+	if (stringmatch(timeControl,"tSet"))
+		timeInterval = tSet
+	elseif(stringmatch(timeControl,"tSetDT"))
+		timeInterval = tSet + dwellTime
+	endif
+end
 
 //restart paused scan
 function resumeScan()
@@ -178,6 +246,29 @@ function setRecordVar(AB)
 	endswitch
 end
 
+//check global variables to for default value on scans
+function/s setDefaultRecordOption()	
+	NVAR recordA =  $(SRSVar("recordA")) //global variable to tell if recording channel a
+	NVAR recordB =  $(SRSVar("recordB")) //global variable to tell if recording channel b
+	
+	string  AB
+	if (recordA)
+		if (recordB)
+			AB = "AB"
+		else
+			AB = "A"
+		endif
+	else
+		if (recordB)
+			AB = "B"
+		else
+			AB = "B" //default case
+		endif
+	endif
+	return AB
+end
+
+
  //set global variables to control how power is measured
 function setPowerVar(power)
 	string power
@@ -204,7 +295,22 @@ function setPowerVar(power)
 	endswitch
 end
 
+//check global variables for default value on scans
+function/s SetDefaultPower()
+	NVAR measurePower =  $(SRSVar("measurePower")) //global variable to control power recording
+	
+	string power
+	if (measurePower == 0)
+		power = "No"
+	elseif(measurePower == 1)
+		power = "NIDAQ"
+	elseif(measurePower == 2)
+		power = "OPAEPM"
+	endif
+	return power
+end
 
+//check so you don't overwrite a wave
 function/s checkWaveName(name)
 	string name
 	if (waveExists($(name)))
@@ -214,102 +320,43 @@ function/s checkWaveName(name)
 	return name
 end
 
+function gettSetTimeFactor()
+	variable timeFactor //create variable to store different time factors for what T is
+	variable timeResponse = querySRS("CI2") //determine this time factor
+	if (timeResponse == 0)
+		timeFactor = 1e-7
+	elseif (timeResponse == 3)
+		timeFactor = 1/(4e3) //trig time factor
+	endif
+	return timeFactor
+end
 
-function chooseWaveNames(tSet,dwellTime)
-	variable tSet
-	variable dwellTime
-	NVAR measurePower =  $(SRSVar("measurePower")) //global variable to control power recording
-	NVAR recordA =  $(SRSVar("recordA")) //global variable to tell if recording channel a
-	NVAR recordB =  $(SRSVar("recordB")) //global variable to tell if recording channel b
-	NVAR timeInterval =  $(SRSVar("timeInterval")) //global variable for time spacing
-	SVAR waveAname =  $(SRSVar("waveAname")) //global variable that stores name of waveA
-	SVAR waveBname =  $(SRSVar("waveBname")) //global variable that stores name of waveB
-	
-	string localAname
-	string localBname
-	string timeControl
-	
-	if (recordA)
-		Prompt localAname, "Set name of wave to store data from Channel A:"
-	endif
-	if (recordB)
-		Prompt localBname, "Set name of wave to store data from Channel B:"
-	endif
-	
-	Prompt timeControl, "Choose time interval is tSet or tSet + dwell time:",popup "tSet;tSetDT"	
-	
-	if (recordA)
-		if (recordB)
-			DoPrompt "Enter Wave Parameters", localAname,localBname,timeControl
-		else
-			DoPrompt "Enter Wave Parameters", localAname,timeControl
-		endif
-	else
-		DoPrompt "Enter Wave Parameters", localBname,timeControl
-	endif	
-	if (V_flag)
-		return -1
-	endif
-	
-	if (recordA)
-		localAname = checkWaveName(localAname)
-		waveAname = localAname
-		make /O/N=0 $(waveAname)
-		wave waveA = $(waveAname)
-		print "Data from Channel A recorded in " + waveAname
-	endif
-	
-	if (recordB)
-		localBname = checkWaveName(localBname)
-		waveBname = localBname
-		make /O/N=0 $(waveBname)
-		wave waveB = $(waveBname)
-		print "Data from Channel B recorded in " + waveBname
-	endif
-	
-	string timeName
-	string powerName	
-	if (recordA)
-		if (recordB)
-			timeName = waveAname + waveBname + "_time"
-			powerName = waveAname + waveBname + "_power"
-		else
-			timeName = waveAname + "_time"
-			powerName = waveAname + "_power"
-		endif
-	else
-		timeName = waveBname + "_time"
-		powerName = waveBname + "_power"
-	endif
-	
-	make/O/N=0 $timeName
-	wave timeWave = $timeName
-	Edit timeWave
-	
-	if (recordA)
-		if (recordB)
-			AppendtoTable waveA, waveB
-			Display waveA, waveB vs timeWave
-		else
-			AppendtoTable waveA
-			Display waveA vs timeWave
-		endif
-	else
-		AppendtoTable waveB
-		Display waveB vs timeWave
-	endif
-
-	if (measurePower > 0)
-		make /O/N=0 $powerName
-		wave powerWave = $powerName
-		AppendtoTable powerWave
-		AppendtoGraph/R powerWave vs timeWave
-	endif
+//check if a variable falls within the proper bounds
+function checkValues(name,param,lower,higher)
+	string name
+	variable &param
+	variable lower
+	variable higher
+	variable localParam = param
 		
-	
-	if (stringmatch(timeControl,"tSet"))
-		timeInterval = tSet
-	elseif(stringmatch(timeControl,"tSetDT"))
-		timeInterval = tSet + dwellTime
+	if ((param < lower) || (param > higher))
+		string promptStr = "Value for " + name + " must be between " + num2str(lower) + " and " + num2str(higher) +  "."
+		Prompt localParam,  promptStr
+		DoPrompt "Value out of bounds.",localParam
+		if (V_flag)
+			return -1
+		endif
+		param = localParam
 	endif
+end
+
+function/s includeName(nameToInclude,boolCheck)
+		string nameToInclude
+		variable boolCheck
+		
+		if (boolCheck)
+			return nameToInclude
+		else
+			return ""
+		endif
 end
