@@ -7,6 +7,7 @@ Function startScan(fixedCont)
 	NVAR measurePower =  $SRSVar("measurePower") //global variable to control power recording
 	NVAR autoPause = $SRSVar("autoPause") //global variable that controls autopausing
 
+
 	//choose scan parameters
 	if (chooseScanParameters(fixedCont) == -1)
 		return -1
@@ -328,7 +329,7 @@ function gettSetTimeFactor()
 	if (timeResponse == 0)
 		timeFactor = 1e-7
 	elseif (timeResponse == 3)
-		timeFactor = 1/(4e3) //trig time factor
+		timeFactor = 1/(1e3) //trig time factor
 	endif
 	return timeFactor
 end
