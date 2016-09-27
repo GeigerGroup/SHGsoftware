@@ -1,5 +1,34 @@
 #pragma rtGlobals=1		// Use modern global access method.
 
+function refNorm(rootname)
+	string rootname
+	variable mmax
+	variable mmin
+	
+	wave w = $rootname
+	
+	mmin = wavemin(w)
+	
+	variable length = numpnts(w)
+	make /n=(length) $(rootname + "_rn") = w-mmin
+	wave rn = $(rootname + "_rn")
+	mmax = wavemax(rn)
+	rn = rn/mmax
+	AppendToTable rn
+	
+end
+
+function findAverage(name, begpt, endpt)
+	string name
+	variable begpt
+	variable endpt
+	
+	wave w = $(name)
+	variable ave = mean(w,begpt,endpt)
+	print "Average = " + num2str(ave)
+end
+
+
 function boxcarNorm(rootname,boxcarNum)
 	
 	string rootname

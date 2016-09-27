@@ -11,6 +11,7 @@ function readDataSRS(s)
 	NVAR pointNumber = $SRSVar("pointNumber")
 	NVAR timeInterval = $SRSVar("timeInterval")
 	NVAR autoPause = $SRSVar("autoPause")
+	NVAR nextPause = $SRSVar("nextPause")
 	SVAR waveAname = $SRSVar("waveAname")
 	SVAR waveBname = $SRSVar("waveBname")
 	SVAR devName = $SRSVar("devName")
@@ -46,6 +47,11 @@ function readDataSRS(s)
 					stopScan()
 				endif
 			endif
+		endif	
+		
+		if (nextPause == pointNumber) //check if nextpause is on, if so, pause
+			stopScan()
+			nextPause = 0 //reset nextPause
 		endif	
 		
 		if (pointNumber > scanLength) //check if at end of scan
