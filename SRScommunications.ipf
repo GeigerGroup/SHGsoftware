@@ -32,10 +32,12 @@ function initSRSVariables()
 	variable/G measurePower = 0
 	variable/G powerScale = 1
 	variable/G autoPause = 0
+	variable/G nextPause = 0
 	string/G waveAname = "waveA"
 	string/G waveBname = "waveB"
 	string/G timeInput = ""
 	string/G devName = StringFromList(0,fDAQmx_DeviceNames());
+	make /n=5/O taskNumWave = 0
 	SetDataFolder root:	
 end
 

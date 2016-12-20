@@ -21,6 +21,7 @@ Menu "Photon Counter"
 		"Pause/F4", stopScan()
 		"Resume/F5", resumeScan()
 		"Stop and Reset", resetScan()
+		"Set Next Pause/F6",setNextPause()
 	End
 	Submenu "Wave Analysis"
 		"Find Average", findAverage()

@@ -5,8 +5,8 @@
 #pragma rtGlobals=1
 
 function COMMPowerMeter()
-	VDT2/P=COM2 baud=9600,stopbits=1,databits=8,parity=0
-	VDTOperationsPort2 COM2
+	VDT2/P=COM3 baud=9600,stopbits=1,databits=8,parity=0
+	VDTOperationsPort2 COM3
 	VDT2 KillIO
 end
 

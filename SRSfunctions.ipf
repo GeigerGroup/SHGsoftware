@@ -6,7 +6,7 @@ Function startScan(fixedCont)
 	NVAR pointNumber =  $SRSVar("pointNumber") //global variable to track point number
 	NVAR measurePower =  $SRSVar("measurePower") //global variable to control power recording
 	NVAR autoPause = $SRSVar("autoPause") //global variable that controls autopausing
-
+	NVAR nextPause = $SRSVar("nextPause") //global variable that controls next pause
 
 	//choose scan parameters
 	if (chooseScanParameters(fixedCont) == -1)
@@ -202,6 +202,19 @@ function stopScan()
 		stopFastReadDAQ() //if recording with NIDAQ, stop it reading power
 	endif
 end
+
+//set next pause
+function setNextPause()
+	NVAR nextPause = $SRSVar("nextPause")
+	variable localNextPause
+		
+	Prompt localNextPause, "Pause at what point?"
+	DoPrompt "Next pause", localNextPause
+	
+	nextPause = localNextPause
+end
+
+
 
 //reset scan
 function resetScan()

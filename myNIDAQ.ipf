@@ -30,3 +30,28 @@ Function getFastReadDAQ()
 	fDAQmx_AI_GetReader(devName,waveTemp) //call NIDAQ function to get data in wave
 	return waveTemp[0] //return value
 End
+
+Function setDIOconfig(channel)
+	variable channel
+	SVAR devName = $(SRSVar("devName")) //global device name
+	wave taskNumWave = root:SRSparameters:taskNumWave
+
+	string param = "/" + devName + "/port0/line" + num2str(channel) //parameters for ports chosen, P0.0
+	DAQmx_DIO_Config /DEV=devName /DIR=1 /LGRP=1 param //call NIDAQ function to set it up
+	taskNumWave[channel] = V_DAQmx_DIO_TaskNumber //store the taskNumber
+End
+
+Function setOutputValue(channel,value)
+	variable channel
+	variable value
+	wave taskNumWave = root:SRSparameters:taskNumWave
+	SVAR devName = $(SRSVar("devName")) //global device name
+	fDAQmx_DIO_Write(devName,taskNumWave[channel],value)
+End
+
+function initDOchannels()
+	setDIOconfig(1)
+	setDIOconfig(2)
+	setDIOconfig(3)
+	setDIOconfig(4)
+end
