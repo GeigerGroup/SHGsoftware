@@ -212,6 +212,10 @@ function setNextPause()
 	DoPrompt "Next pause", localNextPause
 	
 	nextPause = localNextPause
+<<<<<<< HEAD
+=======
+	Print "Next Pause = " + num2str(localNextPause)
+>>>>>>> origin/master
 end
 
 
