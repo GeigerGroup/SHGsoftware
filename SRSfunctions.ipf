@@ -7,7 +7,9 @@ Function startScan(fixedCont)
 	NVAR measurePower =  $SRSVar("measurePower") //global variable to control power recording
 	NVAR autoPause = $SRSVar("autoPause") //global variable that controls autopausing
 	NVAR nextPause = $SRSVar("nextPause") //global variable that controls next pause
-
+	NVAR flowChangeIndex = $SRSVar("flowChangeIndex") //global variable of index for flow control
+	NVAR currentChannel = $SRSVar("currentChannel")
+	
 	//choose scan parameters
 	if (chooseScanParameters(fixedCont) == -1)
 		return -1
@@ -28,6 +30,10 @@ Function startScan(fixedCont)
 	variable waste = querySRS("SS1") //make sure data ready status bit is reset so don't start with 0
 	startRecordingData() //start querying for data
 	sendSRS("CS")	//start scan
+	
+	//reset pump flow control
+	flowChangeIndex = 0
+	currentChannel = 0
 	
 	//print what was chosen
 	if (fixedCont == 0)
@@ -212,10 +218,6 @@ function setNextPause()
 	DoPrompt "Next pause", localNextPause
 	
 	nextPause = localNextPause
-<<<<<<< HEAD
-=======
-	Print "Next Pause = " + num2str(localNextPause)
->>>>>>> origin/master
 end
 
 

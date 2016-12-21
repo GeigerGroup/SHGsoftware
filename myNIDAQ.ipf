@@ -41,17 +41,41 @@ Function setDIOconfig(channel)
 	taskNumWave[channel] = V_DAQmx_DIO_TaskNumber //store the taskNumber
 End
 
-Function setOutputValue(channel,value)
+Function setValve(channel,value)
 	variable channel
-	variable value
-	wave taskNumWave = root:SRSparameters:taskNumWave
-	SVAR devName = $(SRSVar("devName")) //global device name
-	fDAQmx_DIO_Write(devName,taskNumWave[channel],value)
+	variable value //value 0 = closed, value 1 = open
+	
+	if (channel > 0)
+		wave taskNumWave = root:SRSparameters:taskNumWave
+		SVAR devName = $(SRSVar("devName")) //global device name
+		fDAQmx_DIO_Write(devName,taskNumWave[channel],value)
+	endif
 End
+
+function openValve(channel)
+	variable channel
+	
+	setValve(channel,1)
+end
+
+function closeValve(channel)
+	variable channel
+	
+	setValve(channel,0)
+end
 
 function initDOchannels()
 	setDIOconfig(1)
 	setDIOconfig(2)
 	setDIOconfig(3)
 	setDIOconfig(4)
+	
+	closeAllValves()
+end
+
+function closeAllValves()
+	setValve(1,0)
+	setValve(2,0)
+	setValve(3,0)
+	setValve(4,0)
 end

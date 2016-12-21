@@ -12,6 +12,7 @@ function readDataSRS(s)
 	NVAR timeInterval = $SRSVar("timeInterval")
 	NVAR autoPause = $SRSVar("autoPause")
 	NVAR nextPause = $SRSVar("nextPause")
+	NVAR flowControl = $SRSVar("flowControl")
 	SVAR waveAname = $SRSVar("waveAname")
 	SVAR waveBname = $SRSVar("waveBname")
 	SVAR devName = $SRSVar("devName")
@@ -39,6 +40,16 @@ function readDataSRS(s)
 			concatenate /NP/KILL{tempPower},powerWave //append power data
 		endif
 		
+		if (flowControl == 1)
+			NVAR flowChangeIndex = $SRSVar("flowChangeIndex")
+			wave flowCounts = root:SRSparameters:flowCounts
+			
+			if (flowCounts[flowChangeIndex] == pointNumber)
+				print "flow change at point" + num2str(pointNumber)
+				changeFlow()
+			endif
+		endif
+		
 		pointNumber = pointNumber + 1 //increment up one point
 		
 		if (autoPause > 0) //check if autopause is on, if so, check if should pause
@@ -53,6 +64,8 @@ function readDataSRS(s)
 			stopScan()
 			nextPause = 0 //reset nextPause
 		endif	
+		
+		
 		
 		if (pointNumber > scanLength) //check if at end of scan
 			sendSRS("CH") //if so, stop scan

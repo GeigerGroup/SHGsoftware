@@ -33,6 +33,13 @@ function initSRSVariables()
 	variable/G powerScale = 1
 	variable/G autoPause = 0
 	variable/G nextPause = 0
+	
+	variable/G flowControl = 0
+	variable/G flowChangeIndex = 0
+	variable/G currentChannel = 0
+	make/n=100/O flowCounts = 0
+	make/n=100/O flowChannels = 0
+	
 	string/G waveAname = "waveA"
 	string/G waveBname = "waveB"
 	string/G timeInput = ""

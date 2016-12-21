@@ -8,6 +8,12 @@ Menu "Photon Counter"
 	"Close", closeSRS()
 	End
 	
+	Submenu "Valve and pump control"
+	"Initialize valve control", initDOchannels()
+	"Close all valves/F8", closeAllValves()
+	"Stop all flow/F9", stopAllFlow()
+	End
+	
 	Submenu "Stored Photon Counter Settings"
 	"GEO4: OPA- Juli, Alicia, Mavis?", recallGPCParameters(1)
 	"MHZ- Paul and Sarah", recallGPCParameters(2)
