@@ -54,3 +54,83 @@ Function/S SegmentMeans(source, n)
 	endfor
 	return GetWavesDataFolder(destw,2) // string is full path to wave 
 End
+
+function meanNorm(rootname,numSegment)
+
+	string rootname
+	variable numSegment
+	
+	wave root = $rootname
+	wave power = $(rootname + "_power")
+	SegmentMeans(root,numSegment)
+	SegmentMeans(power,numSegment)
+	
+	wave rootMean = $(rootname + "_m")
+	wave powerMean = $(rootname + "_power_m")
+	make /n=(numpnts(rootMean)) $(rootname + "_pow_NORM") = powerMean/powerMean[0]
+	wave powerMeanNorm = $(rootname + "_pow_NORM")
+	make /n=(numpnts(rootMean)) $(rootname + "_mNORM") = rootMean/powerMeanNorm^2
+	wave rootMeanNorm = $(rootname + "_mNORM")
+	
+	AppendToTable rootMean,powerMean,powerMeanNorm,rootMeanNorm
+	
+end
+
+function refNorm(rootname)
+	string rootname
+	variable mmax
+	variable mmin
+	
+	wave w = $rootname
+	
+	mmin = wavemin(w)
+	
+	variable length = numpnts(w)
+	make /n=(length) $(rootname + "_rn") = w-mmin
+	wave rn = $(rootname + "_rn")
+	mmax = wavemax(rn)
+	rn = rn/mmax
+	AppendToTable rn
+	
+end
+
+
+function findAverage(name, begpt, endpt)
+	string name
+	variable begpt
+	variable endpt
+	
+	wave w = $(name)
+	variable ave = mean(w,begpt,endpt)
+	print "Average = " + num2str(ave)
+end
+
+function boxcarNorm(rootname,boxcarNum)
+	
+	string rootname
+	variable boxcarNum
+	
+	boxcar(rootname,boxcarNum)
+	boxcar(rootname + "_power",boxcarNum)
+	boxcar(rootname + "_time",boxcarNum)
+	
+	wave root = $(rootname + "_bc5_0")
+	wave power = $(rootname + "_power" + "_bc5_0")
+	wave wtime = $(rootname + "_time" + "_bc5_0")
+	
+	variable length = numpnts(root)
+	AppendToTable wtime,root,power
+	make /n=(length) $(rootname + "_pow_NORM") = power/power[0]
+	wave powerNorm = $(rootname + "_pow_NORM")
+	make/n=(length) $(rootname +"_bcNORM") = root/powerNorm^2
+	wave rootNorm = $(rootname + "_bcNORM")
+	AppendToTable powerNorm,rootNorm
+	Display rootNorm vs wtime
+	ModifyGraph fSize=14
+	ModifyGraph mirror=2;DelayUpdate
+	Label left "I\\BSHG \\M [a.u.]";DelayUpdate
+	Label bottom "Time[s]"
+end
+
+
+
