@@ -21,6 +21,7 @@ Menu "Photon Counter"
 	End	
 	
 	Submenu "Scan"
+		"Scan Control Panel", scanControl()
 		"Start Fixed Length", startScan(0)
 		"Start Continuous", startScan(1)
 		"Pause/F4", stopScan()
