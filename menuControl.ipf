@@ -9,9 +9,8 @@ Menu "Photon Counter"
 	End
 	
 	Submenu "Valve and pump control"
-	"Initialize valve control", initDOchannels()
-	"Close all valves/F8", closeAllValves()
-	"Stop all flow/F9", stopAllFlow()
+	"Initialize Valve Control", initDOchannels()
+	"Flow Control Panel", flowControlPanel()
 	End
 	
 	Submenu "Stored Photon Counter Settings"

@@ -56,3 +56,22 @@ function stopFlow(channel)
 	string param = num2str(channel) + "I"
 	sendPump(param)
 end
+
+function startFlowValve(channel)
+	variable channel
+	
+	startFlow(channel)
+	print "Started channel " + num2str(channel)
+	openValve(channel)
+	print "Opened valve " + num2str(channel)
+	
+end
+
+function stopValveFlow(channel)
+	variable channel
+	
+	closeValve(channel)
+	print "Closed valve " + num2str(channel)
+	stopFlow(channel)
+	print "Stopped channel " + num2str(channel)
+end

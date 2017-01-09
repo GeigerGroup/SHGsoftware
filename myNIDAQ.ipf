@@ -31,6 +31,15 @@ Function getFastReadDAQ()
 	return waveTemp[0] //return value
 End
 
+function initDOchannels()
+	setDIOconfig(1)
+	setDIOconfig(2)
+	setDIOconfig(3)
+	setDIOconfig(4)
+	
+	closeAllValves()
+end
+
 Function setDIOconfig(channel)
 	variable channel
 	SVAR devName = $(SRSVar("devName")) //global device name
@@ -64,14 +73,7 @@ function closeValve(channel)
 	setValve(channel,0)
 end
 
-function initDOchannels()
-	setDIOconfig(1)
-	setDIOconfig(2)
-	setDIOconfig(3)
-	setDIOconfig(4)
-	
-	closeAllValves()
-end
+
 
 function closeAllValves()
 	setValve(1,0)
