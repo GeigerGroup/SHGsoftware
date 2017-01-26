@@ -7,6 +7,7 @@ Function startScan(fixedCont)
 	NVAR measurePower =  $SRSVar("measurePower") //global variable to control power recording
 	NVAR autoPause = $SRSVar("autoPause") //global variable that controls autopausing
 	NVAR nextPause = $SRSVar("nextPause") //global variable that controls next pause
+	NVAR flowControl = $SRSVar("flowControl") //global variable whether flow control is on
 	NVAR flowChangeIndex = $SRSVar("flowChangeIndex") //global variable of index for flow control
 	NVAR currentChannel = $SRSVar("currentChannel")
 	
@@ -31,9 +32,11 @@ Function startScan(fixedCont)
 	startRecordingData() //start querying for data
 	sendSRS("CS")	//start scan
 	
-	//reset pump flow control
-	flowChangeIndex = 0
-	currentChannel = 0
+	//reset pump flow control\
+	if (flowControl == 1)
+		flowChangeIndex = 0
+		currentChannel = 0
+	endif
 	
 	//print what was chosen
 	if (fixedCont == 0)
@@ -46,12 +49,14 @@ end
 function chooseScanParameters(fixedCont)
 	variable fixedCont
 	NVAR autoPause = $SRSVar("autoPause") //global variable that controls autopausing
+	NVAR flowControl = $SRSVar("flowControl") //global variable whether flow control is on
 	NVAR scanLength = $SRSVar("scanLength") //global variable for scanlength
 	
 	//set defaults before prompt
 	variable localAutoPause = 0
 	string AB = setDefaultRecordOption()
 	string power = setDefaultPower()
+	string flow = "Off"
 	variable localScanLength = 2000 //default scan length	
 	variable dwellTime = querySRS("DT") //get dwellTime from last scan
 	variable tSet = gettSetTimeFactor()*querySRS("CP2") //get tSet from last scan
@@ -65,14 +70,28 @@ function chooseScanParameters(fixedCont)
 	Prompt AB, "Choose A; B; or A and B:", popup "A;B;AB"
 	Prompt power, "Measure Power?", popup "No;NIDAQ;OPAEPM"
 	Prompt localAutoPause, "Autopause? 0 = no, or enter # counts to pause after"
+	Prompt flow, "Flow control on?", popup "On;Off"
 	if (fixedCont == 0)
-		DoPrompt "Enter Scan Parameters", localScanLength, tSet, dwellTime,AB,power,localAutoPause
+		DoPrompt "Enter Scan Parameters", localScanLength, tSet, dwellTime,AB,power,localAutoPause, flow
 	else
-		DoPrompt "Enter Scan Parameters", tSet,dwellTime,AB,power,localAutoPause
+		DoPrompt "Enter Scan Parameters", tSet,dwellTime,AB,power,localAutoPause, flow
 	endif
 	if (V_flag)
 		return -1
 	endif
+	
+	//determine whether flow control is on or off
+	strswitch(flow)
+		case "On":
+			flowControl = 1
+			break
+		case "Off":
+			flowControl = 0
+			break
+		default:
+			Print "Error with flow control on off."
+			break
+	endswitch
 	
 	//make sure variables fall within specified values
 	checkValues("tSet",tSet,1e-7,90000)

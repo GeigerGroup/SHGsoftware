@@ -32,10 +32,11 @@ Function getFastReadDAQ()
 End
 
 function initDOchannels()
-	setDIOconfig(1)
-	setDIOconfig(2)
-	setDIOconfig(3)
-	setDIOconfig(4)
+	
+	variable i
+	for (i = 1; i < 5; i+=1)
+		setDIOconfig(i)
+	endfor
 	
 	closeAllValves()
 end

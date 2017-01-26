@@ -9,7 +9,7 @@ Menu "Photon Counter"
 	End
 	
 	Submenu "Valve and pump control"
-	"Initialize Valve Control", initDOchannels()
+	"Initialize Pump and Valve Settings", initPumpValveSettings()
 	"Flow Control Panel", flowControlPanel()
 	End
 	

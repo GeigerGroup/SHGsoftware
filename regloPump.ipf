@@ -14,34 +14,59 @@ function sendPump(command)
 	VDTWrite2 command
 	COMMSRS()
 end
+	
+function initPumpValveSettings()
+	initDOChannels()
 
-function/s receivePump()
-	string response
-	COMMpump()
-	VDTRead2/O=3/T=",\t\r"  response
-	COMMSRS()
-	print response
-	return response
+	setAllChannels("K")	//set rotation to clockwise
+	setAllChannels("M")    //set pump to flow rate mode
+
+	setAllChannels("f" + convertFlowRate(30)) //set flow rate to 30	
+	
+	SetDataFolder root:SRSParameters
+	variable/G flowControl = 0
+	variable/G flowChangeIndex = 0
+	variable/G currentChannel = 0
+	make/n=100/O flowCounts = 0
+	make/n=100/O flowChannels = 0
+	make/n=100/O flowSpeed = 0
+	SetDataFolder root:
+	
+	Edit :SRSParameters:flowCounts,:SRSParameters:flowChannels, :SRSParameters:flowSpeed
 end
+
+function setAllChannels(command)
+	string command
 	
-function initPumpSettings()
-	sendPump("1K") 		//set rotation to clockwise
-	sendPump("2K")
-	sendPump("3K")
-	sendPump("4K")
-	
-	sendPump("1M")        //set pump to flow rate mode
-	sendPump("2M")
-	sendPump("3M")
-	sendPump("4M")	
+	variable i
+	for(i=1; i < 5; i+=1)
+		sendPump(num2str(i) + command)
+	endfor
 end
 
 function stopAllFlow()
-	sendPump("1I")
-	sendPump("2I")
-	sendPump("3I")
-	sendPump("4I")
+	setAllChannels("I")
 end
+
+function/s convertFlowRate(speed)
+	variable speed
+	
+	string s
+	sprintf s, "%.3e", speed //put variable in exponential string form
+	
+	string speedString = s[0] + s[2,4] + s[6] + s[8] //remove ".", "E", and first exponential digit	
+	return speedString
+end
+
+
+function setFlowSpeed(channel, speed)
+	variable channel
+	variable speed
+	
+	string param = num2str(channel) + "f" + convertFlowRate(speed)
+	sendPump(param)
+end
+	
 
 function startFlow(channel)
 	variable channel
@@ -55,23 +80,4 @@ function stopFlow(channel)
 	
 	string param = num2str(channel) + "I"
 	sendPump(param)
-end
-
-function startFlowValve(channel)
-	variable channel
-	
-	startFlow(channel)
-	print "Started channel " + num2str(channel)
-	openValve(channel)
-	print "Opened valve " + num2str(channel)
-	
-end
-
-function stopValveFlow(channel)
-	variable channel
-	
-	closeValve(channel)
-	print "Closed valve " + num2str(channel)
-	stopFlow(channel)
-	print "Stopped channel " + num2str(channel)
 end
