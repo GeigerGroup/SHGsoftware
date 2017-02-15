@@ -27,7 +27,9 @@ Function channelControlCheck(ctrlName,checked) : CheckBoxControl
 	
 	if (checked == 0)
 		stopValveFlow(channel)
+		closeValve(5)
 	else
+		openValve(5)
 		startFlowValve(channel)
 	endif
 		

@@ -25,14 +25,15 @@ function initPumpValveSettings()
 	
 	SetDataFolder root:SRSParameters
 	variable/G flowControl = 0
-	variable/G flowChangeIndex = 0
-	variable/G currentChannel = 0
-	make/n=100/O flowCounts = 0
-	make/n=100/O flowChannels = 0
-	make/n=100/O flowSpeed = 0
+	variable/G flowChangeIndex = 0 //flow control number
+	make/n=100/O flowCounts = 0  //wave to hold counts at which flow change happens
+	make/n=100/O flowCh1 = 0   //waves to hold pump speeds for specified channels
+	make/n=100/O flowCh2 = 0
+	make/n=100/O flowCh3 = 0
+	make/n=100/O flowCh4 = 0
 	SetDataFolder root:
 	
-	Edit :SRSParameters:flowCounts,:SRSParameters:flowChannels, :SRSParameters:flowSpeed
+	Edit :SRSParameters:flowCounts,:SRSParameters:flowCh1, :SRSParameters:flowCh2, :SRSParameters:flowCh3, :SRSParameters:flowCh4 
 end
 
 function setAllChannels(command)

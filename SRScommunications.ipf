@@ -38,7 +38,7 @@ function initSRSVariables()
 	string/G waveBname = "waveB"
 	string/G timeInput = ""
 	string/G devName = StringFromList(0,fDAQmx_DeviceNames());
-	make /n=5/O taskNumWave = 0
+	make /n=6/O taskNumWave = 0
 	SetDataFolder root:	
 end
 

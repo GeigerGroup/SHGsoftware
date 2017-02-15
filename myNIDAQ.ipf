@@ -34,7 +34,7 @@ End
 function initDOchannels()
 	
 	variable i
-	for (i = 1; i < 5; i+=1)
+	for (i = 1; i < 6; i+=1)
 		setDIOconfig(i)
 	endfor
 	
@@ -51,7 +51,7 @@ Function setDIOconfig(channel)
 	taskNumWave[channel] = V_DAQmx_DIO_TaskNumber //store the taskNumber
 End
 
-Function setValve(channel,value)
+Function setValve(channel,value) //channel 1-4 flow, channel 5 is waste valve
 	variable channel
 	variable value //value 0 = closed, value 1 = open
 	
@@ -74,11 +74,9 @@ function closeValve(channel)
 	setValve(channel,0)
 end
 
-
-
 function closeAllValves()
-	setValve(1,0)
-	setValve(2,0)
-	setValve(3,0)
-	setValve(4,0)
+	variable i
+	for (i = 1; i < 6; i+=1)
+		setValve(i,0)
+	endfor
 end

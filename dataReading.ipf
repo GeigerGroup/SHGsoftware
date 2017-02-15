@@ -44,8 +44,9 @@ function readDataSRS(s)
 			NVAR flowChangeIndex = $SRSVar("flowChangeIndex")
 			wave flowCounts = root:SRSparameters:flowCounts
 			
+			
 			if (flowCounts[flowChangeIndex] == pointNumber)
-				print "flow change at point" + num2str(pointNumber)
+				print "Flow change at point " + num2str(pointNumber)
 				changeFlow()
 			endif
 		endif
