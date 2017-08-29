@@ -1,35 +1,35 @@
-function varargout = mcProg(varargin)
-% MCPROG MATLAB code for mcProg.fig
-%      MCPROG, by itself, creates a new MCPROG or raises the existing
+function varargout = mainGUI(varargin)
+% mainGUI MATLAB code for mainGUI.fig
+%      mainGUI, by itself, creates a new mainGUI or raises the existing
 %      singleton*.
 %
-%      H = MCPROG returns the handle to a new MCPROG or the handle to
+%      H = mainGUI returns the handle to a new mainGUI or the handle to
 %      the existing singleton*.
 %
-%      MCPROG('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in MCPROG.M with the given input arguments.
+%      mainGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in mainGUI.M with the given input arguments.
 %
-%      MCPROG('Property','Value',...) creates a new MCPROG or raises the
+%      mainGUI('Property','Value',...) creates a new mainGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before mcProg_OpeningFcn gets called.  An
+%      applied to the GUI before mainGUI_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to mcProg_OpeningFcn via varargin.
+%      stop.  All inputs are passed to mainGUI_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help mcProg
+% Edit the above text to modify the response to help mainGUI
 
-% Last Modified by GUIDE v2.5 01-Jun-2017 20:12:48
+% Last Modified by GUIDE v2.5 29-Aug-2017 13:09:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @mcProg_OpeningFcn, ...
-                   'gui_OutputFcn',  @mcProg_OutputFcn, ...
+                   'gui_OpeningFcn', @mainGUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @mainGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,13 +44,16 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before mcProg is made visible.
-function mcProg_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before mainGUI is made visible.
+function mainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to mcProg (see VARARGIN)
+% varargin   command line arguments to mainGUI (see VARARGIN)
+
+%initializes global variables
+initializeDataProg;
 
 %get list of com ports to populate popmenus
 list = instrhwinfo('serial');
@@ -67,18 +70,18 @@ set(handles.popupSppH,'String',ports);
 set(handles.popupSpPump,'String',ports);
 
 
-% Choose default command line output for mcProg
+% Choose default command line output for mainGUI
 handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes mcProg wait for user response (see UIRESUME)
+% UIWAIT makes mainGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = mcProg_OutputFcn(hObject, eventdata, handles) 
+function varargout = mainGUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -267,6 +270,7 @@ function connectAll_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in configureMeasurement.
 function configureMeasurement_Callback(hObject, eventdata, handles)
+configureAcqGUI
 % hObject    handle to configureMeasurement (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -281,6 +285,7 @@ function configureControl_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in startExp.
 function startExp_Callback(hObject, eventdata, handles)
+    startExperiment()
 % hObject    handle to startExp (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

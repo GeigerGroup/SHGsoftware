@@ -4,6 +4,13 @@
 
 function sIPP = initIPP(port)
 
-sIPP = serial(port);
-set(sIPP,'BaudRate',9600,'StopBits',1,'DataBits',8);
-fopen(sSPM);
+global pump
+
+if pump == 0
+    sIPP = serial(port);
+    set(sIPP,'BaudRate',9600,'StopBits',1,'DataBits',8);
+    fopen(sSPM);
+    pump = 1;
+end
+
+end

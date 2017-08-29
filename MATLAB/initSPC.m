@@ -4,6 +4,13 @@
 
 function sSPC = initSPC(port)
 
-sSPC = serial(port);
-set(sSPC,'BaudRate',19200,'StopBits',2,'DataBits',8);
-fopen(sSPM);
+global photonCounter
+
+if photonCounter == 0
+    sSPC = serial(port);
+    set(sSPC,'BaudRate',19200,'StopBits',2,'DataBits',8);
+    fopen(sSPM);
+    photonCounter = 1;
+end
+
+end
