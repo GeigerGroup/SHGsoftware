@@ -1,18 +1,25 @@
+%checks if the end of scan or pause
+
 function checkAcquisition
 
-global autoPause pointNumber scanLength
+%load DAQparameters
+DAQparam = getappdata(0,'DAQparam');
+DAQparam.pointNumber = DAQparam.pointNumber + 1;
+setappdata(0,'DAQparam',DAQparam)
 
-pointNumber = pointNumber + 1;
+%view point number
+display('point number')
+display(DAQparam.pointNumber)
 
-if autoPause
-    if pointNumber == autoPause
+if DAQparam.autoPause
+    if DAQparam.pointNumber == DAQparam.autoPause
         pauseAcquisition();
     end
 end
 
-display(pointNumber)
 
-if pointNumber == scanLength
+if DAQparam.pointNumber == DAQparam.scanLength
     stopAcquisition();
 end
+
 end

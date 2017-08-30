@@ -52,6 +52,22 @@ function configureAcqGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to configureAcqGUI (see VARARGIN)
 
+%take in DAQ parameters
+handles.UserData = getappdata(0,'DAQparam');
+
+%set initial scanLength
+handles.scanLengthEdit.Value = handles.UserData.scanLength;
+handles.scanLengthEdit.String = num2str(handles.scanLengthEdit.Value);
+
+%set initial interval
+handles.intervalEdit.Value = handles.UserData.interval;
+handles.intervalEdit.String = num2str(handles.intervalEdit.Value);
+
+%set initial dwellTime
+handles.dwellTimeEdit.Value = handles.UserData.dwellTime;
+handles.dwellTimeEdit.String = num2str(handles.dwellTimeEdit.Value);
+
+
 % Choose default command line output for configureAcqGUI
 handles.output = hObject;
 
@@ -76,6 +92,8 @@ varargout{1} = handles.output;
 
 function scanLengthEdit_Callback(hObject, eventdata, handles)
 hObject.Value = str2num(hObject.String);
+
+
 % hObject    handle to scanLengthEdit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -87,9 +105,6 @@ hObject.Value = str2num(hObject.String);
 
 % --- Executes during object creation, after setting all properties.
 function scanLengthEdit_CreateFcn(hObject, eventdata, handles)
-global scanLength
-hObject.Value = scanLength;
-hObject.String = num2str(scanLength);
 % hObject    handle to scanLengthEdit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -104,6 +119,8 @@ end
 
 function intervalEdit_Callback(hObject, eventdata, handles)
 hObject.Value = str2num(hObject.String);
+
+
 % hObject    handle to intervalEdit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -114,9 +131,6 @@ hObject.Value = str2num(hObject.String);
 
 % --- Executes during object creation, after setting all properties.
 function intervalEdit_CreateFcn(hObject, eventdata, handles)
-global interval
-hObject.Value = interval;
-hObject.String = num2str(interval);
 % hObject    handle to intervalEdit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -141,9 +155,6 @@ hObject.Value = str2num(hObject.String);
 
 % --- Executes during object creation, after setting all properties.
 function dwellTimeEdit_CreateFcn(hObject, eventdata, handles)
-global dwellTime
-hObject.Value = dwellTime;
-hObject.String = num2str(dwellTime);
 % hObject    handle to dwellTimeEdit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -157,11 +168,15 @@ end
 
 % --- Executes on button press in updateValues.
 function updateValues_Callback(hObject, eventdata, handles)
+handles.UserData.scanLength = handles.scanLengthEdit.Value;
+handles.UserData.interval = handles.intervalEdit.Value;
+handles.UserData.dwellTime = handles.dwellTimeEdit.Value;
 
-global scanLength interval dwellTime
-scanLength = handles.scanLengthEdit.Value;
-interval = handles.intervalEdit.Value;
-dwellTime = handles.dwellTimeEdit.Value;
+% Update handles structure
+guidata(hObject, handles);
+
+setappdata(0,'DAQparam',handles.UserData)
+
 close
 
 % hObject    handle to updateValues (see GCBO)

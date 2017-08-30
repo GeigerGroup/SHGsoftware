@@ -22,7 +22,7 @@ function varargout = mainGUI(varargin)
 
 % Edit the above text to modify the response to help mainGUI
 
-% Last Modified by GUIDE v2.5 29-Aug-2017 13:09:01
+% Last Modified by GUIDE v2.5 30-Aug-2017 14:46:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -46,29 +46,21 @@ end
 
 % --- Executes just before mainGUI is made visible.
 function mainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+
+
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to mainGUI (see VARARGIN)
 
-%initializes global variables
-initializeDataProg;
+%take in DAQ parameters
+handles.UserData = getappdata(0,'DAQparam');
 
-%get list of com ports to populate popmenus
-list = instrhwinfo('serial');
-ports = cell(1);
-ports{1} = 'Serial Port';
-for i = 1:length(list.SerialPorts)
-    ports{i+1} = char(list.SerialPorts(i));
-end
-
-%popuplate each popup menu with com ports
-set(handles.popupSpPc,'String',ports);
-set(handles.popupSpDAQ,'String',ports);
-set(handles.popupSppH,'String',ports);
-set(handles.popupSpPump,'String',ports);
-
+handles.photonCounterCheckbox.Value = handles.UserData.photonCounter;
+handles.NIDAQcheckbox.Value = handles.UserData.NIDAQ;
+handles.pHmeterCheckbox.Value = handles.UserData.pHmeter;
+handles.pumpCheckbox.Value = handles.UserData.pump;
 
 % Choose default command line output for mainGUI
 handles.output = hObject;
@@ -91,179 +83,46 @@ function varargout = mainGUI_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
-% --- Executes on button press in connectPC.
-function connectPC_Callback(hObject, eventdata, handles)
-% hObject    handle to connectPC (see GCBO)
+% --- Executes on button press in photonCounterCheckbox.
+function photonCounterCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to photonCounterCheckbox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Hint: get(hObject,'Value') returns toggle state of photonCounterCheckbox
 
-% --- Executes on selection change in popupSpPc.
-function popupSpPc_Callback(hObject, eventdata, handles)
-% hObject    handle to popupSpPc (see GCBO)
+
+% --- Executes on button press in NIDAQcheckbox.
+function NIDAQcheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to NIDAQcheckbox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns popupSpPc contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupSpPc
+% Hint: get(hObject,'Value') returns toggle state of NIDAQcheckbox
 
 
-% --- Executes during object creation, after setting all properties.
-function popupSpPc_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupSpPc (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
+% --- Executes on button press in pHmeterCheckbox.
+function pHmeterCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to pHmeterCheckbox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Hint: get(hObject,'Value') returns toggle state of pHmeterCheckbox
 
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
+
+% --- Executes on button press in pumpCheckbox.
+function pumpCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to pumpCheckbox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
-% --- Executes on button press in connectDAQ.
-function connectDAQ_Callback(hObject, eventdata, handles)
-% hObject    handle to connectDAQ (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% Hint: get(hObject,'Value') returns toggle state of pumpCheckbox
 
 
-% --- Executes on selection change in popupSpDAQ.
-function popupSpDAQ_Callback(hObject, eventdata, handles)
-% hObject    handle to popupSpDAQ (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupSpDAQ contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupSpDAQ
-
-
-% --- Executes during object creation, after setting all properties.
-function popupSpDAQ_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupSpDAQ (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in connectpH.
-function connectpH_Callback(hObject, eventdata, handles)
-% hObject    handle to connectpH (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on selection change in popupSppH.
-function popupSppH_Callback(hObject, eventdata, handles)
-% hObject    handle to popupSppH (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupSppH contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupSppH
-
-
-% --- Executes during object creation, after setting all properties.
-function popupSppH_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupSppH (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in connectPump.
-function connectPump_Callback(hObject, eventdata, handles)
-% hObject    handle to connectPump (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on selection change in popupSpPump.
-function popupSpPump_Callback(hObject, eventdata, handles)
-% hObject    handle to popupSpPump (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupSpPump contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupSpPump
-
-
-% --- Executes during object creation, after setting all properties.
-function popupSpPump_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupSpPump (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in checkPC.
-function checkPC_Callback(hObject, eventdata, handles)
-% hObject    handle to checkPC (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkPC
-
-
-% --- Executes on button press in checkbox2.
-function checkbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox2
-
-
-% --- Executes on button press in checkbox3.
-function checkbox3_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox3
-
-
-% --- Executes on button press in checkbox4.
-function checkbox4_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox4
-
-
-% --- Executes on button press in connectAll.
-function connectAll_Callback(hObject, eventdata, handles)
-% hObject    handle to connectAll (see GCBO)
+% --- Executes on button press in manageConnections.
+function manageConnections_Callback(hObject, eventdata, handles)
+manageConnectionsGUI
+% hObject    handle to manageConnections (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -283,23 +142,35 @@ function configureControl_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in startExp.
-function startExp_Callback(hObject, eventdata, handles)
-    startExperiment()
-% hObject    handle to startExp (see GCBO)
+% --- Executes on button press in startExperiment.
+function startExperiment_Callback(hObject, eventdata, handles)
+startAcquisition
+% hObject    handle to startExperiment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in abortExperiment.
-function abortExperiment_Callback(hObject, eventdata, handles)
-% hObject    handle to abortExperiment (see GCBO)
+% --- Executes on button press in stopExperiment.
+function stopExperiment_Callback(hObject, eventdata, handles)
+stopAcquisition
+% hObject    handle to stopExperiment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in pauseExp.
-function pauseExp_Callback(hObject, eventdata, handles)
-% hObject    handle to pauseExp (see GCBO)
+% --- Executes on button press in pauseExperiment.
+function pauseExperiment_Callback(hObject, eventdata, handles)
+pauseAcquisition
+
+% hObject    handle to pauseExperiment (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in resumeExperiment.
+function resumeExperiment_Callback(hObject, eventdata, handles)
+t = getappdata(0,'timer');
+start(t);
+% hObject    handle to resumeExperiment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

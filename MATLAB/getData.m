@@ -1,42 +1,43 @@
-function getData()
+%called at each interval in the timer to get the data
 
-global waveName ...
-    photonCounter recordA recordB ...
-    pHmeter pH cond ...
-    measurePower NIDAQ EPM
+function getData
+
+%load DAQparameters
+DAQparam = getappdata(0,'DAQparam');
 
 display('Getting Data');
 
-if photonCounter
+if DAQparam.photonCounter
     if checkPCdataReady()
-        if recordA
-            appendDataPC('A',waveName)
+        if DAQparam.recordA
+            appendDataPC('A',DAQparam.waveName)
         end
         if recordB
-            appendDataPC('B',waveName)
+            DAQparam.appendDataPC('B',DAQparam.waveName)
         end
     end
 end
 
-if pHmeter
-    if cond
+if DAQparam.pHmeter
+    if DAQparam.cond
         appendCondData()
     end
-    if pH
+    if DAQparam.pH
         appendpHData()
     end
 end
 
-if measurePower
-    if NIDAQ
+if DAQparam.measurePower
+    if DAQparam.NIDAQ
         getNIDAQdata()
     end
-    if EPM
+    if DAQparam.EPM
         getEPMdata()
     end
 end
 
-checkAcquisition();
+% see if end of scan or pause
+checkAcquisition;
 
 
 end
