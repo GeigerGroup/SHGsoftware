@@ -23,4 +23,20 @@ DAQparam = struct('waveName','wave1',...
 setappdata(0,'DAQparam',DAQparam)
 display('DAQparam inititalized.')
 
+%get address of DAQ
+%DAQ = daq.getDevices;
+%setappdata(0,'DAQ',DAQ)
+
+%set up NI daq session
+daqSess = daq.createSession('ni');
+%add reading analog voltage from channel 1 (differential?)
+addAnalogInputChannel(daqSess,'Dev1',0,'Voltage');
+daqSess.Rate = 2000; % 2000 readings a second
+daqSess.DurationInSeconds = 0.1; % for 0.1 seconds
+
+setappdata(0,'DAQsession',daqSess);
+
+
+
+
 end

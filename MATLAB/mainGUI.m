@@ -57,6 +57,7 @@ function mainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 %take in DAQ parameters
 handles.UserData = getappdata(0,'DAQparam');
 
+
 handles.photonCounterCheckbox.Value = handles.UserData.photonCounter;
 handles.NIDAQcheckbox.Value = handles.UserData.NIDAQ;
 handles.pHmeterCheckbox.Value = handles.UserData.pHmeter;

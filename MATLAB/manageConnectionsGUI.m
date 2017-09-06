@@ -60,8 +60,6 @@ handles.NIDAQcheckbox.Value = handles.UserData.NIDAQ;
 handles.pHmeterCheckbox.Value = handles.UserData.pHmeter;
 handles.pumpCheckbox.Value = handles.UserData.pump;
 
-
-
 %get list of com ports to populate popmenus
 list = instrhwinfo('serial');
 ports = cell(1);
@@ -70,12 +68,47 @@ for i = 1:length(list.SerialPorts)
     ports{i+1} = char(list.SerialPorts(i));
 end
 
-%popuplate each popup menu with com ports
-set(handles.photonCounterPopup,'String',ports);
-set(handles.NIDAQpopup,'String',ports);
-set(handles.pHmeterPopup,'String',ports);
-set(handles.pumpPopup,'String',ports);
+%popuplate each serial popup menu with com ports
+handles.photonCounterPopup.String = ports;
+handles.pHmeterPopup.String = ports;
+handles.pumpPopup.String = ports;
 
+%get list of device names
+daqIDs = daq.getDevices();
+daqs = cell(1);
+daqs{1} = 'Devices';
+for i = 1:length(daqIDs)
+    daqs{i+1} = daqIDs(1).ID;
+end
+
+%populate NIDAQ with device names
+handles.NIDAQpopup.String = daqs;
+
+
+
+%**************set default values***************%
+%computer specific
+
+%photon counter COM1
+if ismember('COM1',ports)
+    handles.photonCounterPopup.Value = find(ismember(ports,'COM1'));
+end
+
+%pump COM7
+if ismember('COM7',ports)
+    handles.pumpPopup.Value = find(ismember(ports,'COM7'));
+end
+
+%pH meter COM3
+if ismember('COM3',ports)
+    handles.pHmeterPopup.Value = find(ismember(ports,'COM3'));
+end
+
+%NIDAQ Dev1
+if ismember('Dev1',daqs)
+    handles.NIDAQpopup.Value = find(ismember(daqs,'Dev1'));
+end
+%******* end default values ******%
 
 % Choose default command line output for manageConnectionsGUI
 handles.output = hObject;
@@ -104,6 +137,30 @@ function photonCounterConnect_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%get port
+COMport = handles.photonCounterPopup.String{handles.photonCounterPopup.Value};
+serialPhotonCounter = serial(COMport);
+serialPhotonCounter.BaudRate = 19200;
+serialPhotonCounter.StopBits = 2;
+serialPhotonCounter.DataBits = 8;
+serialPump.Terminator = 'CR';
+
+%open port
+fopen(serialPhotonCounter)
+
+%save port
+setappdata(0,'serialPhotonCounter',serialPhotonCounter)
+
+%set checkbox to 1
+handles.photonCounterCheckbox.Value = 1;
+
+%set photon counter connect status to 1
+DAQparam = getappdata(0,'DAQparam');
+DAQparam.photonCounter = 1;
+setappdata(0,'DAQparam',DAQparam)
+
+
+
 
 % --- Executes on selection change in photonCounterPopup.
 function photonCounterPopup_Callback(hObject, eventdata, handles)
@@ -126,20 +183,6 @@ function photonCounterPopup_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --- Executes on button press in NIDAQconnect.
@@ -178,6 +221,28 @@ function pHmeterConnect_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%get port
+COMport = handles.pHmeterPopup.String{handles.pHmeterPopup.Value};
+serialpHmeter = serial(COMport);
+serialpHmeter.BaudRate = 9600;
+serialpHmeter.StopBits = 1;
+serialpHmeter.DataBits = 8;
+serialPump.Terminator = 'CR';
+
+%open port
+fopen(serialpHmeter)
+
+%save port
+setappdata(0,'serialpHmeter',serialpHmeter)
+
+%set checkbox to 1
+handles.pHmeterCheckbox.Value = 1;
+
+%set photon counter connect status to 1
+DAQparam = getappdata(0,'DAQparam');
+DAQparam.pHmeter = 1;
+setappdata(0,'DAQparam',DAQparam)
+
 
 % --- Executes on selection change in pHmeterPopup.
 function pHmeterPopup_Callback(hObject, eventdata, handles)
@@ -207,6 +272,28 @@ function pumpConnect_Callback(hObject, eventdata, handles)
 % hObject    handle to pumpConnect (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+%get port
+COMport = handles.pumpPopup.String{handles.pumpPopup.Value};
+serialPump = serial(COMport);
+serialPump.BaudRate = 9600;
+serialPump.StopBits = 1;
+serialPump.DataBits = 8;
+serialPump.Terminator = 'CR';
+
+%open port
+fopen(serialPump)
+
+%save port
+setappdata(0,'serialPump',serialPump)
+
+%set checkbox to 1
+handles.pumpCheckbox.Value = 1;
+
+%set photon counter connect status to 1
+DAQparam = getappdata(0,'DAQparam');
+DAQparam.pump = 1;
+setappdata(0,'DAQparam',DAQparam)
 
 
 % --- Executes on selection change in pumpPopup.
@@ -267,12 +354,6 @@ function pumpCheckbox_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of pumpCheckbox
 
-
-% --- Executes on button press in connectAll.
-function connectAll_Callback(hObject, eventdata, handles)
-% hObject    handle to connectAll (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 % --- Executes on button press in closeWindow.
 function closeWindow_Callback(hObject, eventdata, handles)
