@@ -329,6 +329,13 @@ setappdata(0,'serialPump',serialPump)
 handles.pumpCheckbox.Value = 1;
 handles.UserData.pumpCheckbox.Value = 1;
 
+% set rotation to clockwise, set to flowrate, flowrate to 30
+for i = 1:4
+    giveChannelCommand(i,'K');
+    giveChannelCommand(i,'M');
+    giveChannelCommand(i,strcat('f',converFlowRate(30)));
+end
+
 %set photon counter connect status to 1
 DAQparam = getappdata(0,'DAQparam');
 DAQparam.pump = 1;
