@@ -52,13 +52,25 @@ function manageConnectionsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to manageConnectionsGUI (see VARARGIN)
 
-%take in DAQ parameters
-handles.UserData = getappdata(0,'DAQparam');
+% %take in DAQ parameters
+% handles.UserData = getappdata(0,'DAQparam');
+% 
+% handles.photonCounterCheckbox.Value = handles.UserData.photonCounter;
+% handles.NIDAQcheckbox.Value = handles.UserData.NIDAQ;
+% handles.pHmeterCheckbox.Value = handles.UserData.pHmeter;
+% handles.pumpCheckbox.Value = handles.UserData.pump;
 
-handles.photonCounterCheckbox.Value = handles.UserData.photonCounter;
-handles.NIDAQcheckbox.Value = handles.UserData.NIDAQ;
-handles.pHmeterCheckbox.Value = handles.UserData.pHmeter;
-handles.pumpCheckbox.Value = handles.UserData.pump;
+%get in checkvalues
+checks = getappdata(0,'DAQparam');
+
+handles.photonCounterCheckbox.Value = checks.photonCounter;
+handles.NIDAQcheckbox.Value = checks.NIDAQ;
+handles.pHmeterCheckbox.Value = checks.pHmeter;
+handles.pumpCheckbox.Value = checks.pump;
+
+%get in handles to master figure to output checkbox values
+handles.UserData = varargin{1};
+
 
 %get list of com ports to populate popmenus
 list = instrhwinfo('serial');
@@ -143,7 +155,7 @@ serialPhotonCounter = serial(COMport);
 serialPhotonCounter.BaudRate = 19200;
 serialPhotonCounter.StopBits = 2;
 serialPhotonCounter.DataBits = 8;
-serialPump.Terminator = 'CR';
+serialPhotonCounter.Terminator = 'CR';
 
 %open port
 fopen(serialPhotonCounter)
@@ -151,8 +163,9 @@ fopen(serialPhotonCounter)
 %save port
 setappdata(0,'serialPhotonCounter',serialPhotonCounter)
 
-%set checkbox to 1
+%set checkboxes to 1
 handles.photonCounterCheckbox.Value = 1;
+handles.UserData.photonCounterCheckbox.Value = 1;
 
 %set photon counter connect status to 1
 DAQparam = getappdata(0,'DAQparam');
@@ -191,6 +204,28 @@ function NIDAQconnect_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%set up NI daq session
+DAQsession = daq.createSession('ni');
+daqname = handles.NIDAQpopup.String{handles.NIDAQpopup.Value};
+%add reading analog voltage from channel 0
+addAnalogInputChannel(DAQsession,daqname,0,'Voltage');
+
+%add output digital channels, port 0 lines 1 through 5
+addDigitalChannel(DAQsession,daqname,'Port0/Line1:5','OutputOnly');
+states = [0 0 0 0 0];
+outputSingleScan(DAQsession,states) % set all to zero
+
+setappdata(0,'DAQsession',DAQsession);
+
+%set checkbox to 1
+handles.NIDAQcheckbox.Value = 1;
+handles.UserData.NIDAQcheckbox.Value = 1;
+
+%set photon counter connect status to 1
+DAQparam = getappdata(0,'DAQparam');
+DAQparam.NIDAQ = 1;
+setappdata(0,'DAQparam',DAQparam)
+
 
 % --- Executes on selection change in NIDAQpopup.
 function NIDAQpopup_Callback(hObject, eventdata, handles)
@@ -200,6 +235,8 @@ function NIDAQpopup_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns NIDAQpopup contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from NIDAQpopup
+
+
 
 
 % --- Executes during object creation, after setting all properties.
@@ -227,7 +264,7 @@ serialpHmeter = serial(COMport);
 serialpHmeter.BaudRate = 9600;
 serialpHmeter.StopBits = 1;
 serialpHmeter.DataBits = 8;
-serialPump.Terminator = 'CR';
+serialpHmeter.Terminator = 'CR';
 
 %open port
 fopen(serialpHmeter)
@@ -237,6 +274,7 @@ setappdata(0,'serialpHmeter',serialpHmeter)
 
 %set checkbox to 1
 handles.pHmeterCheckbox.Value = 1;
+handles.UserData.pHmeterCheckbox.Value = 1;
 
 %set photon counter connect status to 1
 DAQparam = getappdata(0,'DAQparam');
@@ -289,6 +327,7 @@ setappdata(0,'serialPump',serialPump)
 
 %set checkbox to 1
 handles.pumpCheckbox.Value = 1;
+handles.UserData.pumpCheckbox.Value = 1;
 
 %set photon counter connect status to 1
 DAQparam = getappdata(0,'DAQparam');

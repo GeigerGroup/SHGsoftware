@@ -22,7 +22,7 @@ function varargout = mainGUI(varargin)
 
 % Edit the above text to modify the response to help mainGUI
 
-% Last Modified by GUIDE v2.5 30-Aug-2017 14:46:11
+% Last Modified by GUIDE v2.5 06-Sep-2017 16:09:12
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,13 +55,13 @@ function mainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to mainGUI (see VARARGIN)
 
 %take in DAQ parameters
-handles.UserData = getappdata(0,'DAQparam');
+DAQparam = getappdata(0,'DAQparam');
 
 
-handles.photonCounterCheckbox.Value = handles.UserData.photonCounter;
-handles.NIDAQcheckbox.Value = handles.UserData.NIDAQ;
-handles.pHmeterCheckbox.Value = handles.UserData.pHmeter;
-handles.pumpCheckbox.Value = handles.UserData.pump;
+handles.photonCounterCheckbox.Value = DAQparam.photonCounter;
+handles.NIDAQcheckbox.Value = DAQparam.NIDAQ;
+handles.pHmeterCheckbox.Value = DAQparam.pHmeter;
+handles.pumpCheckbox.Value = DAQparam.pump;
 
 % Choose default command line output for mainGUI
 handles.output = hObject;
@@ -122,7 +122,7 @@ function pumpCheckbox_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in manageConnections.
 function manageConnections_Callback(hObject, eventdata, handles)
-manageConnectionsGUI
+manageConnectionsGUI(handles)
 % hObject    handle to manageConnections (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -173,5 +173,14 @@ function resumeExperiment_Callback(hObject, eventdata, handles)
 t = getappdata(0,'timer');
 start(t);
 % hObject    handle to resumeExperiment (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in closeProgram.
+function closeProgram_Callback(hObject, eventdata, handles)
+closeProgram
+close
+% hObject    handle to closeProgram (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
