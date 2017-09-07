@@ -151,17 +151,12 @@ function photonCounterConnect_Callback(hObject, eventdata, handles)
 
 %get port
 COMport = handles.photonCounterPopup.String{handles.photonCounterPopup.Value};
-serialPhotonCounter = serial(COMport);
-serialPhotonCounter.BaudRate = 19200;
-serialPhotonCounter.StopBits = 2;
-serialPhotonCounter.DataBits = 8;
-serialPhotonCounter.Terminator = 'CR';
 
-%open port
-fopen(serialPhotonCounter)
+%initialize object
+photonCounter = PhotonCounter(COMport);
 
-%save port
-setappdata(0,'serialPhotonCounter',serialPhotonCounter)
+%save object
+setappdata(0,'photonCounter',photonCounter)
 
 %set checkboxes to 1
 handles.photonCounterCheckbox.Value = 1;
@@ -204,18 +199,14 @@ function NIDAQconnect_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%set up NI daq session
-DAQsession = daq.createSession('ni');
+%get name
 daqname = handles.NIDAQpopup.String{handles.NIDAQpopup.Value};
-%add reading analog voltage from channel 0
-addAnalogInputChannel(DAQsession,daqname,0,'Voltage');
 
-%add output digital channels, port 0 lines 1 through 5
-addDigitalChannel(DAQsession,daqname,'Port0/Line1:5','OutputOnly');
-states = [0 0 0 0 0];
-outputSingleScan(DAQsession,states) % set all to zero
+%create object
+daqSession = DAQsession(daqname);
 
-setappdata(0,'DAQsession',DAQsession);
+%save object
+setappdata(0,'daqSession',daqSession);
 
 %set checkbox to 1
 handles.NIDAQcheckbox.Value = 1;
@@ -260,17 +251,12 @@ function pHmeterConnect_Callback(hObject, eventdata, handles)
 
 %get port
 COMport = handles.pHmeterPopup.String{handles.pHmeterPopup.Value};
-serialpHmeter = serial(COMport);
-serialpHmeter.BaudRate = 9600;
-serialpHmeter.StopBits = 1;
-serialpHmeter.DataBits = 8;
-serialpHmeter.Terminator = 'CR';
 
-%open port
-fopen(serialpHmeter)
+%initiliaze object
+pHmeter = PHmeter(COMport);
 
-%save port
-setappdata(0,'serialpHmeter',serialpHmeter)
+%save pHmeter
+setappdata(0,'pHmeter',pHmeter)
 
 %set checkbox to 1
 handles.pHmeterCheckbox.Value = 1;
@@ -313,28 +299,17 @@ function pumpConnect_Callback(hObject, eventdata, handles)
 
 %get port
 COMport = handles.pumpPopup.String{handles.pumpPopup.Value};
-serialPump = serial(COMport);
-serialPump.BaudRate = 9600;
-serialPump.StopBits = 1;
-serialPump.DataBits = 8;
-serialPump.Terminator = 'CR';
 
-%open port
-fopen(serialPump)
+%initialize object
+pump = Pump(COMport);
 
-%save port
-setappdata(0,'serialPump',serialPump)
+%save object
+setappdata(0,'pump',pump)
 
 %set checkbox to 1
 handles.pumpCheckbox.Value = 1;
 handles.UserData.pumpCheckbox.Value = 1;
 
-% set rotation to clockwise, set to flowrate, flowrate to 30
-for i = 1:4
-    giveChannelCommand(i,'K');
-    giveChannelCommand(i,'M');
-    giveChannelCommand(i,strcat('f',converFlowRate(30)));
-end
 
 %set photon counter connect status to 1
 DAQparam = getappdata(0,'DAQparam');
