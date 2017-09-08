@@ -1,6 +1,6 @@
 % creates a class for REGLO ICC pump
 
-classdef Pump
+classdef Pump < handle
     properties
         Serial
     end

@@ -1,6 +1,6 @@
 % creates a class for pH meter object
 
-classdef PHmeter
+classdef PHmeter < handle
     properties
         Serial
     end
@@ -37,8 +37,8 @@ classdef PHmeter
             string = fscanf(obj.Serial);
             split = strsplit(string,','); % split it
             
-            pH = split{9}; % pick out pH
-            cond = split{20}; % pick out cond
+            pH = str2num(split{9}); % pick out pH
+            cond = str2num(split{20}); % pick out cond
         end
     end
 end

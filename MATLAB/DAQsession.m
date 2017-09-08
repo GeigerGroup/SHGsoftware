@@ -14,6 +14,10 @@ classdef DAQsession
                     
                     %add reading analog voltage from channel 0
                     addAnalogInputChannel(obj.Session,devname,0,'Voltage');
+                    obj.Session.Rate = 10;
+                    
+                    %ideally different sessions or something to average
+                    %analog data
                     
                     %add output digital channels, port 0 lines 1 through 5
                     addDigitalChannel(obj.Session,devname,'Port0/Line1:5','OutputOnly');

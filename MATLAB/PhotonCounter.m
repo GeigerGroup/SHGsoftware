@@ -1,8 +1,10 @@
 %creates a class for photon counter objects to communicate with
 
-classdef PhotonCounter
+classdef PhotonCounter < handle
     properties
         Serial
+        DwellTime = 0.002;
+        Interval = 1;
     end
     methods
         function obj = PhotonCounter(COMport)
@@ -17,6 +19,12 @@ classdef PhotonCounter
                     %open
                     fopen(obj.Serial)
                     
+                    %set default dwellTime
+                    obj.setDwellTime(obj.DwellTime);
+                    
+                    %set default Interval
+                    obj.setInterval(obj.Interval);
+                    
                 else
                     error('Input COM port must be char')
                 end
@@ -30,5 +38,33 @@ classdef PhotonCounter
         function stopScan(obj)
             fprintf(obj.Serial,'CH');
         end
+        
+        function resetScan(obj)
+            fprintf(obj.Serial,'CR');
+        end
+        
+        function data = getData(obj,channel)          
+            %channel is either A or B
+            
+            %check if data is ready
+            fprintf(obj.Serial,'SS1');
+            if str2num(fscanf(obj.Serial)); %test on status byte
+                fprintf(obj.Serial,strcat('Q',channel)); %ask for data
+                data = str2num(fscanf(obj.Serial)); %receive data
+            else
+                display('Error: no data ready') %if data is not ready
+            end
+        end
+        
+        function setDwellTime(obj,dwellTime)
+            fprintf(obj.Serial,strcat('DT',num2str(dwellTime))); %dwell time in seconds
+        end
+        
+        function setInterval(obj,interval)
+            %in seconds, if timing off 10 Mhz (change 1e7 if otherwise)
+            fprintf(obj.Serial,strcat('CP2,',num2str(interval*1e7))); 
+        end
+            
+            
     end
 end
