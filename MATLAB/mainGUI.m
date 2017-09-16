@@ -145,7 +145,10 @@ function configureControl_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in startExperiment.
 function startExperiment_Callback(hObject, eventdata, handles)
-startAcquisition
+acquisition = Acquisition('test');
+setappdata(0,'acquisition',acquisition);
+acquisition.startAcquisition;
+
 % hObject    handle to startExperiment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -153,7 +156,8 @@ startAcquisition
 
 % --- Executes on button press in stopExperiment.
 function stopExperiment_Callback(hObject, eventdata, handles)
-stopAcquisition
+acquisition = getappdata(0,'acquisition');
+acquisition.stopAcquisition;
 % hObject    handle to stopExperiment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -161,7 +165,8 @@ stopAcquisition
 
 % --- Executes on button press in pauseExperiment.
 function pauseExperiment_Callback(hObject, eventdata, handles)
-pauseAcquisition
+acquisition = getappdata(0,'acquisition');
+acquisition.pauseAcquisition;
 
 % hObject    handle to pauseExperiment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -170,8 +175,8 @@ pauseAcquisition
 
 % --- Executes on button press in resumeExperiment.
 function resumeExperiment_Callback(hObject, eventdata, handles)
-t = getappdata(0,'timer');
-start(t);
+acquisition = getappdata(0,'acquisition');
+acquisition.resumeAcquisition
 % hObject    handle to resumeExperiment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
