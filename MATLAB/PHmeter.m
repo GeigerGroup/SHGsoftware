@@ -13,6 +13,7 @@ classdef PHmeter < handle
                     obj.Serial.StopBits = 1;
                     obj.Serial.DataBits = 8;
                     obj.Serial.Terminator = 'CR';
+                    obj.Serial.TimeOut = 0.1;
                     
                     %open
                     fopen(obj.Serial)
@@ -31,14 +32,27 @@ classdef PHmeter < handle
             %send command
             fprintf(obj.Serial,'GETMEAS');
             out = fscanf(obj.Serial); % echo of GETMEAS
-            out = fscanf(obj.Serial); % empty - clean up?
-            
-            % get actual string
-            string = fscanf(obj.Serial);
-            split = strsplit(string,','); % split it
-            
-            pH = str2num(split{9}); % pick out pH
-            cond = str2num(split{20}); % pick out cond
+            if ~strcmp(out,'GETMEAS')
+                display('no pH data')
+                pH = [];
+                cond = [];
+                return
+            else
+                
+                out = fscanf(obj.Serial); % empty - clean up?
+                
+                % get actual string
+                string = fscanf(obj.Serial);
+                if ~isempty(string)
+                    split = strsplit(string,','); % split it
+                    
+                    pH = str2double(split{9}); % pick out pH
+                    cond = str2double(split{20}); % pick out cond
+                else
+                    pH = [];
+                    cond = [];
+                end
+            end
         end
     end
 end

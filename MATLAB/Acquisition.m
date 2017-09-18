@@ -9,12 +9,17 @@ classdef Acquisition < handle
         PhotonCounter
         PHmeter
         DAQsession
-
+        
         Time
         DataPhotonCounter
         DataNIDAQpower
         DatapH
         DataCond
+        
+        PlotPhotonCounter
+        PlotPower
+        PlotpH
+        PlotCond
     end
     
     methods
@@ -34,9 +39,14 @@ classdef Acquisition < handle
                     obj.DAQsession = getappdata(0,'daqSession');
                     
                     %give reference to pHmeter
-                    %obj.PHmeter = getappdata(0,'pHmeter');
-                   
+                    obj.PHmeter = getappdata(0,'pHmeter');
                     
+                    %create each plot handle
+                    figure
+                    obj.PlotPhotonCounter = plot(obj.Time,obj.DataPhotonCounter);
+                    obj.PlotPower = plot(obj.Time,obj.DataNIDAQpower);
+                    obj.PlotpH = plot(obj.Time,obj.DatapH);
+                    obj.PlotCond = plot(obj.Time,obj.DataCond);
                     
                 else
                     error('Input name must be char')
@@ -49,32 +59,42 @@ classdef Acquisition < handle
         function  getData(obj)
             %get data from the instruments selected
             
-            %time based on photon counter
-            if (~isempty(obj.PhotonCounter))
-                obj.Time = vertcat(obj.Time,obj.PointNumber*obj.PhotonCounter.Interval);
-            end  
-            
             %photon counter data
             if (~isempty(obj.PhotonCounter))
-               obj.DataPhotonCounter = vertcat(obj.DataPhotonCounter,obj.PhotonCounter.getData('A'));
+                data = obj.PhotonCounter.getData('A');
+                if ~isempty(data) %if it got something continue
+                    obj.DataPhotonCounter = vertcat(obj.DataPhotonCounter,data);
+                else
+                    return %else exit
+                end
+                obj.Time = vertcat(obj.Time,obj.PointNumber*obj.PhotonCounter.Interval);
             end
+         
             
             %NIDAQ power data
             if (~isempty(obj.DAQsession))
-               obj.DataNIDAQpower = vertcat(obj.DataNIDAQpower,obj.DAQsession.Session.inputSingleScan);
+                obj.DataNIDAQpower = vertcat(obj.DataNIDAQpower,obj.DAQsession.Session.inputSingleScan);
             end
             
             %pH meter data
             if (~isempty(obj.PHmeter))
                 [pH, cond] = obj.PHmeter.getData;
-                obj.DatapH = vertcat(obj.DatapH,pH);
-                obj.DataCond = vertcat(obj.DataCond,cond);
+                
+                if ~isempty(pH) %if got the data add it
+                    obj.DatapH = vertcat(obj.DatapH,pH);
+                    obj.DataCond = vertcat(obj.DataCond,cond);
+                else
+                    obj.DatapH = vertcat(obj.DatapH,0); %else add 0s
+                    obj.DataCond = vertcat(obj.DataCond,0);
+                end
             end
             
-            figure(1)
-            plot(obj.Time,obj.DataPhotonCounter)
-            figure(2)
-            plot(obj.Time,obj.DataNIDAQpower)
+            
+            set(obj.PlotPhotonCounter,'XData',obj.Time,'YData',obj.DataPhotonCounter)
+            set(obj.PlotPower,'XData',obj.Time,'YData',obj.DataNIDAQpower)
+            set(obj.PlotpH,'XData',obj.Time,'YData',obj.DatapH)
+            set(obj.PlotCond,'XData',obj.Time,'YData',obj.DataCond)
+            drawnow;
         end
         
         function checkAcquisition(obj)
@@ -118,14 +138,14 @@ classdef Acquisition < handle
             
             %start timer
             start(obj.Timer);
-                        
+            
             %start photon counter
             if (~isempty(obj.PhotonCounter))
                 obj.PhotonCounter.startScan
             end
         end
-            
-            
+        
+        
         
         function stopAcquisition(obj)
             stop(obj.Timer);
@@ -136,7 +156,6 @@ classdef Acquisition < handle
                 obj.PhotonCounter.stopScan
             end
         end
-
+        
     end
 end
-    

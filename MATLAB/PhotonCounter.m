@@ -52,6 +52,7 @@ classdef PhotonCounter < handle
                 fprintf(obj.Serial,strcat('Q',channel)); %ask for data
                 data = str2num(fscanf(obj.Serial)); %receive data
             else
+                data = [];
                 display('Error: no data ready') %if data is not ready
             end
         end
