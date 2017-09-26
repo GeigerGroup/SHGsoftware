@@ -34,7 +34,7 @@ classdef Acquisition < handle
                     obj.DAQsession = getappdata(0,'daqSession');
                     
                     %give reference to pHmeter
-                    obj.PHmeter = getappdata(0,'pHmeter');
+                    %obj.PHmeter = getappdata(0,'pHmeter');
                    
                     
                     
@@ -71,14 +71,10 @@ classdef Acquisition < handle
                 obj.DataCond = vertcat(obj.DataCond,cond);
             end
             
-%             figure(1)
-%             plot(obj.Time,obj.DataPhotonCounter)
-%             figure(2)
-%             plot(obj.Time,obj.DataNIDAQpower)
-%             figure(3)
-%             plot(obj.Time,obj.DatapH)
-%             figure(4)
-%             plot(obj.Time,obj.DataCond)
+            figure(1)
+            plot(obj.Time,obj.DataPhotonCounter)
+            figure(2)
+            plot(obj.Time,obj.DataNIDAQpower)
         end
         
         function checkAcquisition(obj)
@@ -113,6 +109,7 @@ classdef Acquisition < handle
             %stop photon counter
             if (~isempty(obj.PhotonCounter))
                 obj.PhotonCounter.stopScan
+                display('Photon counter paused')
             end
             
         end
