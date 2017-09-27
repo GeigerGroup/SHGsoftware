@@ -9,6 +9,12 @@ classdef Acquisition < handle
         PhotonCounter
         PHmeter
         DAQsession
+        Pump
+        
+        FlowIndex = 1;
+        FlowConcentrationPoint;
+        FlowConcentrationValue;
+        FlowControl = false;
 
         Time
         DataPhotonCounter
@@ -33,11 +39,13 @@ classdef Acquisition < handle
                     %give reference to DAQsession
                     obj.DAQsession = getappdata(0,'daqSession');
                     
+                    %give reference to pump
+                    obj.Pump = getappdata(0,'pump');
+                    
                     %give reference to pHmeter
                     %obj.PHmeter = getappdata(0,'pHmeter');
                    
-                    
-                    
+
                 else
                     error('Input name must be char')
                 end
@@ -78,12 +86,24 @@ classdef Acquisition < handle
         end
         
         function checkAcquisition(obj)
-            %check to see if have exceeded point number
+            %check to see if have exceeded point number, and if flow
+            %control if change should occurr
             
-            %increment
+            if obj.FlowControl %check if flow control is enabled
+                if obj.PointNumber == obj.FlowConcentrationPoint(obj.FlowIndex) 
+                    %check if point number is point number where change happens
+                    
+                    %calculate flow rates for two reservoir salt
+                    obj.Pump.calculateSalt2Reservoir(obj.FlowConcentrationValue(obj.FlowIndex));
+                    obj.FlowIndex = obj.FlowIndex + 1; %increment flow index
+                end
+            end
+                    
+            
+            %increment point number in acquisition
             obj.PointNumber = obj.PointNumber + 1;
             
-            %check if have exceeded and then stop
+            %check if have exceeded scan length and then stop
             if obj.PointNumber > obj.ScanLength
                 obj.stopAcquisition
             end
@@ -109,7 +129,7 @@ classdef Acquisition < handle
             %stop photon counter
             if (~isempty(obj.PhotonCounter))
                 obj.PhotonCounter.stopScan
-                display('Photon counter paused')
+                disp('Photon counter paused')
             end
             
         end
