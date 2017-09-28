@@ -9,6 +9,13 @@ classdef Acquisition < handle
         PhotonCounter
         PHmeter
         DAQsession
+        Pump
+        
+        FigureHandle;
+        LineHandlePhotons;
+        LineHandlePower;
+        LineHandlepH;
+        LineHandleCond;
         
         FlowIndex = 1;
         FlowConcentrationPoint;
@@ -20,11 +27,7 @@ classdef Acquisition < handle
         DataNIDAQpower
         DatapH
         DataCond
-        
-        PlotPhotonCounter
-        PlotPower
-        PlotpH
-        PlotCond
+
     end
     
     methods
@@ -49,15 +52,41 @@ classdef Acquisition < handle
                     %give reference to pHmeter
                     obj.PHmeter = getappdata(0,'pHmeter');
                     
-                    %create each plot handle
-                    figure
-                    obj.PlotPhotonCounter = plot(obj.Time,obj.DataPhotonCounter);
-                    obj.PlotPower = plot(obj.Time,obj.DataNIDAQpower);
-                    obj.PlotpH = plot(obj.Time,obj.DatapH);
-                    obj.PlotCond = plot(obj.Time,obj.DataCond);
+                    %create new figure to hold 4 subplots handle
+                    obj.FigureHandle = figure;
+                    
+                    %plot for photon data
+                    subplot(4,1,1)                
+                    %create line object with temp point then delete-
+                    %cleanup?
+                    obj.LineHandlePhotons = plot(1,1);
+                    obj.LineHandlePhotons.XData = [];
+                    obj.LineHandlePhotons.YData = [];
+                    
+                    %plot for power data
+                    subplot(4,1,2)                
+                    %create line object with temp point then delete-
+                    %cleanup?
+                    obj.LineHandlePower = plot(1,1);
+                    obj.LineHandlePower.XData = [];
+                    obj.LineHandlePower.YData = [];
                     
                     
-                    %obj.PHmeter = getappdata(0,'pHmeter');
+                    %plot for pH data
+                    subplot(4,1,3)                
+                    %create line object with temp point then delete-
+                    %cleanup?
+                    obj.LineHandlepH = plot(1,1);
+                    obj.LineHandlepH.XData = [];
+                    obj.LineHandlepH.YData = [];
+                    
+                    %plot for cond data
+                    subplot(4,1,4)                
+                    %create line object with temp point then delete-
+                    %cleanup?
+                    obj.LineHandleCond = plot(1,1);
+                    obj.LineHandleCond.XData = [];
+                    obj.LineHandleCond.YData = [];
 
                 else
                     error('Input name must be char')
@@ -100,12 +129,19 @@ classdef Acquisition < handle
                 end
             end
             
+            %update x and y data for each plot
+            obj.LineHandlePhotons.XData = obj.Time;
+            obj.LineHandlePhotons.YData = obj.DataPhotonCounter;
             
-            set(obj.PlotPhotonCounter,'XData',obj.Time,'YData',obj.DataPhotonCounter)
-            set(obj.PlotPower,'XData',obj.Time,'YData',obj.DataNIDAQpower)
-            set(obj.PlotpH,'XData',obj.Time,'YData',obj.DatapH)
-            set(obj.PlotCond,'XData',obj.Time,'YData',obj.DataCond)
-            drawnow;
+            obj.LineHandlePower.XData = obj.Time;
+            obj.LineHandlePower.YData = obj.DataNIDAQpower;
+            
+            obj.LineHandlepH.XData = obj.Time;
+            obj.LineHandlepH.YData = obj.DatapH;
+            
+            obj.LineHandleCond.XData = obj.Time;
+            obj.LineHandleCond.YData = obj.DataCond;
+
         end
         
         function checkAcquisition(obj)

@@ -25,7 +25,7 @@ classdef Pump < handle
                     
                     %initialize certain settings
                     for i = 1:4
-                        fprintf(obj.Serial,strcat(num2str(i),'K')); % set rotation to clockwise,
+                        fprintf(obj.Serial,strcat(num2str(i),'J')); % set rotation to clockwise,
                         fprintf(obj.Serial,strcat(num2str(i),'M')); % set to flowrate
                         setFlowRate(obj,i,30); % flowrate to 30
                     end

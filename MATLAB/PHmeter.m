@@ -32,17 +32,13 @@ classdef PHmeter < handle
             %send command
             fprintf(obj.Serial,'GETMEAS');
             out = fscanf(obj.Serial); % echo of GETMEAS
-            if ~strcmp(out,'GETMEAS')
-                display('no pH data')
-                pH = [];
-                cond = [];
-                return
-            else
-                
+            
+            if strfind(out,'GETMEAS')
                 out = fscanf(obj.Serial); % empty - clean up?
                 
                 % get actual string
                 string = fscanf(obj.Serial);
+                out = fscanf(obj.Serial); % empty - clean up?
                 if ~isempty(string)
                     split = strsplit(string,','); % split it
                     
@@ -52,6 +48,11 @@ classdef PHmeter < handle
                     pH = [];
                     cond = [];
                 end
+                
+            else
+                display('no pH data')
+                pH = [];
+                cond = [];  
             end
         end
     end
