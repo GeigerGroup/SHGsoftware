@@ -22,7 +22,6 @@ classdef Acquisition < handle
         FlowConcentrationValue;
         FlowControl = false;
 
-        Time
         DataPhotonCounter
         DataNIDAQpower
         DatapH
@@ -42,15 +41,19 @@ classdef Acquisition < handle
                     
                     %give reference to photon counter
                     obj.PhotonCounter = getappdata(0,'photonCounter');
+                    obj.DataPhotonCounter = XYData;
                     
                     %give reference to DAQsession
                     obj.DAQsession = getappdata(0,'daqSession');
+                    obj.DataNIDAQpower = XYData;
                     
                     %give reference to pump
                     obj.Pump = getappdata(0,'pump');
                     
                     %give reference to pHmeter
                     obj.PHmeter = getappdata(0,'pHmeter');
+                    obj.DatapH = XYData;
+                    obj.DataCond = XYData;
                     
                     %create new figure to hold 4 subplots handle
                     obj.FigureHandle = figure;
@@ -87,6 +90,15 @@ classdef Acquisition < handle
                     obj.LineHandleCond = plot(1,1);
                     obj.LineHandleCond.XData = [];
                     obj.LineHandleCond.YData = [];
+                    
+                    
+                    
+                    
+                    % test flow control parameters
+                    obj.FlowControl = true;
+                    obj.FlowConcentrationPoint = [1 200 400 600 800];
+                    obj.FlowConcentrationValue = [0.1 0.05 0 0.05 0.1];
+                    
 
                 else
                     error('Input name must be char')
@@ -103,17 +115,22 @@ classdef Acquisition < handle
             if (~isempty(obj.PhotonCounter))
                 data = obj.PhotonCounter.getData('A');
                 if ~isempty(data) %if it got something continue
-                    obj.DataPhotonCounter = vertcat(obj.DataPhotonCounter,data);
+                    obj.DataPhotonCounter.XData = ...
+                        vertcat(obj.DataPhotonCounter.XData,obj.PointNumber*obj.PhotonCounter.Interval);
+                    obj.DataPhotonCounter.YData = ...
+                        vertcat(obj.DataPhotonCounter.YData,data);
                 else
                     return %else exit
                 end
-                obj.Time = vertcat(obj.Time,obj.PointNumber*obj.PhotonCounter.Interval);
             end
          
             
-            %NIDAQ power data
+            %NIDAQ power data, needs photoncounter interval to create x
             if (~isempty(obj.DAQsession))
-                obj.DataNIDAQpower = vertcat(obj.DataNIDAQpower,obj.DAQsession.Session.inputSingleScan);
+                obj.DataNIDAQpower.XData = ...
+                    vertcat(obj.DataNIDAQpower.XData,obj.PointNumber*obj.PhotonCounter.Interval);
+                obj.DataNIDAQpower.YData = ...
+                    vertcat(obj.DataNIDAQpower.YData,obj.DAQsession.Session.inputSingleScan);
             end
             
             %pH meter data
@@ -121,26 +138,28 @@ classdef Acquisition < handle
                 [pH, cond] = obj.PHmeter.getData;
                 
                 if ~isempty(pH) %if got the data add it
-                    obj.DatapH = vertcat(obj.DatapH,pH);
-                    obj.DataCond = vertcat(obj.DataCond,cond);
-                else
-                    obj.DatapH = vertcat(obj.DatapH,0); %else add 0s
-                    obj.DataCond = vertcat(obj.DataCond,0);
+                    obj.DatapH.XData = ...
+                        vertcat(obj.DatapH.XData,obj.PointNumber*obj.PhotonCounter.Interval);
+                    obj.DataCond.XData = ...
+                        vertcat(obj.DataCond.XData,obj.PointNumber*obj.PhotonCounter.Interval);
+                    obj.DatapH.YData = vertcat(obj.DatapH.YData,pH);
+                    obj.DataCond.YData = vertcat(obj.DataCond.YData,cond);
                 end
+
             end
             
             %update x and y data for each plot
-            obj.LineHandlePhotons.XData = obj.Time;
-            obj.LineHandlePhotons.YData = obj.DataPhotonCounter;
+            obj.LineHandlePhotons.XData = obj.DataPhotonCounter.XData;
+            obj.LineHandlePhotons.YData = obj.DataPhotonCounter.YData;
             
-            obj.LineHandlePower.XData = obj.Time;
-            obj.LineHandlePower.YData = obj.DataNIDAQpower;
+            obj.LineHandlePower.XData = obj.DataNIDAQpower.XData;
+            obj.LineHandlePower.YData = obj.DataNIDAQpower.YData;
             
-            obj.LineHandlepH.XData = obj.Time;
-            obj.LineHandlepH.YData = obj.DatapH;
+            obj.LineHandlepH.XData = obj.DatapH.XData;
+            obj.LineHandlepH.YData = obj.DatapH.YData;
             
-            obj.LineHandleCond.XData = obj.Time;
-            obj.LineHandleCond.YData = obj.DataCond;
+            obj.LineHandleCond.XData = obj.DataCond.XData;
+            obj.LineHandleCond.YData = obj.DataCond.YData;
 
         end
         

@@ -39,7 +39,7 @@ classdef Pump < handle
             coefConc = [obj.cWater obj.cConc; 1 1]; %matrix for conc
             coefDil = [obj.cWater obj.cDil; 1 1]; %matrix for dil
             
-            solMatrix = [ojb.fTotal*conc; obj.fTotal]; %matrix for solutions
+            solMatrix = [obj.fTotal*conc; obj.fTotal]; %matrix for solutions
             
             flowConc = inv(coefConc)*solMatrix; %rates if conc works
             flowDil = inv(coefDil)*solMatrix; %rates if diluted works
@@ -66,6 +66,9 @@ classdef Pump < handle
                 obj.setFlowRate(i,finalFlowRates(i));
             end
             
+            for i = 1:4
+                obj.startFlow(i)
+            end
         end
         
         function setFlowRate(obj,channel,rate)

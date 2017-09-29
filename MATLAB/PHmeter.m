@@ -44,6 +44,10 @@ classdef PHmeter < handle
                     
                     pH = str2double(split{9}); % pick out pH
                     cond = str2double(split{20}); % pick out cond
+                    
+                    if strcmp(split{21},'mS/cm') %put in microS/cm if in mS
+                        cond = cond*1000;
+                    end
                 else
                     pH = [];
                     cond = [];
