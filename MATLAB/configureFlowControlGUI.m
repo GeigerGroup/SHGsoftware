@@ -14,7 +14,6 @@ function varargout = configureFlowControlGUI(varargin)
 %      CONFIGUREFLOWCONTROLGUI('CALLBACK') and CONFIGUREFLOWCONTROLGUI('CALLBACK',hObject,...) call the
 %      local function named CALLBACK in CONFIGUREFLOWCONTROLGUI.M with the given input
 %      arguments.
-%
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
@@ -22,7 +21,13 @@ function varargout = configureFlowControlGUI(varargin)
 
 % Edit the above text to modify the response to help configureFlowControlGUI
 
-% Last Modified by GUIDE v2.5 02-Oct-2017 11:53:26
+% Last Modified by GUIDE v2.5 02-Oct-2017 16:08:42
+
+% Menu for specifying the points and conditions for the flow system made up
+% of a pump and solenoid valve system, the data of which is stored in
+% DAQparam.
+
+
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -86,9 +91,70 @@ function flowControlTable_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to flowControlTable (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
+
+% Table to hold the data that populates DAQparam FlowConcentrationPoint
+% and FlowConcentrationValue. Its Data property is a cell array, column one
+% represents the points and column two represents the values.
+
+%get daqParam
 daqParam = getappdata(0,'daqParam');
 
-hObject.Data{1} = daqParam.FlowConcentrationPoint;
-hObject.Data{2} = daqParam.FlowConcentrationValue;
+%horizontally concatenate and turn into cell array
+data = horzcat(daqParam.FlowConcentrationPoint,daqParam.FlowConcentrationValue);
+data = [num2cell(data);cell(1,2)]; %add blank row
+hObject.Data = data;
 
 
+
+% --- Executes when entered data in editable cell(s) in flowControlTable.
+function flowControlTable_CellEditCallback(hObject, eventdata, handles)
+% hObject    handle to flowControlTable (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.TABLE)
+%	Indices: row and column indices of the cell(s) edited
+%	PreviousData: previous data for the cell(s) edited
+%	EditData: string(s) entered by the user
+%	NewData: EditData or its converted form set on the Data property. Empty if Data was not changed
+%	Error: error string when failed to convert EditData to appropriate value for Data
+% handles    structure with handles and user data (see GUIDATA)
+
+% Turns the strings that are entered into numbers and, if there is no
+% longer an empty row at the end of the table, will add another row.
+
+%convert entered string to number
+hObject.Data{eventdata.Indices(1),eventdata.Indices(2)} = str2double(eventdata.EditData);
+
+%check if need to add more rows
+%get length
+last = size(hObject.Data);
+last = last(1);
+
+%check if either are not empty
+if (~isempty(hObject.Data{last,1}) || ~isempty(hObject.Data{last,2}))
+    %add row if so
+    hObject.Data = [hObject.Data;cell(1,2)];
+end
+
+
+% --- Executes on button press in updateCloseButton.
+function updateCloseButton_Callback(hObject, eventdata, handles)
+% hObject    handle to updateCloseButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%Takes the values that have been updated in the table and adds them to the
+%DAQ parameters for flow control. Will crash if table doesn't have the same
+%number of points and values. (fix?)
+
+%convert from cell array to matrix
+A = handles.flowControlTable.Data;
+i1 = cellfun(@ischar,A);
+sz = cellfun('size',A(~i1),2);
+A(i1) = {nan(1,sz(1))};
+C = cell2mat(A);
+
+%get reference to daqparam and set values
+daqParam = getappdata(0,'daqParam');
+daqParam.FlowConcentrationPoint = C(:,1);
+daqParam.FlowConcentrationValue = C(:,2);
+
+close %close window
