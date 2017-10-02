@@ -1,24 +1,26 @@
 classdef DAQparam < handle
     properties
-        WaveName = 'wave1';
-        ScanLength = Inf;
-        
+        Name = 'wave1';
+
+        %boolenas of if hardware is enabled
         PhotonCounter = false;
-        RecordA = false;
-        RecordB = false;
-        
-        PHmeter = false;
-        PH = false;
-        Cond = false;
-        
-        MeasurePower = false;
         NIDAQ = false;
-        EPM = false;
-        
-        AutoPause = false;
-        
-        FlowControl = false;
-        
         Pump = false;
+        PHmeter = false;
+        
+        
+        %parameters for photon counter
+        ScanLength = Inf;
+        Interval = 1;
+        DwellTime = 0.02;
+                
+        
+        
+        %parameters for flow control
+        FlowControl = false;
+        FlowConcentrationPoint;
+        FlowConcentrationValue;
+        
+      
     end
 end

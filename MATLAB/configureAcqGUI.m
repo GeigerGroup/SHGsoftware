@@ -22,7 +22,7 @@ function varargout = configureAcqGUI(varargin)
 
 % Edit the above text to modify the response to help configureAcqGUI
 
-% Last Modified by GUIDE v2.5 29-Aug-2017 12:51:26
+% Last Modified by GUIDE v2.5 02-Oct-2017 11:08:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -52,20 +52,23 @@ function configureAcqGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to configureAcqGUI (see VARARGIN)
 
-%take in DAQ parameters
-handles.UserData = getappdata(0,'DAQparam');
+%take in current DAQ parameters
+daqParam = getappdata(0,'daqParam');
 
-%set initial scanLength
-handles.scanLengthEdit.Value = handles.UserData.scanLength;
+%set initial ScanLength
+handles.scanLengthEdit.Value = daqParam.ScanLength;
 handles.scanLengthEdit.String = num2str(handles.scanLengthEdit.Value);
 
-%set initial interval
-handles.intervalEdit.Value = handles.UserData.interval;
+%set initial Interval
+handles.intervalEdit.Value = daqParam.Interval;
 handles.intervalEdit.String = num2str(handles.intervalEdit.Value);
 
-%set initial dwellTime
-handles.dwellTimeEdit.Value = handles.UserData.dwellTime;
+%set initial DwellTime
+handles.dwellTimeEdit.Value = daqParam.DwellTime;
 handles.dwellTimeEdit.String = num2str(handles.dwellTimeEdit.Value);
+
+%set whether flow control is on or off
+handles.flowControlCheck.Value = daqParam.FlowControl;
 
 
 % Choose default command line output for configureAcqGUI
@@ -168,17 +171,27 @@ end
 
 % --- Executes on button press in updateValues.
 function updateValues_Callback(hObject, eventdata, handles)
-handles.UserData.scanLength = handles.scanLengthEdit.Value;
-handles.UserData.interval = handles.intervalEdit.Value;
-handles.UserData.dwellTime = handles.dwellTimeEdit.Value;
 
-% Update handles structure
-guidata(hObject, handles);
+%take in current DAQ parameters
+daqParam = getappdata(0,'daqParam');
 
-setappdata(0,'DAQparam',handles.UserData)
+daqParam.ScanLength = handles.scanLengthEdit.Value;
+daqParam.Interval = handles.intervalEdit.Value;
+daqParam.DwellTime = handles.dwellTimeEdit.Value;
+daqParam.FlowControl = handles.flowControlCheck.Value;
+
 
 close
 
 % hObject    handle to updateValues (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in flowControlCheck.
+function flowControlCheck_Callback(hObject, eventdata, handles)
+% hObject    handle to flowControlCheck (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of flowControlCheck

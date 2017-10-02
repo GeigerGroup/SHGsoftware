@@ -1,31 +1,40 @@
 classdef Acquisition < handle
     properties
+        %name of acquisition and timer
         Name
         Timer
         
-        PointNumber = 1;
-        ScanLength = Inf;
+        %handles for plotting data
+        FigureHandle
+        LineHandlePhotons
+        LineHandlePower
+        LineHandlepH
+        LineHandleCond
         
+        %data
+        DataPhotonCounter
+        DataNIDAQpower
+        DatapH
+        DataCond
+        
+        %hardware objects
         PhotonCounter
         PHmeter
         DAQsession
         Pump
         
-        FigureHandle;
-        LineHandlePhotons;
-        LineHandlePower;
-        LineHandlepH;
-        LineHandleCond;
+        %parameters for photon counter
+        PointNumber
+        ScanLength
+        Interval
+        DwellTime
         
+        %parameters for flow control
+        FlowControl = false;
         FlowIndex = 1;
         FlowConcentrationPoint;
         FlowConcentrationValue;
-        FlowControl = false;
-
-        DataPhotonCounter
-        DataNIDAQpower
-        DatapH
-        DataCond
+        
 
     end
     
@@ -91,10 +100,13 @@ classdef Acquisition < handle
                     obj.LineHandleCond.XData = [];
                     obj.LineHandleCond.YData = [];
                     
+                    %read in current parameters
+                    currentDAQparam = getappdata(0,'daqParam');
+                    obj.ScanLength = currentDAQparam.ScanLength;
+                    obj.Interval = currentDAQparam.Interval;
+                    obj.DwellTime = currentDAQparam.DwellTime;
                     
-                    
-                    
-                    % test flow control parameters
+                    %test flow control parameters
                     obj.FlowControl = true;
                     obj.FlowConcentrationPoint = [1 200 400 600 800];
                     obj.FlowConcentrationValue = [0.1 0.05 0 0.05 0.1];
@@ -113,7 +125,7 @@ classdef Acquisition < handle
             
             %photon counter data
             if (~isempty(obj.PhotonCounter))
-                data = obj.PhotonCounter.getData('A');
+                data = obj.PhotonCounter.getData;
                 if ~isempty(data) %if it got something continue
                     obj.DataPhotonCounter.XData = ...
                         vertcat(obj.DataPhotonCounter.XData,obj.PointNumber*obj.PhotonCounter.Interval);

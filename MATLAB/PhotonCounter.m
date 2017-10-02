@@ -3,8 +3,10 @@
 classdef PhotonCounter < handle
     properties
         Serial
-        DwellTime = 0.002;
-        Interval = 1;
+        DwellTime;
+        Interval;
+        %channel enabled hard set here, should be option eventually
+        ChannelEnabled = 'A';
     end
     methods
         function obj = PhotonCounter(COMport)
@@ -43,13 +45,13 @@ classdef PhotonCounter < handle
             fprintf(obj.Serial,'CR');
         end
         
-        function data = getData(obj,channel)          
+        function data = getData(obj)          
             %channel is either A or B
             
             %check if data is ready
             fprintf(obj.Serial,'SS1');
             if str2num(fscanf(obj.Serial)); %test on status byte
-                fprintf(obj.Serial,strcat('Q',channel)); %ask for data
+                fprintf(obj.Serial,strcat('Q',obj.ChannelEnabled)); %ask for data
                 data = str2num(fscanf(obj.Serial)); %receive data
             else
                 data = [];

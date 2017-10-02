@@ -124,18 +124,18 @@ function pumpCheckbox_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in manageConnections.
 function manageConnections_Callback(hObject, eventdata, handles)
-manageConnectionsGUI(handles)
 % hObject    handle to manageConnections (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+manageConnectionsGUI(handles)
 
 
 % --- Executes on button press in configureMeasurement.
 function configureMeasurement_Callback(hObject, eventdata, handles)
-configureAcqGUI
 % hObject    handle to configureMeasurement (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+configureAcqGUI
 
 
 % --- Executes on button press in configureControl.
@@ -143,7 +143,7 @@ function configureControl_Callback(hObject, eventdata, handles)
 % hObject    handle to configureControl (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+configureFlowControlGUI
 
 % --- Executes on button press in startExperiment.
 function startExperiment_Callback(hObject, eventdata, handles)
