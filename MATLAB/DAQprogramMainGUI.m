@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 02-Oct-2017 10:21:11
+% Last Modified by GUIDE v2.5 02-Oct-2017 17:24:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,8 +57,6 @@ function DAQprogramMainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 %take in DAQ parameters
 daqParam = DAQparam();
 setappdata(0,'daqParam',daqParam);
-
-
 
 handles.photonCounterCheckbox.Value = daqParam.PhotonCounter;
 handles.NIDAQcheckbox.Value = daqParam.NIDAQ;
@@ -147,14 +145,15 @@ configureFlowControlGUI
 
 % --- Executes on button press in startExperiment.
 function startExperiment_Callback(hObject, eventdata, handles)
-acquisition = Acquisition('test');
-setappdata(0,'acquisition',acquisition);
-acquisition.startAcquisition;
-
 % hObject    handle to startExperiment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%initialize acquisition with name from edit box
+acquisition = Acquisition(handles.acqNameEdit.String);
+setappdata(0,handles.acqNameEdit.String,acquisition);
+
+acquisition.startAcquisition;
 
 % --- Executes on button press in stopExperiment.
 function stopExperiment_Callback(hObject, eventdata, handles)
@@ -205,3 +204,25 @@ delete(instrfind)
 
 %close window
 close
+
+
+function acqNameEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to acqNameEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of acqNameEdit as text
+%        str2double(get(hObject,'String')) returns contents of acqNameEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function acqNameEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to acqNameEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

@@ -21,7 +21,7 @@ function varargout = configureFlowControlGUI(varargin)
 
 % Edit the above text to modify the response to help configureFlowControlGUI
 
-% Last Modified by GUIDE v2.5 02-Oct-2017 16:08:42
+% Last Modified by GUIDE v2.5 02-Oct-2017 17:42:08
 
 % Menu for specifying the points and conditions for the flow system made up
 % of a pump and solenoid valve system, the data of which is stored in

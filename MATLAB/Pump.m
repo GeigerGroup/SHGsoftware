@@ -35,7 +35,7 @@ classdef Pump < handle
             end
         end
         
-        function calculateSalt2Reservoir(obj,conc)
+        function flowRates = calculateSalt2Reservoir(obj,conc)
             coefConc = [obj.cWater obj.cConc; 1 1]; %matrix for conc
             coefDil = [obj.cWater obj.cDil; 1 1]; %matrix for dil
             
@@ -81,6 +81,7 @@ classdef Pump < handle
             fprintf(obj.Serial,strcat(num2str(channel),'f',string));
             
         end
+        
         
         function startFlow(obj,channel)
             fprintf(obj.Serial,strcat(num2str(channel),'H'));

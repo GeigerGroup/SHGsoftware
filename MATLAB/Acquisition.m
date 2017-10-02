@@ -102,15 +102,17 @@ classdef Acquisition < handle
                     
                     %read in current parameters
                     currentDAQparam = getappdata(0,'daqParam');
+                    
+                    %photon parameters
+                    obj.PointNumber = 1;
                     obj.ScanLength = currentDAQparam.ScanLength;
                     obj.Interval = currentDAQparam.Interval;
                     obj.DwellTime = currentDAQparam.DwellTime;
                     
-                    %test flow control parameters
-                    obj.FlowControl = true;
-                    obj.FlowConcentrationPoint = [1 200 400 600 800];
-                    obj.FlowConcentrationValue = [0.1 0.05 0 0.05 0.1];
-                    
+                    %flow control parameters
+                    obj.FlowControl = daqParam.FlowControl;
+                    obj.FlowConcentrationPoint = daqParam.FlowConcentrationPoint;
+                    obj.FlowConcentrationValue = daqParam.FlowConcentrationValue;
 
                 else
                     error('Input name must be char')
@@ -182,10 +184,32 @@ classdef Acquisition < handle
             if obj.FlowControl %check if flow control is enabled
                 if obj.PointNumber == obj.FlowConcentrationPoint(obj.FlowIndex) 
                     %check if point number is point number where change happens
+                    disp('Flow change at point ')
+                    disp(obj.PointNumber)
                     
                     %calculate flow rates for two reservoir salt
-                    obj.Pump.calculateSalt2Reservoir(obj.FlowConcentrationValue(obj.FlowIndex));
+                    rates = obj.Pump.calculateSalt2Reservoir(obj.FlowConcentrationValue(obj.FlowIndex));
+                    disp(rates)
+                    
+                    %calculate solenoid state
+                    states = rates > 0; %set solenoid valve to on if rate > 0
+                    states =[states any(states)]; %set valve 5 to on if any of others are on
+                    disp(states)
+                    
+                    %set flow rates and start flow
+                    for i = 1:4
+                        obj.Pump.setFlowRate(i,rates(i));
+                        obj.Pump.startFlow(i);
+                    end
+                    
+                    %set solenoid state
+                    obj.DAQsession.setValveState(states);           
+                    
                     obj.FlowIndex = obj.FlowIndex + 1; %increment flow index
+                    
+                    if obj.FlowIndex > length(obj.FlowConcentrationPoint)
+                        obj.FlowControl = false; %if made all changes turn off flow control
+                    end
                 end
             end
                     
