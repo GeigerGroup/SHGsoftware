@@ -1,35 +1,35 @@
-function varargout = mainGUI(varargin)
-% mainGUI MATLAB code for mainGUI.fig
-%      mainGUI, by itself, creates a new mainGUI or raises the existing
+function varargout = DAQprogramMainGUI(varargin)
+% DAQprogramMainGUI MATLAB code for DAQprogramMainGUI.fig
+%      DAQprogramMainGUI, by itself, creates a new DAQprogramMainGUI or raises the existing
 %      singleton*.
 %
-%      H = mainGUI returns the handle to a new mainGUI or the handle to
+%      H = DAQprogramMainGUI returns the handle to a new DAQprogramMainGUI or the handle to
 %      the existing singleton*.
 %
-%      mainGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in mainGUI.M with the given input arguments.
+%      DAQprogramMainGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in DAQprogramMainGUI.M with the given input arguments.
 %
-%      mainGUI('Property','Value',...) creates a new mainGUI or raises the
+%      DAQprogramMainGUI('Property','Value',...) creates a new DAQprogramMainGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before mainGUI_OpeningFcn gets called.  An
+%      applied to the GUI before DAQprogramMainGUI_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to mainGUI_OpeningFcn via varargin.
+%      stop.  All inputs are passed to DAQprogramMainGUI_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help mainGUI
+% Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 06-Sep-2017 16:09:12
+% Last Modified by GUIDE v2.5 02-Oct-2017 10:21:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @mainGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @mainGUI_OutputFcn, ...
+                   'gui_OpeningFcn', @DAQprogramMainGUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @DAQprogramMainGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,37 +44,39 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before mainGUI is made visible.
-function mainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before DAQprogramMainGUI is made visible.
+function DAQprogramMainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
 
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to mainGUI (see VARARGIN)
+% varargin   command line arguments to DAQprogramMainGUI (see VARARGIN)
 
 %take in DAQ parameters
-DAQparam = getappdata(0,'DAQparam');
+daqParam = DAQparam();
+setappdata(0,'daqParam',daqParam);
 
 
-handles.photonCounterCheckbox.Value = DAQparam.photonCounter;
-handles.NIDAQcheckbox.Value = DAQparam.NIDAQ;
-handles.pHmeterCheckbox.Value = DAQparam.pHmeter;
-handles.pumpCheckbox.Value = DAQparam.pump;
 
-% Choose default command line output for mainGUI
+handles.photonCounterCheckbox.Value = daqParam.PhotonCounter;
+handles.NIDAQcheckbox.Value = daqParam.NIDAQ;
+handles.pHmeterCheckbox.Value = daqParam.PHmeter;
+handles.pumpCheckbox.Value = daqParam.Pump;
+
+% Choose default command line output for DAQprogramMainGUI
 handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes mainGUI wait for user response (see UIRESUME)
+% UIWAIT makes DAQprogramMainGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = mainGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = DAQprogramMainGUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -184,8 +186,22 @@ acquisition.resumeAcquisition
 
 % --- Executes on button press in closeProgram.
 function closeProgram_Callback(hObject, eventdata, handles)
-closeProgram
-close
 % hObject    handle to closeProgram (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+daqParam = getappdata(0,'daqParam');
+
+%delete NIDAQ session
+if daqParam.NIDAQ
+    daqSession = getappdata(0,'daqSession');
+    release(daqSession.Session)
+    delete(daqSession.Session)
+    daqreset
+end
+
+%delete serial instruments
+delete(instrfind)
+
+%close window
+close

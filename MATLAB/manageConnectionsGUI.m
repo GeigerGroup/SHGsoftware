@@ -61,12 +61,12 @@ function manageConnectionsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles.pumpCheckbox.Value = handles.UserData.pump;
 
 %get in checkvalues
-checks = getappdata(0,'DAQparam');
+checks = getappdata(0,'daqParam');
 
-handles.photonCounterCheckbox.Value = checks.photonCounter;
+handles.photonCounterCheckbox.Value = checks.PhotonCounter;
 handles.NIDAQcheckbox.Value = checks.NIDAQ;
-handles.pHmeterCheckbox.Value = checks.pHmeter;
-handles.pumpCheckbox.Value = checks.pump;
+handles.pHmeterCheckbox.Value = checks.PHmeter;
+handles.pumpCheckbox.Value = checks.Pump;
 
 %get in handles to master figure to output checkbox values
 handles.UserData = varargin{1};
@@ -163,10 +163,8 @@ handles.photonCounterCheckbox.Value = 1;
 handles.UserData.photonCounterCheckbox.Value = 1;
 
 %set photon counter connect status to 1
-DAQparam = getappdata(0,'DAQparam');
-DAQparam.photonCounter = 1;
-setappdata(0,'DAQparam',DAQparam)
-
+daqParam = getappdata(0,'daqParam');
+daqParam.PhotonCounter = true;
 
 
 
@@ -213,9 +211,8 @@ handles.NIDAQcheckbox.Value = 1;
 handles.UserData.NIDAQcheckbox.Value = 1;
 
 %set photon counter connect status to 1
-DAQparam = getappdata(0,'DAQparam');
-DAQparam.NIDAQ = 1;
-setappdata(0,'DAQparam',DAQparam)
+daqParam = getappdata(0,'daqParam');
+daqParam.NIDAQ = true;
 
 
 % --- Executes on selection change in NIDAQpopup.
@@ -263,9 +260,8 @@ handles.pHmeterCheckbox.Value = 1;
 handles.UserData.pHmeterCheckbox.Value = 1;
 
 %set photon counter connect status to 1
-DAQparam = getappdata(0,'DAQparam');
-DAQparam.pHmeter = 1;
-setappdata(0,'DAQparam',DAQparam)
+daqParam = getappdata(0,'daqParam');
+daqParam.PHmeter = true;
 
 
 % --- Executes on selection change in pHmeterPopup.
@@ -312,9 +308,8 @@ handles.UserData.pumpCheckbox.Value = 1;
 
 
 %set photon counter connect status to 1
-DAQparam = getappdata(0,'DAQparam');
-DAQparam.pump = 1;
-setappdata(0,'DAQparam',DAQparam)
+daqParam = getappdata(0,'daqParam');
+daqParam.Pump = true;
 
 
 % --- Executes on selection change in pumpPopup.
