@@ -63,6 +63,13 @@ for i = 1:5
     handles.(str).Value = handles.UserData.SolStates(i); %set value from solstates
 end
     
+%rearrange items in hObject.Children so checkboxes are 1-5
+uistack(hObject.Children(8),'up',8)
+uistack(hObject.Children(9),'up',9)
+uistack(hObject.Children(10),'up',10)
+uistack(hObject.Children(11),'up',11)
+uistack(hObject.Children(12),'up',12)
+
 
 % Update handles structure
 guidata(hObject, handles);
@@ -86,12 +93,12 @@ function pushbutton_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-
-%set checkbox value to opposite
-str = strcat('checkbox',hObject.String);
-handles.(str).Value = ~handles.(str).Value;
+% 
+% 
+% 
+% %set checkbox value to opposite
+% str = strcat('checkbox',hObject.String);
+% handles.(str).Value = ~handles.(str).Value;
 
 %change SolStates in daqParam
 handles.UserData.SolStates(str2num(hObject.String)) = ...
@@ -106,6 +113,10 @@ daqSession.setValveStates(handles.UserData.SolStates);
 
 % --- Executes on button press in pushbuttonClose.
 function pushbuttonClose_Callback(hObject, eventdata, handles)
+%delete handle to figure
+setappdata(0,'solGUI',[]);
+
+%close window
 close
 % hObject    handle to pushbuttonClose (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB

@@ -233,10 +233,13 @@ function controlSolenoids_Callback(hObject, eventdata, handles)
 % hObject    handle to controlSolenoids (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-controlSolenoidsGUI
+solGUI = controlSolenoidsGUI;
+setappdata(0,'solGUI',solGUI);
 
 % --- Executes on button press in controlPump.
 function controlPump_Callback(hObject, eventdata, handles)
 % hObject    handle to controlPump (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+pumpGUI = controlPumpGUI;
+setappdata(0,'pumpGUI',pumpGUI);
