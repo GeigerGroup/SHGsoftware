@@ -34,7 +34,7 @@ classdef DAQsession
             data = obj.Session.inputSingleScan;
         end
         
-        function setValveState(obj,state)
+        function setValveStates(obj,state)
             obj.Session.outputSingleScan(state)
         end
     end

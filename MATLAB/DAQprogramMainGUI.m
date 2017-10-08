@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 02-Oct-2017 17:24:09
+% Last Modified by GUIDE v2.5 08-Oct-2017 12:51:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -226,3 +226,17 @@ function acqNameEdit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in controlSolenoids.
+function controlSolenoids_Callback(hObject, eventdata, handles)
+% hObject    handle to controlSolenoids (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+controlSolenoidsGUI
+
+% --- Executes on button press in controlPump.
+function controlPump_Callback(hObject, eventdata, handles)
+% hObject    handle to controlPump (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

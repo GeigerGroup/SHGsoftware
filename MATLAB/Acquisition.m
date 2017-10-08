@@ -45,8 +45,6 @@ classdef Acquisition < handle
                     %add name
                     obj.Name = name;
                     
-                    %create timer to time acquisition
-                    obj.Timer = createDataTimer(obj);
                     
                     %give reference to photon counter
                     obj.PhotonCounter = getappdata(0,'photonCounter');
@@ -103,16 +101,23 @@ classdef Acquisition < handle
                     %read in current parameters
                     currentDAQparam = getappdata(0,'daqParam');
                     
+                    
+                    
                     %photon parameters
                     obj.PointNumber = 1;
                     obj.ScanLength = currentDAQparam.ScanLength;
                     obj.Interval = currentDAQparam.Interval;
                     obj.DwellTime = currentDAQparam.DwellTime;
+                    obj.PhotonCounter.setDwellTime(obj.DwellTime);
+                    obj.PhotonCounter.setInterval(obj.Interval);
                     
                     %flow control parameters
-                    obj.FlowControl = daqParam.FlowControl;
-                    obj.FlowConcentrationPoint = daqParam.FlowConcentrationPoint;
-                    obj.FlowConcentrationValue = daqParam.FlowConcentrationValue;
+                    obj.FlowControl = currentDAQparam.FlowControl;
+                    obj.FlowConcentrationPoint = currentDAQparam.FlowConcentrationPoint;
+                    obj.FlowConcentrationValue = currentDAQparam.FlowConcentrationValue;
+                    
+                    %create timer to time acquisition
+                    obj.Timer = createDataTimer(obj);
 
                 else
                     error('Input name must be char')
@@ -203,7 +208,7 @@ classdef Acquisition < handle
                     end
                     
                     %set solenoid state
-                    obj.DAQsession.setValveState(states);           
+                    obj.DAQsession.setValveStates(states);           
                     
                     obj.FlowIndex = obj.FlowIndex + 1; %increment flow index
                     

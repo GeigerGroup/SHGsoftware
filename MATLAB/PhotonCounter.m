@@ -61,11 +61,13 @@ classdef PhotonCounter < handle
         
         function setDwellTime(obj,dwellTime)
             fprintf(obj.Serial,strcat('DT',num2str(dwellTime))); %dwell time in seconds
+            obj.DwellTime = dwellTime;
         end
         
         function setInterval(obj,interval)
             %in seconds, if timing off 10 Mhz (change 1e7 if otherwise)
-            fprintf(obj.Serial,strcat('CP2,',num2str(interval*1e7))); 
+            fprintf(obj.Serial,strcat('CP2,',num2str(interval*1e7)));
+            obj.Interval = interval
         end
             
             
