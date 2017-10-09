@@ -44,8 +44,7 @@ classdef Acquisition < handle
                 if ischar(name)
                     %add name
                     obj.Name = name;
-                    
-                    
+                      
                     %give reference to photon counter
                     obj.PhotonCounter = getappdata(0,'photonCounter');
                     obj.DataPhotonCounter = XYData;
@@ -202,10 +201,8 @@ classdef Acquisition < handle
                     disp(states)
                     
                     %set flow rates and start flow
-                    for i = 1:4
-                        obj.Pump.setFlowRate(i,rates(i));
-                        obj.Pump.startFlow(i);
-                    end
+                    obj.Pump.setFlowRates(rates);
+                    obj.Pump.startFlows;
                     
                     %set solenoid state
                     obj.DAQsession.setValveStates(states);           

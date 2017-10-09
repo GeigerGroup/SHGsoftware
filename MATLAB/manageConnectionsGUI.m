@@ -334,43 +334,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes on button press in photonCounterCheckbox.
-function photonCounterCheckbox_Callback(hObject, eventdata, handles)
-% hObject    handle to photonCounterCheckbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of photonCounterCheckbox
-
-
-% --- Executes on button press in NIDAQcheckbox.
-function NIDAQcheckbox_Callback(hObject, eventdata, handles)
-% hObject    handle to NIDAQcheckbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of NIDAQcheckbox
-
-
-% --- Executes on button press in pHmeterCheckbox.
-function pHmeterCheckbox_Callback(hObject, eventdata, handles)
-% hObject    handle to pHmeterCheckbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of pHmeterCheckbox
-
-
-% --- Executes on button press in pumpCheckbox.
-function pumpCheckbox_Callback(hObject, eventdata, handles)
-% hObject    handle to pumpCheckbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of pumpCheckbox
-
-
 % --- Executes on button press in closeWindow.
 function closeWindow_Callback(hObject, eventdata, handles)
 close

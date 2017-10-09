@@ -157,7 +157,7 @@ acquisition.startAcquisition;
 
 % --- Executes on button press in stopExperiment.
 function stopExperiment_Callback(hObject, eventdata, handles)
-acquisition = getappdata(0,'acquisition');
+acquisition = getappdata(0,handles.acqNameEdit.String);
 acquisition.stopAcquisition;
 % hObject    handle to stopExperiment (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -166,7 +166,7 @@ acquisition.stopAcquisition;
 
 % --- Executes on button press in pauseExperiment.
 function pauseExperiment_Callback(hObject, eventdata, handles)
-acquisition = getappdata(0,'acquisition');
+acquisition = getappdata(0,handles.acqNameEdit.String);
 acquisition.pauseAcquisition;
 
 % hObject    handle to pauseExperiment (see GCBO)

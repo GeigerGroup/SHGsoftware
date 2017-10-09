@@ -18,6 +18,9 @@ classdef DAQparam < handle
         
         %solenoid valves
         SolStates = false(1,5);
+        
+        %pump flow rates
+        PumpStates = [0 0 0 0];
              
     end
 end

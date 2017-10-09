@@ -35,7 +35,7 @@ classdef Pump < handle
             end
         end
         
-        function flowRates = calculateSalt2Reservoir(obj,conc)
+        function finalFlowRates = calculateSalt2Reservoir(obj,conc)
             coefConc = [obj.cWater obj.cConc; 1 1]; %matrix for conc
             coefDil = [obj.cWater obj.cDil; 1 1]; %matrix for dil
             
@@ -48,7 +48,7 @@ classdef Pump < handle
             flowConcCheck = ((flowConc < 0.35)|(flowConc > 30)) & (flowConc ~= 0);
             flowDilCheck = ((flowDil < 0.35)|(flowDil > 30)) & (flowDil ~= 0);
             
-            finalFlowRates = [0; 0; 0; 0]; %matrix to hold final rates
+            finalFlowRates = [0 0 0 0]; %matrix to hold final rates
             
             if sum(flowConcCheck) == 0 %check if conc works
                 finalFlowRates(1) = flowConc(1);
@@ -62,13 +62,10 @@ classdef Pump < handle
             
             display(finalFlowRates)
             
-            for i = 1:4
-                obj.setFlowRate(i,finalFlowRates(i));
-            end
+            obj.setFlowRates(finalFlowRates);
+            obj.startFlows
             
-            for i = 1:4
-                obj.startFlow(i)
-            end
+
         end
         
         function setFlowRate(obj,channel,rate)
@@ -90,6 +87,39 @@ classdef Pump < handle
         function stopFlow(obj,channel)
             fprintf(obj.Serial,strcat(num2str(channel),'I'));
         end
+        
+        
+        function setFlowRates(obj,rates)
+            
+            %get daqParam
+            daqParam = getappdata(0,'daqParam');
+            daqParam.PumpStates = rates;
+            
+            for i = 1:4
+                %set flow rate
+                obj.setFlowRate(i,rates(i));
+                
+                %update GUI if open
+                pumpGUI = getappdata(0,'pumpGUI');
+                if ~isempty(pumpGUI)
+                    pumpGUI.Children(i).String = num2str(rates(i));
+                end
+            end
+            
+        end
+        
+        function startFlows(obj)
+            for i = 1:4
+                obj.startFlow(i);
+            end
+        end
+        
+        function stopFlows(obj)
+            for i = 1:4
+                obj.stopFlow(i);
+            end
+        end
+        
     end
 end
 

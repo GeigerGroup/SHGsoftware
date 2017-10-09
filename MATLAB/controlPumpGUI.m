@@ -55,8 +55,20 @@ function controlPumpGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for controlPumpGUI
 handles.output = hObject;
 
-%set pump as user data
-handles.UserData = getappdata(0,'pump');
+%get daqParam
+daqParam = getappdata(0,'daqParam');
+
+%set edit strings from PumpStates from daqParam
+for i = 1:4
+    str = strcat('flowEdit',num2str(i));
+    handles.(str).String = num2str(daqParam.PumpStates(i));
+end
+
+%rearrange items in hObject.Children so edits are 1-4
+uistack(hObject.Children(8),'up',8)
+uistack(hObject.Children(9),'up',9)
+uistack(hObject.Children(10),'up',10)
+uistack(hObject.Children(11),'up',11)
 
 % Update handles structure
 guidata(hObject, handles);
@@ -85,14 +97,23 @@ function flowEdit_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of flowEdit1 as text
 %        str2double(get(hObject,'String')) returns contents of flowEdit1 as a double
 
+%get pump
+pump = getappdata(0,'pump');
+
 %rate from entered value
 rate = str2double(hObject.String);
 
 %channel from which box edited
 channel = str2double(hObject.Tag(end));
 
+%get daqParam
+daqParam = getappdata(0,'daqParam');
+
+%set flow rate in daqParam
+daqParam.PumpStates(channel) = rate;
+
 %set flow rate
-handles.UserData.setFlowRate(channel,rate);
+pump.setFlowRate(channel,rate);
 
 % --- Executes during object creation, after setting all properties.
 function flowEdit_CreateFcn(hObject, eventdata, handles)
@@ -112,11 +133,15 @@ function startButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%get channel pressed
-channel = str2double(hObject.Tag(end));
+%get pump
+pump = getappdata(0,'pump');
+
+%get daqParam
+daqParam = getappdata(0,'daqParam');
+pump.setFlowRates(daqParam.PumpStates);
 
 %start flow
-handles.UserData.startFlow(channel);
+pump.startFlows;
 
 
 % --- Executes on button press in stopButton.
@@ -125,15 +150,20 @@ function stopButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%get channel pressed
-channel = str2double(hObject.Tag(end));
+%get pump
+pump = getappdata(0,'pump');
 
-%start flow
-handles.UserData.stopFlow(channel);
+%stop flow
+pump.stopFlows;
 
 % --- Executes on button press in closeButton.
 function closeButton_Callback(hObject, eventdata, handles)
 % hObject    handle to closeButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+%remove reference to pumpGUI
+setappdata(0,'pumpGUI',[]);
+
+%close window
 close
