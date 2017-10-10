@@ -2,11 +2,11 @@
 
 classdef PhotonCounter < handle
     properties
-        Serial
+        Serial;
         DwellTime;
         Interval;
         %channel enabled hard set here, should be option eventually
-        ChannelEnabled = 'A';
+        ChannelEnabled = 'B';
     end
     methods
         function obj = PhotonCounter(COMport)
@@ -19,7 +19,7 @@ classdef PhotonCounter < handle
                     obj.Serial.Terminator = 'CR';
                     
                     %open
-                    fopen(obj.Serial)
+                    fopen(obj.Serial);
                     
                     %set default dwellTime
                     obj.setDwellTime(obj.DwellTime);
@@ -48,14 +48,20 @@ classdef PhotonCounter < handle
         function data = getData(obj)          
             %channel is either A or B
             
+            %read out all waiting data if it is there
+            if obj.Serial.BytesAvailable
+                fread(obj.Serial,obj.Serial.BytesAvailable);
+            end
+            
+            
             %check if data is ready
             fprintf(obj.Serial,'SS1');
-            if str2num(fscanf(obj.Serial)); %test on status byte
+            if str2double(fscanf(obj.Serial)); %test on status byte
                 fprintf(obj.Serial,strcat('Q',obj.ChannelEnabled)); %ask for data
-                data = str2num(fscanf(obj.Serial)); %receive data
+                data = str2double(fscanf(obj.Serial)); %receive data
             else
                 data = [];
-                display('Error: no data ready') %if data is not ready
+                display('Error with Photon Counter: no data ready') %if data is not ready
             end
         end
         
@@ -67,7 +73,7 @@ classdef PhotonCounter < handle
         function setInterval(obj,interval)
             %in seconds, if timing off 10 Mhz (change 1e7 if otherwise)
             fprintf(obj.Serial,strcat('CP2,',num2str(interval*1e7)));
-            obj.Interval = interval
+            obj.Interval = interval;
         end
             
             

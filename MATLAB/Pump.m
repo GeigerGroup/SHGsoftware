@@ -35,7 +35,7 @@ classdef Pump < handle
             end
         end
         
-        function finalFlowRates = calculateSalt2Reservoir(obj,conc)
+        function rates = calculateSalt2Reservoir(obj,conc)
             coefConc = [obj.cWater obj.cConc; 1 1]; %matrix for conc
             coefDil = [obj.cWater obj.cDil; 1 1]; %matrix for dil
             
@@ -48,24 +48,18 @@ classdef Pump < handle
             flowConcCheck = ((flowConc < 0.35)|(flowConc > 30)) & (flowConc ~= 0);
             flowDilCheck = ((flowDil < 0.35)|(flowDil > 30)) & (flowDil ~= 0);
             
-            finalFlowRates = [0 0 0 0]; %matrix to hold final rates
+            rates = [0 0 0 0]; %matrix to hold final rates
             
             if sum(flowConcCheck) == 0 %check if conc works
-                finalFlowRates(1) = flowConc(1);
-                finalFlowRates(2) = flowConc(2);
+                rates(1) = flowConc(1);
+                rates(2) = flowConc(2);
             elseif sum(flowDilCheck) == 0  %check if diluted works
-                finalFlowRates(1) = flowDil(1);
-                finalFlowRates(3) = flowDil(2);
+                rates(1) = flowDil(1);
+                rates(3) = flowDil(2);
             else
+                rates = [];
                 disp('Flow settings out of bounds'); %display if neither works
             end
-            
-            display(finalFlowRates)
-            
-            obj.setFlowRates(finalFlowRates);
-            obj.startFlows
-            
-
         end
         
         function setFlowRate(obj,channel,rate)
