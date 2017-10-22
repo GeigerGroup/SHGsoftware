@@ -52,14 +52,6 @@ function manageConnectionsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to manageConnectionsGUI (see VARARGIN)
 
-% %take in DAQ parameters
-% handles.UserData = getappdata(0,'DAQparam');
-% 
-% handles.photonCounterCheckbox.Value = handles.UserData.photonCounter;
-% handles.NIDAQcheckbox.Value = handles.UserData.NIDAQ;
-% handles.pHmeterCheckbox.Value = handles.UserData.pHmeter;
-% handles.pumpCheckbox.Value = handles.UserData.pump;
-
 %get in checkvalues
 daqParam = getappdata(0,'daqParam');
 
@@ -70,7 +62,6 @@ handles.pumpCheckbox.Value = daqParam.Pump;
 
 %get in handles to master figure to output checkbox values
 handles.UserData = varargin{1};
-
 
 %get list of com ports to populate popmenus
 list = instrhwinfo('serial');
@@ -95,8 +86,6 @@ end
 
 %populate NIDAQ with device names
 handles.NIDAQpopup.String = daqs;
-
-
 
 %**************set default values***************%
 %computer specific
@@ -167,30 +156,6 @@ daqParam = getappdata(0,'daqParam');
 daqParam.PhotonCounter = true;
 
 
-
-% --- Executes on selection change in photonCounterPopup.
-function photonCounterPopup_Callback(hObject, eventdata, handles)
-% hObject    handle to photonCounterPopup (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns photonCounterPopup contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from photonCounterPopup
-
-
-% --- Executes during object creation, after setting all properties.
-function photonCounterPopup_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to photonCounterPopup (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
 % --- Executes on button press in NIDAQconnect.
 function NIDAQconnect_Callback(hObject, eventdata, handles)
 % hObject    handle to NIDAQconnect (see GCBO)
@@ -213,31 +178,6 @@ handles.UserData.NIDAQcheckbox.Value = 1;
 %set photon counter connect status to 1
 daqParam = getappdata(0,'daqParam');
 daqParam.NIDAQ = true;
-
-
-% --- Executes on selection change in NIDAQpopup.
-function NIDAQpopup_Callback(hObject, eventdata, handles)
-% hObject    handle to NIDAQpopup (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns NIDAQpopup contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from NIDAQpopup
-
-
-
-
-% --- Executes during object creation, after setting all properties.
-function NIDAQpopup_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to NIDAQpopup (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
 
 
 % --- Executes on button press in pHmeterConnect.
@@ -264,29 +204,6 @@ daqParam = getappdata(0,'daqParam');
 daqParam.PHmeter = true;
 
 
-% --- Executes on selection change in pHmeterPopup.
-function pHmeterPopup_Callback(hObject, eventdata, handles)
-% hObject    handle to pHmeterPopup (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns pHmeterPopup contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from pHmeterPopup
-
-
-% --- Executes during object creation, after setting all properties.
-function pHmeterPopup_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to pHmeterPopup (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
 % --- Executes on button press in pumpConnect.
 function pumpConnect_Callback(hObject, eventdata, handles)
 % hObject    handle to pumpConnect (see GCBO)
@@ -306,37 +223,16 @@ setappdata(0,'pump',pump)
 handles.pumpCheckbox.Value = 1;
 handles.UserData.pumpCheckbox.Value = 1;
 
-
 %set photon counter connect status to 1
 daqParam = getappdata(0,'daqParam');
 daqParam.Pump = true;
 
 
-% --- Executes on selection change in pumpPopup.
-function pumpPopup_Callback(hObject, eventdata, handles)
-% hObject    handle to pumpPopup (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns pumpPopup contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from pumpPopup
-
-
-% --- Executes during object creation, after setting all properties.
-function pumpPopup_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to pumpPopup (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
 % --- Executes on button press in closeWindow.
 function closeWindow_Callback(hObject, eventdata, handles)
-close
 % hObject    handle to closeWindow (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+close
+

@@ -22,7 +22,7 @@ function varargout = configureAcqGUI(varargin)
 
 % Edit the above text to modify the response to help configureAcqGUI
 
-% Last Modified by GUIDE v2.5 22-Oct-2017 12:25:49
+% Last Modified by GUIDE v2.5 22-Oct-2017 16:24:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,25 +56,25 @@ function configureAcqGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 daqParam = getappdata(0,'daqParam');
 
 %set initial ScanLength
-handles.scanLengthEdit.Value = daqParam.ScanLength;
-handles.scanLengthEdit.String = num2str(handles.scanLengthEdit.Value);
+handles.scanLengthEdit.String = num2str(daqParam.ScanLength);
 
 %set initial Interval
-handles.intervalEdit.Value = daqParam.Interval;
-handles.intervalEdit.String = num2str(handles.intervalEdit.Value);
+handles.intervalEdit.String = num2str(daqParam.Interval);
 
 %set initial DwellTime
-handles.dwellTimeEdit.Value = daqParam.DwellTime;
-handles.dwellTimeEdit.String = num2str(handles.dwellTimeEdit.Value);
+handles.dwellTimeEdit.String = num2str(daqParam.DwellTime);
+
+%set whether to communicate with the photon counter
+handles.photonCounterCheck.Value = daqParam.PhotonCounterEnabled;
+
+%set whether NIDAQ power monitoring is on or off
+handles.nidaqPowerCheck.Value = daqParam.NIDAQpowerEnabled;
 
 %set whether flow control is on or off
 handles.flowControlCheck.Value = daqParam.FlowControl;
 
 %set whether pH meter monitoring is on or off
 handles.pHmeterCheck.Value = daqParam.PHmeterEnabled;
-
-%set whether NIDAQ power monitoring is on or off
-handles.nidaqPowerCheck.Value = daqParam.NIDAQpowerEnabled;
 
 % Choose default command line output for configureAcqGUI
 handles.output = hObject;
@@ -97,30 +97,6 @@ function varargout = configureAcqGUI_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
-function scanLengthEdit_Callback(hObject, eventdata, handles)
-% hObject    handle to scanLengthEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-hObject.Value = str2num(hObject.String);
-
-
-function intervalEdit_Callback(hObject, eventdata, handles)
-% hObject    handle to intervalEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-hObject.Value = str2num(hObject.String);
-
-
-function dwellTimeEdit_Callback(hObject, eventdata, handles)
-% hObject    handle to dwellTimeEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-hObject.Value = str2num(hObject.String);
-
-
 % --- Executes on button press in updateValues.
 function updateValues_Callback(hObject, eventdata, handles)
 % hObject    handle to updateValues (see GCBO)
@@ -130,12 +106,16 @@ function updateValues_Callback(hObject, eventdata, handles)
 %take in current DAQ parameters
 daqParam = getappdata(0,'daqParam');
 
-daqParam.ScanLength = handles.scanLengthEdit.Value;
-daqParam.Interval = handles.intervalEdit.Value;
-daqParam.DwellTime = handles.dwellTimeEdit.Value;
+%convert to numbers and set numeric parameters
+daqParam.ScanLength = str2double(handles.scanLengthEdit.String);
+daqParam.Interval = str2double(handles.intervalEdit.String);
+daqParam.DwellTime = str2double(handles.dwellTimeEdit.String);
+
+%set boolean parameters
+daqParam.PhotonCounterEnabled = handles.photonCounterCheck.Value;
+daqParam.NIDAQpowerEnabled = handles.nidaqPowerCheck.Value;
 daqParam.FlowControl = handles.flowControlCheck.Value;
 daqParam.PHmeterEnabled = handles.pHmeterCheck.Value;
-daqParam.NIDAQpowerEnabled = handles.nidaqPowerCheck.Value;
 
 %close update values and close window
 close

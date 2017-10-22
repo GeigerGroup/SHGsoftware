@@ -1,6 +1,6 @@
 classdef DAQparam < handle
     properties
-        %boolenas of if hardware is enabled
+        %booleans of if hardware is enabled
         PhotonCounter = false;
         NIDAQ = false;
         Pump = false;
@@ -11,9 +11,11 @@ classdef DAQparam < handle
         Interval = 1;
         DwellTime = 0.02;
         
+        %booleans of if enabled for an acquisition
+        PhotonCounterEnabled = true;
+        NIDAQpowerEnabled = true;
         PHmeterEnabled = false;
-        NIDAQpowerEnabled = false;
-                               
+      
         %parameters for flow control
         FlowControl = false;
         FlowConcentrationPoint;
@@ -23,7 +25,6 @@ classdef DAQparam < handle
         SolStates = false(1,5);
         
         %pump flow rates
-        PumpStates = [0 0 0 0];
-             
+        PumpStates = [0 0 0 0];       
     end
 end

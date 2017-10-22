@@ -23,6 +23,11 @@ classdef Acquisition < handle
         DAQsession
         Pump
         
+        %if objects enabled for this acquisition
+        PHmeterEnabled
+        NIDAQpowerEnabled
+        FlowControl
+        
         %parameters for photon counter
         PointNumber
         ScanLength
@@ -30,12 +35,9 @@ classdef Acquisition < handle
         DwellTime
         
         %parameters for flow control
-        FlowControl = false;
         FlowIndex = 1;
-        FlowConcentrationPoint;
-        FlowConcentrationValue;
-        
-
+        FlowConcentrationPoint
+        FlowConcentrationValue
     end
     
     methods
@@ -44,7 +46,10 @@ classdef Acquisition < handle
                 if ischar(name)
                     %add name
                     obj.Name = name;
-                      
+                    
+                    %get current daqParam
+                    daqParam = getappdata(0,'daqParam');
+                    
                     %give reference to photon counter
                     obj.PhotonCounter = getappdata(0,'photonCounter');
                     obj.DataPhotonCounter = XYData;
@@ -96,28 +101,22 @@ classdef Acquisition < handle
                     obj.LineHandleCond = plot(1,1);
                     obj.LineHandleCond.XData = [];
                     obj.LineHandleCond.YData = [];
-                    
-                    %read in current parameters
-                    currentDAQparam = getappdata(0,'daqParam');
-                    
-                    
-                    
+                               
                     %photon parameters
                     obj.PointNumber = 1;
-                    obj.ScanLength = currentDAQparam.ScanLength;
-                    obj.Interval = currentDAQparam.Interval;
-                    obj.DwellTime = currentDAQparam.DwellTime;
+                    obj.ScanLength = daqParam.ScanLength;
+                    obj.Interval = daqParam.Interval;
+                    obj.DwellTime = daqParam.DwellTime;
                     obj.PhotonCounter.setDwellTime(obj.DwellTime);
                     obj.PhotonCounter.setInterval(obj.Interval);
                     
                     %flow control parameters
-                    obj.FlowControl = currentDAQparam.FlowControl;
-                    obj.FlowConcentrationPoint = currentDAQparam.FlowConcentrationPoint;
-                    obj.FlowConcentrationValue = currentDAQparam.FlowConcentrationValue;
+                    obj.FlowControl = daqParam.FlowControl;
+                    obj.FlowConcentrationPoint = daqParam.FlowConcentrationPoint;
+                    obj.FlowConcentrationValue = daqParam.FlowConcentrationValue;
                     
                     %create timer to time acquisition
                     obj.Timer = createDataTimer(obj);
-
                 else
                     error('Input name must be char')
                 end

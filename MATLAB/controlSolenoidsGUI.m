@@ -55,12 +55,12 @@ function controlSolenoidsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for controlSolenoidsGUI
 handles.output = hObject;
 
-%set DAQsession as UserData
-handles.UserData = getappdata(0,'daqParam');
+%get daqParam
+daqParam = getappdata(0,'daqParam');
 
 for i = 1:5
     str = strcat('checkbox',num2str(i)); %valve number
-    handles.(str).Value = handles.UserData.SolStates(i); %set value from solstates
+    handles.(str).Value = daqParam.SolStates(i); %set value from solstates
 end
     
 %rearrange items in hObject.Children so checkboxes are 1-5
@@ -93,31 +93,27 @@ function pushbutton_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% 
-% 
-% 
-% %set checkbox value to opposite
-% str = strcat('checkbox',hObject.String);
-% handles.(str).Value = ~handles.(str).Value;
+
+%get daqParam
+daqParam = getappdata(0,'daqParam');
 
 %change SolStates in daqParam
-handles.UserData.SolStates(str2num(hObject.String)) = ...
-    ~handles.UserData.SolStates(str2num(hObject.String));
+daqParam.SolStates(str2num(hObject.String)) = ...
+    ~daqParam.SolStates(str2num(hObject.String));
 
 %send to SolenoidValve to change
 daqSession = getappdata(0,'daqSession');
-daqSession.setValveStates(handles.UserData.SolStates);
-
-
+daqSession.setValveStates(daqParam.SolStates);
 
 
 % --- Executes on button press in pushbuttonClose.
 function pushbuttonClose_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbuttonClose (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
 %delete handle to figure
 setappdata(0,'solGUI',[]);
 
 %close window
 close
-% hObject    handle to pushbuttonClose (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
