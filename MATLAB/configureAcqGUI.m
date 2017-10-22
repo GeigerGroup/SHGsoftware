@@ -22,7 +22,7 @@ function varargout = configureAcqGUI(varargin)
 
 % Edit the above text to modify the response to help configureAcqGUI
 
-% Last Modified by GUIDE v2.5 02-Oct-2017 11:08:09
+% Last Modified by GUIDE v2.5 22-Oct-2017 11:46:56
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -195,3 +195,12 @@ function flowControlCheck_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of flowControlCheck
+
+
+% --- Executes on button press in pHmeterCheck.
+function pHmeterCheck_Callback(hObject, eventdata, handles)
+% hObject    handle to pHmeterCheck (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of pHmeterCheck
