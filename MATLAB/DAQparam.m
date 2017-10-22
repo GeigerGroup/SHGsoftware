@@ -10,6 +10,9 @@ classdef DAQparam < handle
         ScanLength = Inf;
         Interval = 1;
         DwellTime = 0.02;
+        
+        PHmeterEnabled = false;
+        NIDAQpowerEnabled = false;
                                
         %parameters for flow control
         FlowControl = false;
