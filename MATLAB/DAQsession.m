@@ -37,16 +37,13 @@ classdef DAQsession
         function setValveStates(obj,state)
             obj.Session.outputSingleScan(state)
             
-            
             %update GUI if it exists
             solGUI = getappdata(0,'solGUI');
             if ~isempty(solGUI)
                 for i = 1:5
-                    str = strcat('checkbox',num2str(i));
                     solGUI.Children(i).Value = state(i);
                 end
-            end
-            
+            end     
         end
     end
 end

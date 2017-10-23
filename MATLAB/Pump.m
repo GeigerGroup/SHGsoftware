@@ -62,15 +62,13 @@ classdef Pump < handle
             end
         end
         
-        function setFlowRate(obj,channel,rate)
-            
+        function setFlowRate(obj,channel,rate)     
             %convert flow rate to pump format
             string = sprintf('%.3e', rate);
             string = strcat(string(1),string(3:5),string(7),string(9));
             
             %send to pump
-            fprintf(obj.Serial,strcat(num2str(channel),'f',string));
-            
+            fprintf(obj.Serial,strcat(num2str(channel),'f',string));      
         end
         
         
@@ -83,8 +81,7 @@ classdef Pump < handle
         end
         
         
-        function setFlowRates(obj,rates)
-            
+        function setFlowRates(obj,rates)      
             %get daqParam
             daqParam = getappdata(0,'daqParam');
             daqParam.PumpStates = rates;
@@ -98,8 +95,7 @@ classdef Pump < handle
                 if ~isempty(pumpGUI)
                     pumpGUI.Children(i).String = num2str(rates(i));
                 end
-            end
-            
+            end 
         end
         
         function startFlows(obj)

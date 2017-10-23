@@ -158,7 +158,7 @@ function resumeExperiment_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-acquisition = getappdata(0,'acquisition');
+acquisition = getappdata(0,handles.acqNameEdit.String);
 acquisition.resumeAcquisition
 
 
