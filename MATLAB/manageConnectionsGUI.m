@@ -101,8 +101,8 @@ if ismember('COM7',ports)
 end
 
 %pH meter COM3
-if ismember('COM3',ports)
-    handles.pHmeterPopup.Value = find(ismember(ports,'COM3'));
+if ismember('COM8',ports)
+    handles.pHmeterPopup.Value = find(ismember(ports,'COM8'));
 end
 
 %NIDAQ Dev1
