@@ -3,10 +3,10 @@
 classdef Pump < handle
     properties
         Serial
-        cWater = 0; %conc of water
-        cConc = 0.1; %conc of concentrated reservoir
-        cDil = 0.001; %conc of dilute reservoir
-        fTotal = 30; %total flow rate
+        Mode = true; %true is salt mode, false is pH mode
+        Concentrations = [0 0 0 0];
+        Reservoirs = [true true true true];
+        TotalFlow = 30;
     end
     
     methods

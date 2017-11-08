@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 22-Oct-2017 15:47:46
+% Last Modified by GUIDE v2.5 08-Nov-2017 13:19:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -110,6 +110,13 @@ function controlPump_Callback(hObject, eventdata, handles)
 pumpGUI = controlPumpGUI;
 setappdata(0,'pumpGUI',pumpGUI);
 
+% --- Executes on button press in solutionGUI.
+function solutionGUI_Callback(hObject, eventdata, handles)
+% hObject    handle to solutionGUI (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+solutionGUI;
 
 % --- Executes on button press in configureMeasurement.
 function configureMeasurement_Callback(hObject, eventdata, handles)
