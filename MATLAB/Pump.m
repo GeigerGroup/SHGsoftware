@@ -13,16 +13,16 @@ classdef Pump < handle
         function obj = Pump(COMport)
             if nargin > 0
                 if ischar(COMport)
+                    %set COMport
                     obj.Serial = serial(COMport);
                     obj.Serial.BaudRate = 9600;
                     obj.Serial.StopBits = 1;
                     obj.Serial.DataBits = 8;
                     obj.Serial.Terminator = 'CR';
                     
-                    %open
+                    %open COMport
                     fopen(obj.Serial);
-                    
-                    
+                                      
                     %initialize certain settings
                     for i = 1:4
                         fprintf(obj.Serial,strcat(num2str(i),'J')); % set rotation to clockwise,
