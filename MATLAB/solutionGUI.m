@@ -22,7 +22,7 @@ function varargout = solutionGUI(varargin)
 
 % Edit the above text to modify the response to help solutionGUI
 
-% Last Modified by GUIDE v2.5 08-Nov-2017 14:39:07
+% Last Modified by GUIDE v2.5 09-Nov-2017 17:29:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,6 +70,13 @@ else
     handles.saltCheck.Value = false;
     handles.pHcheck.Value = true;
 end
+
+%populate ID possibilities here
+tubeIDs = {'3.17','0.76'};
+%set string
+handles.tubeIDpopup.String = tubeIDs;
+%set default
+handles.tubeIDpopup.Value = find(ismember(tubeIDs,pump.TubeID));
 
 %set total flow
 handles.totalFlowEdit.String = num2str(pump.TotalFlow);
@@ -143,6 +150,10 @@ pump.Mode = handles.saltCheck.Value;
 %set total flow
 pump.TotalFlow = str2double(handles.totalFlowEdit.String);
 
+
+%set tubeID
+pump.TubeID = handles.tubeIDpopup.String{handles.tubeIDpopup.Value};
+
 %set check marks
 for i = 1:4
     pump.Reservoirs(i) = handles.(strcat('res',num2str(i),'check')).Value;
@@ -160,6 +171,3 @@ for i = 1:4
 end
 
 close;
-
-
-
