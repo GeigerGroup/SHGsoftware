@@ -37,7 +37,8 @@ classdef Pump < handle
         end
         
         function rates = calculateRates(obj,conc)
-            
+                   
+            %select which reservoir to mix to get value
             res = [];
             %if reservoir 2 is enabled
             if obj.Reservoirs(2)
@@ -52,54 +53,50 @@ classdef Pump < handle
                         if conc <= obj.Concentrations(4)
                             res = 4;
                         else
-                            display('Concentration too high for res 4')
+                            disp('Concentration too high for res 4')
                         end
                     else
-                        display('Concentration too high for res 3')
+                        disp('Concentration too high for res 3')
                     end
                 else
-                    display('Concentration too high for res 2')
+                    disp('Concentration too high for res 2')
                 end
             else
-                display('Only one reservoir available?')
+                disp('Only one reservoir available?')
             end
             
             if isempty(res)
-                display('No flowrates found')
-            else
-                display(res)
+                disp('No flowrates found')
             end
-        end
-        rates = res;                
-                
-
-        
-%         function rates = calculateSalt2Reservoir(obj,conc)
-%             coefConc = [obj.cWater obj.cConc; 1 1]; %matrix for conc
-%             coefDil = [obj.cWater obj.cDil; 1 1]; %matrix for dil
-%             
-%             solMatrix = [obj.fTotal*conc; obj.fTotal]; %matrix for solutions
-%             
-%             flowConc = inv(coefConc)*solMatrix; %rates if conc works
-%             flowDil = inv(coefDil)*solMatrix; %rates if diluted works
-%             
-%             %min with 3.17 ID tubing is 0.35 mL/min
-%             flowConcCheck = ((flowConc < 0.35)|(flowConc > 30)) & (flowConc ~= 0);
-%             flowDilCheck = ((flowDil < 0.35)|(flowDil > 30)) & (flowDil ~= 0);
-%             
-%             rates = [0 0 0 0]; %matrix to hold final rates
-%             
-%             if sum(flowConcCheck) == 0 %check if conc works
-%                 rates(1) = flowConc(1);
-%                 rates(2) = flowConc(2);
-%             elseif sum(flowDilCheck) == 0  %check if diluted works
-%                 rates(1) = flowDil(1);
-%                 rates(3) = flowDil(2);
-%             else
-%                 rates = [];
-%                 disp('Flow settings out of bounds'); %display if neither works
-%             end
-%         end
+            
+            concMatrix = [obj.Concentrations(1) obj.Concentrations(res); 1 1];
+            solMatrix = [obj.TotalFlow*conc; obj.TotalFlow];
+            
+            flowMatrix = solMatrix/concMatrix; %calculate rates
+            
+            %check rates
+            if obj.TubeID == '3.17'
+                flowMin = 0.35;
+                flowMax = 35;
+            elseif obj.TubeID == '0.76'
+                flowMin = 0.036;
+                flowMax = 3.6;
+            end
+            
+            flowCheck = ((flowMatrix < flowMin)|(flowMatrix > flowMax)) & (Matrix ~= 0);
+            
+            
+            rates = [0 0 0 0];
+            
+            if sum(flowCheck) == 0
+                rates(1) = flowMatrix(1);
+                rates(res) = flowMatrix(2);
+            else
+                rates = [];
+                disp('Flow settings out of bounds')
+            end
+            
+        end                
         
         function setFlowRate(obj,channel,rate)     
             %convert flow rate to pump format
