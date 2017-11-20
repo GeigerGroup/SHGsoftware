@@ -18,10 +18,10 @@ end
 function initPumpValveSettings()
 	initDOChannels()
 
-	setAllChannels("K")	//set rotation to clockwise
+	setAllChannels("J")	//set rotation to clockwise
 	setAllChannels("M")    //set pump to flow rate mode
 
-	setAllChannels("f" + convertFlowRate(30)) //set flow rate to 30	
+	setAllChannels("f" + convertFlowRate(0)) //set flow rate to 0	
 	
 	SetDataFolder root:SRSParameters
 	variable/G flowControl = 0

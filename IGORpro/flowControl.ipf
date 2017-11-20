@@ -26,12 +26,6 @@ function changeFlow()
 		totalFlow = totalFlow + channelWave[flowChangeIndex] //add the flow for this channel to the total flow
 	endfor
 	
-	if (totalFlow > 0) //if total flow is above 0, open waste valve
-		openValve(5)
-	else
-		closeValve(5) //if it isn't (theres no flow), close waste valve
-	endif
-	
 	flowChangeIndex = flowChangeIndex + 1 //iterate to next time to change flow
 	
 end

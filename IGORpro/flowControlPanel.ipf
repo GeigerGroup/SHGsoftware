@@ -2,8 +2,7 @@
 
 Window flowControlPanel() : Panel
 	PauseUpdate; Silent 1		// building window...
-	NewPanel /W=(552,296,725,490)
-	ShowTools/A
+	NewPanel /W=(562,97,735,291)
 	CheckBox channel1,pos={49,41},size={66,14},proc=channelControlCheck,title="Channel 1"
 	CheckBox channel1,value= 0
 	CheckBox channel2,pos={49,63},size={66,14},proc=channelControlCheck,title="Channel 2"

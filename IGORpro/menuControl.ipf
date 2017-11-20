@@ -11,6 +11,7 @@ Menu "Photon Counter"
 	Submenu "Valve and pump control"
 	"Initialize Pump and Valve Settings", initPumpValveSettings()
 	"Flow Control Panel", flowControlPanel()
+	"Flow Rate Panel",flowRatePanel()
 	End
 	
 	Submenu "Stored Photon Counter Settings"
