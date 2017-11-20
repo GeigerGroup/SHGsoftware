@@ -26,6 +26,10 @@ function initPumpValveSettings()
 	SetDataFolder root:SRSParameters
 	variable/G flowControl = 0
 	variable/G flowChangeIndex = 0 //flow control number
+	variable/G flowRateChannel1 = 0 //flow rates for channels
+	variable/G flowRateChannel2 = 0 
+	variable/G flowRateChannel3 = 0
+	variable/G flowRateChannel4 = 0
 	make/n=100/O flowCounts = 0  //wave to hold counts at which flow change happens
 	make/n=100/O flowCh1 = 0   //waves to hold pump speeds for specified channels
 	make/n=100/O flowCh2 = 0
