@@ -211,12 +211,13 @@ classdef Acquisition < handle
                         disp(strcat('Flow change at point:  ',num2str(obj.PointNumber)))
                         
                         %calculate flow rates for two reservoir salt
-                        rates = obj.Pump.calculateSalt2Reservoir(obj.FlowConcentrationValue(obj.FlowIndex));
+                        rates = obj.Pump.calculateRates(obj.FlowConcentrationValue(obj.FlowIndex));
                         disp(rates)
                         
                         %calculate solenoid state
                         states = rates > 0; %set solenoid valve to on if rate > 0
-                        states =[states any(states)]; %set valve 5 to on if any of others are on
+                        %states =[states any(states)]; %set valve 5 to on if any of others are on
+                        states = [states 0]; %keep 5 always off
                         disp(states)
                         
                         %save solenoid states

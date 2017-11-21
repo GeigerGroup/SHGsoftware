@@ -67,23 +67,25 @@ classdef Pump < handle
             
             if isempty(res)
                 disp('No flowrates found')
+                rates = [];
+                return
             end
             
             concMatrix = [obj.Concentrations(1) obj.Concentrations(res); 1 1];
             solMatrix = [obj.TotalFlow*conc; obj.TotalFlow];
             
-            flowMatrix = solMatrix/concMatrix; %calculate rates
+            flowMatrix = inv(concMatrix)*solMatrix; %calculate rates
             
             %check rates
-            if obj.TubeID == '3.17'
+            if strcmp(obj.TubeID,'3.17')
                 flowMin = 0.35;
                 flowMax = 35;
-            elseif obj.TubeID == '0.76'
+            elseif strcmp(obj.TubeID,'0.76')
                 flowMin = 0.036;
                 flowMax = 3.6;
             end
             
-            flowCheck = ((flowMatrix < flowMin)|(flowMatrix > flowMax)) & (Matrix ~= 0);
+            flowCheck = ((flowMatrix < flowMin)|(flowMatrix > flowMax)) & (flowMatrix ~= 0);
             
             
             rates = [0 0 0 0];
