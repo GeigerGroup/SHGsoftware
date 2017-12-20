@@ -161,7 +161,8 @@ classdef Acquisition < handle
                     obj.LineHandlePhotons.XData = obj.DataPhotonCounter.XData;
                     obj.LineHandlePhotons.YData = obj.DataPhotonCounter.YData;
                 else
-                    return %else exit
+                    %if no data ready, exit without checking
+                    return
                 end
             end
          
@@ -198,6 +199,9 @@ classdef Acquisition < handle
                     obj.LineHandleCond.YData = obj.DataCond.YData;
                 end
             end
+            
+            %if data was received, check acquisition
+            obj.checkAcquisition
         end
         
         function checkAcquisition(obj)
@@ -253,6 +257,9 @@ classdef Acquisition < handle
             if (obj.PhotonCounterEnabled)
                 obj.PhotonCounter.resetScan
                 obj.PhotonCounter.startScan
+                
+                %clear out first point?
+                obj.PhotonCounter.getData;
             end
         end
         

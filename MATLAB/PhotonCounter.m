@@ -54,14 +54,14 @@ classdef PhotonCounter < handle
             end
             
             
-            %check if data is ready
+            %ask if data is ready
             fprintf(obj.Serial,'SS1');
-            if str2double(fscanf(obj.Serial)); %test on status byte
+            if str2double(fscanf(obj.Serial));
                 fprintf(obj.Serial,strcat('Q',obj.ChannelEnabled)); %ask for data
                 data = str2double(fscanf(obj.Serial)); %receive data
             else
+                %set data to empty if not ready
                 data = [];
-                display('Error with Photon Counter: no data ready') %if data is not ready
             end
         end
         

@@ -16,7 +16,7 @@ classdef PHmeter < handle
                     obj.Serial.TimeOut = 0.1;
                     
                     %open
-                    fopen(obj.Serial)
+                    fopen(obj.Serial);
                 else
                     error('Input COM port must be char')
                 end
@@ -42,11 +42,19 @@ classdef PHmeter < handle
                 if ~isempty(string)
                     split = strsplit(string,','); % split it
                     
-                    pH = str2double(split{9}); % pick out pH
-                    cond = str2double(split{20}); % pick out cond
+                    %make sure its the proper length
+                    if (length(split) == 33)
+                        
+                        pH = str2double(split{9}); % pick out pH
+                        cond = str2double(split{20}); % pick out cond
                     
-                    if strcmp(split{21},'mS/cm') %put in microS/cm if in mS
-                        cond = cond*1000;
+                        if strcmp(split{21},'mS/cm') %put in microS/cm if in mS
+                            cond = cond*1000;
+                        end
+                    else
+                        pH = [];
+                        cond = [];
+                        disp('pH cond string not correct length.')
                     end
                 else
                     pH = [];

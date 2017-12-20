@@ -1,17 +1,13 @@
 function t = createDataTimer(acq)
 % initializes data timer to called data acquisition function
-% currently only runs off photon counter, should make more general
-
-
-% get appdata
-photonCounter = getappdata(0,'photonCounter');
+% currently checks to see if data from photon counter is ready every 200 ms
 
 t = timer;
 t.StartFcn = @dataTimerStart; % function called when started
 t.TimerFcn = {@dataTimerGet, acq};  % function called at each interval
 t.StopFcn = @dataTimerStop;  % function called when stopped
-t.Period = photonCounter.Interval + photonCounter.DwellTime; % period to wait
-t.StartDelay = 1.1*photonCounter.Interval + photonCounter.DwellTime; % wait slightly longer than a period the first time
+t.Period = 0.4; % period to wait 400 ms
+t.StartDelay = 0.1; % wait 100 ms before starting
 t.ExecutionMode = 'fixedRate'; % fixed rate, so time to execute doesn't effect
 
 end
@@ -27,7 +23,6 @@ end
 function dataTimerGet(timerobj,event,acq)
 %function at each interval
 acq.getData
-acq.checkAcquisition
 %display(event.Type)
 %display(event.Data)
 end
