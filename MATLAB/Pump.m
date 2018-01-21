@@ -40,41 +40,113 @@ classdef Pump < handle
                    
             %select which reservoir to mix to get value
             res = [];
-            %if reservoir 2 is enabled
-            if obj.Reservoirs(2)
-                % if concentratrion <= reservoir 2, choose it
-                if conc <= obj.Concentrations(2)
-                    res = 2;
-                elseif obj.Reservoirs(3)
-                    %if concentration <= reservoir3, choose it
-                    if conc <= obj.Concentrations(3)
-                        res = 3;
-                    elseif obj.Reservoirs(4)
-                        if conc <= obj.Concentrations(4)
-                            res = 4;
+            
+            %salt mode
+            if obj.Mode == true;
+                %if reservoir 2 is enabled
+                if obj.Reservoirs(2)
+                    % if concentratrion <= reservoir 2, choose it
+                    if conc <= obj.Concentrations(2)
+                        res = 2;
+                    elseif obj.Reservoirs(3)
+                        %if concentration <= reservoir3, choose it
+                        if conc <= obj.Concentrations(3)
+                            res = 3;
+                        elseif obj.Reservoirs(4)
+                            if conc <= obj.Concentrations(4)
+                                res = 4;
+                            else
+                                disp('Concentration too high for res 4')
+                            end
                         else
-                            disp('Concentration too high for res 4')
+                            disp('Concentration too high for res 3')
                         end
                     else
-                        disp('Concentration too high for res 3')
+                        disp('Concentration too high for res 2')
                     end
                 else
-                    disp('Concentration too high for res 2')
+                    disp('Only one reservoir available?')
                 end
-            else
-                disp('Only one reservoir available?')
+
+                if isempty(res)
+                    disp('No flowrates found')
+                    rates = [];
+                    return
+                end
+
+                concMatrix = [obj.Concentrations(1) obj.Concentrations(res); 1 1];
+                solMatrix = [obj.TotalFlow*conc; obj.TotalFlow];
+
+                flowMatrix = inv(concMatrix)*solMatrix; %calculate rates
             end
             
-            if isempty(res)
-                disp('No flowrates found')
-                rates = [];
-                return
+            %pH mode, can only go one direction from 7
+            if obj.Mode == false;
+                %if reservoir 2 is enabled
+                if obj.Reservoirs(2)
+                    % if pH is closer to 7 than reservoir 2, choose it
+                    if abs(conc-7) <= abs(obj.Concentrations(2)-7)
+                        res = 2;
+                    elseif obj.Reservoirs(3)
+                        %if pH is closer to 7 than reservoir 3, choose it
+                        if abs(conc-7) <= abs(obj.Concentrations(3)-7)
+                            res = 3;
+                        elseif obj.Reservoirs(4)
+                            if abs(conc-7) <= abs(obj.Concentrations(4)-7)
+                                res = 4;
+                            else
+                                disp('pH too far from 7 for res 4')
+                            end
+                        else
+                            disp('pH too far from 7 for res 4')
+                        end
+                    else
+                        disp('pH too far from 7 for res 4')
+                    end
+                else
+                    disp('Only one reservoir available?')
+                end
+
+                if isempty(res)
+                    disp('No flowrates found')
+                    rates = [];
+                    return
+                end
+                
+                % if pH 7, only flow first reservoir
+                if conc == 7
+                    flowMatrix = [obj.TotalFlow 0 0 0];
+                end
+                        
+                % if going up 
+                if conc > 7
+                    concOHres = 10^-(14-obj.Concentrations(res));
+                    concOHwant = 10^-(14-conc);
+                    
+                    concMatrix = [0 concOHres; 1 1];
+                    solMatrix = [obj.TotalFlow*concOHwant; obj.TotalFlow];
+                    
+                    flowMatrix = inv(concMatrix)*solMatrix; %calculate rates
+                    flowMatrix = round(flowMatrix,4); %round to four decimal places
+                end
+                
+                % if going down
+                if conc < 7
+                    concHres = 10^-obj.Concentrations(res);
+                    concHwant = 10^-conc;
+                    
+                    concMatrix = [0 concHres; 1 1];
+                    solMatrix = [obj.TotalFlow*concHwant; obj.TotalFlow];
+                    
+                    flowMatrix = inv(concMatrix)*solMatrix; %calculate rates
+                    flowMatrix = round(flowMatrix,4);
+                end
+
+                
             end
+
             
-            concMatrix = [obj.Concentrations(1) obj.Concentrations(res); 1 1];
-            solMatrix = [obj.TotalFlow*conc; obj.TotalFlow];
-            
-            flowMatrix = inv(concMatrix)*solMatrix; %calculate rates
+            disp(conc)
             
             %check rates
             if strcmp(obj.TubeID,'3.17')
