@@ -72,7 +72,7 @@ else
 end
 
 %populate ID possibilities here
-tubeIDs = {'3.17','0.76'};
+tubeIDs = {'3.17','2.29','0.76'};
 %set string
 handles.tubeIDpopup.String = tubeIDs;
 %set default

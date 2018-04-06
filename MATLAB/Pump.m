@@ -6,8 +6,8 @@ classdef Pump < handle
         Mode = true; %true is salt mode, false is pH mode
         Concentrations = [0 0 0 0]; %one must hold water or most dilute sol
         Reservoirs = [true true true true];
-        TotalFlow = 30;
-        TubeID = '3.17';
+        TotalFlow = 20;
+        TubeID = '2.29';
     end
     
     methods
@@ -25,10 +25,12 @@ classdef Pump < handle
                     fopen(obj.Serial);
                                       
                     %initialize certain settings
+                    
                     for i = 1:4
+                        fprintf(obj.Serial,strcat(num2str(i),'+0',num2str(str2num(obj.TubeID)*100))); %set tube ID
                         fprintf(obj.Serial,strcat(num2str(i),'J')); % set rotation to clockwise,
                         fprintf(obj.Serial,strcat(num2str(i),'M')); % set to flowrate
-                        setFlowRate(obj,i,30); % flowrate to 30
+                        setFlowRate(obj,i,20); % flowrate to 20
                     end
                 else
                     error('Input COM port must be char');
@@ -152,6 +154,9 @@ classdef Pump < handle
             if strcmp(obj.TubeID,'3.17')
                 flowMin = 0.35;
                 flowMax = 35;
+            elseif strcomp(obj.TubeID,'2.29')
+                flowMin = 0.24;
+                flowMax = 24;
             elseif strcmp(obj.TubeID,'0.76')
                 flowMin = 0.036;
                 flowMax = 3.6;

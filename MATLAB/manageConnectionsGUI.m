@@ -22,7 +22,7 @@ function varargout = manageConnectionsGUI(varargin)
 
 % Edit the above text to modify the response to help manageConnectionsGUI
 
-% Last Modified by GUIDE v2.5 30-Aug-2017 15:09:18
+% Last Modified by GUIDE v2.5 26-Feb-2018 16:02:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -100,10 +100,11 @@ if ismember('COM7',ports)
     handles.pumpPopup.Value = find(ismember(ports,'COM7'));
 end
 
-%pH meter COM3
-if ismember('COM8',ports)
-    handles.pHmeterPopup.Value = find(ismember(ports,'COM8'));
+%pH meter COM13
+if ismember('COM13',ports)
+    handles.pHmeterPopup.Value = find(ismember(ports,'COM13'));
 end
+
 
 %NIDAQ Dev1
 if ismember('Dev1',daqs)
@@ -228,6 +229,9 @@ daqParam = getappdata(0,'daqParam');
 daqParam.Pump = true;
 
 
+
+
+
 % --- Executes on button press in closeWindow.
 function closeWindow_Callback(hObject, eventdata, handles)
 % hObject    handle to closeWindow (see GCBO)
@@ -235,4 +239,3 @@ function closeWindow_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 close
-

@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 08-Nov-2017 13:19:46
+% Last Modified by GUIDE v2.5 06-Apr-2018 12:07:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
