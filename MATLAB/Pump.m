@@ -154,7 +154,7 @@ classdef Pump < handle
             if strcmp(obj.TubeID,'3.17')
                 flowMin = 0.35;
                 flowMax = 35;
-            elseif strcomp(obj.TubeID,'2.29')
+            elseif strcmp(obj.TubeID,'2.29')
                 flowMin = 0.24;
                 flowMax = 24;
             elseif strcmp(obj.TubeID,'0.76')

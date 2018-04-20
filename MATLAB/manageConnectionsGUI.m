@@ -95,14 +95,14 @@ if ismember('COM1',ports)
     handles.photonCounterPopup.Value = find(ismember(ports,'COM1'));
 end
 
-%pump COM7
-if ismember('COM7',ports)
-    handles.pumpPopup.Value = find(ismember(ports,'COM7'));
+%pump COM5
+if ismember('COM5',ports)
+    handles.pumpPopup.Value = find(ismember(ports,'COM5'));
 end
 
-%pH meter COM13
-if ismember('COM13',ports)
-    handles.pHmeterPopup.Value = find(ismember(ports,'COM13'));
+%pH meter COM18
+if ismember('COM18',ports)
+    handles.pHmeterPopup.Value = find(ismember(ports,'COM18'));
 end
 
 
