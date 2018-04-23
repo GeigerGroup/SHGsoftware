@@ -1,8 +1,8 @@
 #pragma rtGlobals=1		// Use modern global access method.
 
 function COMMpump()
-	VDT2/P=COM7 baud=9600,stopbits=1,databits=8,parity=0
-	VDTOperationsPort2 COM7
+	VDT2/P=COM5 baud=9600,stopbits=1,databits=8,parity=0
+	VDTOperationsPort2 COM5
 	VDT2 KillIO
 end
 

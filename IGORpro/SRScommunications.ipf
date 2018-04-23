@@ -16,7 +16,7 @@ end
 
 //defines communication parameters, opens comms with GPC
 function COMMSRS()
-	VDT2/P=COM1 baud=19200,stopbits=2,databits=8,parity=0
+	VDT2/P=COM1 baud=9600,stopbits=2,databits=8,parity=0
 	VDTOperationsPort2 COM1
 	VDT2 KillIO
 end
