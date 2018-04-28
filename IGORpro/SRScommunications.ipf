@@ -16,8 +16,8 @@ end
 
 //defines communication parameters, opens comms with GPC
 function COMMSRS()
-	VDT2/P=COM1 baud=9600,stopbits=2,databits=8,parity=0
-	VDTOperationsPort2 COM1
+	VDT2/P=COM3 baud=9600,stopbits=2,databits=8,parity=0
+	VDTOperationsPort2 COM3
 	VDT2 KillIO
 end
 
@@ -73,7 +73,7 @@ end
 //close communications with photon counter to allow another program access.
 //not generally necessary
 function closeSRS() 
-	VDTClosePort2 COM1
+	VDTClosePort2 COM3
 	print "Communication with photon counter closed."	
 end
 
