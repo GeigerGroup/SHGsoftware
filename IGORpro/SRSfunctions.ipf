@@ -21,10 +21,6 @@ Function startScan(fixedCont)
 		return -1
 	endif
 	
-	//start setup NIDAQ if using it	
-	if (measurePower == 1)
-		setupFastReadDAQ()
-	endif	
 	pointNumber = 1 //reset point counter
 	sendSRS("NE1") //continuous mode for GPC
 	sendSRS("CR") //reset scan
@@ -68,7 +64,7 @@ function chooseScanParameters(fixedCont)
 	Prompt tSet, "Set length of each count (must be between 0.02 and 90000s): "
 	Prompt dwellTime, "Set dwell time (must be between 0.002 and 60s): "
 	Prompt AB, "Choose A; B; or A and B:", popup "A;B;AB"
-	Prompt power, "Measure Power?", popup "No;NIDAQ;OPAEPM"
+	Prompt power, "Measure Power?", popup "No;ADC;OPAEPM"
 	Prompt localAutoPause, "Autopause? 0 = no, or enter # counts to pause after"
 	Prompt flow, "Flow control on?", popup "On;Off"
 	if (fixedCont == 0)
@@ -209,10 +205,6 @@ function resumeScan()
 	NVAR measurePower =  $SRSVar("measurePower") //global variable saying if power is recorded
 	resumeRecordingData() //start asking if there is new data again
 	
-	if (measurePower == 1) //check if recording with NIDAQ, restart fast scan if so
-		setupFastReadDAQ()
-	endif
-	
 	sendSRS("CS") //tell GPC to start scan
 end
 	 
@@ -223,9 +215,6 @@ function stopScan()
 	sendSRS("CH")  //stop scan
 	stopRecordingdata() //stop asking if there is new data
 	
-	if (measurePower == 1)
-		stopFastReadDAQ() //if recording with NIDAQ, stop it reading power
-	endif
 end
 
 //set next pause
@@ -257,9 +246,6 @@ function resetScan()
 		sendSRS("CR") //stop and reset
 		stopRecordingData() //stop asking if there is new data
 		
-		if (measurePower == 1)
-			stopFastReadDAQ() //if recording with NIDAQ, stop it reading power
-		endif	
 	endif
 end	
 
@@ -321,7 +307,7 @@ function setPowerVar(power)
 		case "No":
 			measurePower = 0
 			break
-		case "NIDAQ":
+		case "ADC":
 			measurePower = 1
 			variable localPowerScale = powerScale
 			Prompt localPowerScale, "Enter Power Meter Range (in W): "
@@ -345,7 +331,7 @@ function/s SetDefaultPower()
 	if (measurePower == 0)
 		power = "No"
 	elseif(measurePower == 1)
-		power = "NIDAQ"
+		power = "ADC"
 	elseif(measurePower == 2)
 		power = "OPAEPM"
 	endif

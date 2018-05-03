@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 06-Apr-2018 12:07:18
+% Last Modified by GUIDE v2.5 03-May-2018 16:32:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -58,6 +58,7 @@ setappdata(0,'daqParam',daqParam);
 
 handles.photonCounterCheckbox.Value = daqParam.PhotonCounter;
 handles.NIDAQcheckbox.Value = daqParam.NIDAQ;
+handles.ADCcheckbox.Value = daqParam.ADC;
 handles.pHmeterCheckbox.Value = daqParam.PHmeter;
 handles.pumpCheckbox.Value = daqParam.Pump;
 

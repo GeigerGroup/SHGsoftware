@@ -13,7 +13,7 @@ classdef PhotonCounter < handle
             if nargin > 0
                 if ischar(COMport)
                     obj.Serial = serial(COMport);
-                    obj.Serial.BaudRate = 19200;
+                    obj.Serial.BaudRate = 9600;
                     obj.Serial.StopBits = 2;
                     obj.Serial.DataBits = 8;
                     obj.Serial.Terminator = 'CR';

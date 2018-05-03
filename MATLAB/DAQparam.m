@@ -3,6 +3,7 @@ classdef DAQparam < handle
         %booleans of if hardware is enabled
         PhotonCounter = false;
         NIDAQ = false;
+        ADC = false;
         Pump = false;
         PHmeter = false;
              
@@ -13,11 +14,13 @@ classdef DAQparam < handle
         
         %booleans of if enabled for an acquisition
         PhotonCounterEnabled = true;
-        NIDAQpowerEnabled = true;
-        PHmeterEnabled = false;
+        ADCenabled = true;
+
       
         %parameters for flow control
         FlowControl = false;
+        ADCpowerEnabled = false;
+        PHmeterEnabled = false;
         FlowConcentrationPoint;
         FlowConcentrationValue;
         

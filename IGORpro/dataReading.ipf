@@ -32,8 +32,8 @@ function readDataSRS(s)
 			string powerName = includeName(waveAname,recordA) + includeName(waveBname,recordB) + "_power"
 			wave powerWave = $powerName
 								
-			if (measurePower == 1) //if using NIDAQ
-				make /n=1 tempPower = getNIDAQpower()
+			if (measurePower == 1) //if using ADC
+				make /n=1 tempPower = getADCpower()
 			elseif(measurePower == 2) //if using EPM
 				make /n=1 tempPower = getEPMPower()
 			endif		
@@ -94,15 +94,18 @@ function appendSRSDataPoint(onOff,waveNameAppend,query)
 	endif
 end
 
-//get power if using NIDAQ
-function getNIDAQpower()
+//get power if using ADC
+function getADCpower()
+	NVAR ljRefNum = $SRSVar("ljRefNum")
 	NVAR powerScale = $SRSVar("powerScale")
 				
 	variable meanPower
 	make/n = 200 tempPowerArray //create array to hold data
 	variable ii;
+	variable reading //variable to hold one reading
 	for (ii = 0; ii<200;ii+=1)
-		tempPowerArray[ii] = getFastReadDAQ() //read in all the points
+		LJ_eAIN(ljRefNum, 4,5,0,0,0,0,reading)
+		tempPowerArray[ii] = reading //read in all the points
 	endfor
 	meanPower = powerScale*mean(tempPowerArray) //average and scale power
 	KillWaves tempPowerArray //destroy temp array

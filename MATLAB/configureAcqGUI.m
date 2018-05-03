@@ -22,7 +22,7 @@ function varargout = configureAcqGUI(varargin)
 
 % Edit the above text to modify the response to help configureAcqGUI
 
-% Last Modified by GUIDE v2.5 22-Oct-2017 16:24:45
+% Last Modified by GUIDE v2.5 03-May-2018 16:50:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -67,8 +67,8 @@ handles.dwellTimeEdit.String = num2str(daqParam.DwellTime);
 %set whether to communicate with the photon counter
 handles.photonCounterCheck.Value = daqParam.PhotonCounterEnabled;
 
-%set whether NIDAQ power monitoring is on or off
-handles.nidaqPowerCheck.Value = daqParam.NIDAQpowerEnabled;
+%set whether ADC power monitoring is on or off
+handles.adcPowerCheck.Value = daqParam.ADCpowerEnabled;
 
 %set whether flow control is on or off
 handles.flowControlCheck.Value = daqParam.FlowControl;
@@ -113,7 +113,7 @@ daqParam.DwellTime = str2double(handles.dwellTimeEdit.String);
 
 %set boolean parameters
 daqParam.PhotonCounterEnabled = handles.photonCounterCheck.Value;
-daqParam.NIDAQpowerEnabled = handles.nidaqPowerCheck.Value;
+daqParam.ADCpowerEnabled = handles.adcPowerCheck.Value;
 daqParam.FlowControl = handles.flowControlCheck.Value;
 daqParam.PHmeterEnabled = handles.pHmeterCheck.Value;
 

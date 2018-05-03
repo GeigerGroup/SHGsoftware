@@ -44,7 +44,7 @@ classdef Pump < handle
             res = [];
             
             %salt mode
-            if obj.Mode == true;
+            if obj.Mode == true
                 %if reservoir 2 is enabled
                 if obj.Reservoirs(2)
                     % if concentratrion <= reservoir 2, choose it
@@ -83,7 +83,7 @@ classdef Pump < handle
             end
             
             %pH mode, can only go one direction from 7
-            if obj.Mode == false;
+            if obj.Mode == false
                 %if reservoir 2 is enabled
                 if obj.Reservoirs(2)
                     % if pH is closer to 7 than reservoir 2, choose it
