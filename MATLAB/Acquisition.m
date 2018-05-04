@@ -13,19 +13,20 @@ classdef Acquisition < handle
         
         %data
         DataPhotonCounter
-        DataNIDAQpower
+        DataADCpower
         DatapH
         DataCond
         
         %hardware objects
         PhotonCounter
+        LabJack
         PHmeter
         DAQsession
         Pump
         
         %if objects enabled for this acquisition
         PhotonCounterEnabled
-        NIDAQpowerEnabled
+        ADCpowerEnabled
         PHmeterEnabled
         FlowControl
         SolStates
@@ -56,12 +57,15 @@ classdef Acquisition < handle
                     obj.PhotonCounter = getappdata(0,'photonCounter');
                     obj.DataPhotonCounter = XYData;
                     
-                    %give reference to DAQsession
-                    obj.DAQsession = getappdata(0,'daqSession');
-                    obj.DataNIDAQpower = XYData;
+                    %give reference to labjack
+                    obj.LabJack = getappdata(0,'labJack');
+                    obj.DataADCpower = XYData;
                     
                     %give reference to pump
                     obj.Pump = getappdata(0,'pump');
+                    
+                    %give reference to DAQsession
+                    obj.DAQsession = getappdata(0,'daqSession');
                     
                     %give reference to pHmeter
                     obj.PHmeter = getappdata(0,'pHmeter');
@@ -70,7 +74,7 @@ classdef Acquisition < handle
                     
                     %hardware enabled
                     obj.PhotonCounterEnabled = daqParam.PhotonCounterEnabled;
-                    obj.NIDAQpowerEnabled = daqParam.NIDAQpowerEnabled;
+                    obj.ADCpowerEnabled = daqParam.ADCpowerEnabled;
                     obj.PHmeterEnabled = daqParam.PHmeterEnabled;
                     obj.FlowControl = daqParam.FlowControl;
                       
@@ -97,7 +101,7 @@ classdef Acquisition < handle
                         ylabel('Counts')
                     end
                     
-                    if obj.NIDAQpowerEnabled
+                    if obj.ADCpowerEnabled
                         %plot for power data
                         subplot(4,1,2)                
                         %create line object with temp point then delete-
@@ -167,16 +171,16 @@ classdef Acquisition < handle
             end
          
             
-            %NIDAQ power data
-            if (obj.NIDAQpowerEnabled)
-                obj.DataNIDAQpower.XData = ...
-                    vertcat(obj.DataNIDAQpower.XData,obj.PointNumber*obj.Interval);
-                obj.DataNIDAQpower.YData = ...
-                    vertcat(obj.DataNIDAQpower.YData,obj.DAQsession.Session.inputSingleScan);
+            %ADC power data
+            if (obj.ADCpowerEnabled)
+                obj.DataADCpower.XData = ...
+                    vertcat(obj.DataADCpower.XData,obj.PointNumber*obj.Interval);
+                obj.DataADCpower.YData = ...
+                    vertcat(obj.DataADCpower.YData,obj.LabJack.getReading);
                 
                 %update x and y data on plot
-                obj.LineHandlePower.XData = obj.DataNIDAQpower.XData;
-                obj.LineHandlePower.YData = obj.DataNIDAQpower.YData;
+                obj.LineHandlePower.XData = obj.DataADCpower.XData;
+                obj.LineHandlePower.YData = obj.DataADCpower.YData;
             end
             
             %pH meter data
@@ -323,8 +327,8 @@ classdef Acquisition < handle
             %find lengths to pad with nan
             nR = [size(obj.DataPhotonCounter.XData,1) ...
                 size(obj.DataPhotonCounter.YData,1) ...
-                size(obj.DataNIDAQpower.XData,1) ...
-                size(obj.DataNIDAQpower.YData,1) ...
+                size(obj.DataADCpower.XData,1) ...
+                size(obj.DataADCpower.YData,1) ...
                 size(obj.DataCond.XData,1) ...
                 size(obj.DataCond.YData,1) ...
                 size(obj.DatapH.YData,1) ];
@@ -333,8 +337,8 @@ classdef Acquisition < handle
             %pad with nan and turn into array
             data = horzcat([obj.DataPhotonCounter.XData;nan(dR(1),1)], ...
                 [obj.DataPhotonCounter.YData;nan(dR(2),1)], ...
-                [obj.DataNIDAQpower.XData;nan(dR(3),1)], ...
-                [obj.DataNIDAQpower.YData;nan(dR(4),1)], ...
+                [obj.DataADCpower.XData;nan(dR(3),1)], ...
+                [obj.DataADCpower.YData;nan(dR(4),1)], ...
                 [obj.DataCond.XData;nan(dR(5),1)], ...
                 [obj.DataCond.YData;nan(dR(6),1)], ...
                 [obj.DatapH.YData;nan(dR(7),1)]);

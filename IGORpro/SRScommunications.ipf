@@ -11,13 +11,13 @@ function openSRS()
 	
 	initSRSVariables() //initialize important GPC variables
 	
-	initNIDAQ() //initialize NIDAQ board, print status
+	initLJ() //initialized LJ ADC
 end
 
 //defines communication parameters, opens comms with GPC
 function COMMSRS()
-	VDT2/P=COM1 baud=19200,stopbits=2,databits=8,parity=0
-	VDTOperationsPort2 COM1
+	VDT2/P=COM3 baud=9600,stopbits=2,databits=8,parity=0
+	VDTOperationsPort2 COM3
 	VDT2 KillIO
 end
 
@@ -40,6 +40,18 @@ function initSRSVariables()
 	string/G devName = StringFromList(0,fDAQmx_DeviceNames());
 	make /n=6/O taskNumWave = 0
 	SetDataFolder root:	
+end
+
+function initLJ() //initialized labjack ADC
+	SetDataFolder root:SRSParameters
+	LJ_ListAll(LJ_dtU3,LJ_ctUSB)
+	variable/G ljRefNum = 0
+	SetDataFolder root:
+	variable localLJRefNum
+	
+	LJ_OpenLabJack(LJ_dtU3,LJ_ctUSB,"notused",1,localLJRefNum)
+	ljRefNum = localLJRefNum
+		
 end
 
 //return full path to SRS variables (use when calling global variables
@@ -73,7 +85,7 @@ end
 //close communications with photon counter to allow another program access.
 //not generally necessary
 function closeSRS() 
-	VDTClosePort2 COM1
+	VDTClosePort2 COM3
 	print "Communication with photon counter closed."	
 end
 

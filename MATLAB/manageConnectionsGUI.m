@@ -22,7 +22,7 @@ function varargout = manageConnectionsGUI(varargin)
 
 % Edit the above text to modify the response to help manageConnectionsGUI
 
-% Last Modified by GUIDE v2.5 26-Feb-2018 16:02:30
+% Last Modified by GUIDE v2.5 03-May-2018 16:29:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,6 +57,7 @@ daqParam = getappdata(0,'daqParam');
 
 handles.photonCounterCheckbox.Value = daqParam.PhotonCounter;
 handles.NIDAQcheckbox.Value = daqParam.NIDAQ;
+handles.ADCcheckbox.Value = daqParam.ADC;
 handles.pHmeterCheckbox.Value = daqParam.PHmeter;
 handles.pumpCheckbox.Value = daqParam.Pump;
 
@@ -71,45 +72,29 @@ for i = 1:length(list.SerialPorts)
     ports{i+1} = char(list.SerialPorts(i));
 end
 
-%popuplate each serial popup menu with com ports
+%populate each serial popup menu with com ports
 handles.photonCounterPopup.String = ports;
 handles.pHmeterPopup.String = ports;
 handles.pumpPopup.String = ports;
 
-%get list of device names
-daqIDs = daq.getDevices();
-daqs = cell(1);
-daqs{1} = 'Devices';
-for i = 1:length(daqIDs)
-    daqs{i+1} = daqIDs(1).ID;
-end
-
-%populate NIDAQ with device names
-handles.NIDAQpopup.String = daqs;
-
 %**************set default values***************%
 %computer specific
 
-%photon counter COM1
-if ismember('COM1',ports)
-    handles.photonCounterPopup.Value = find(ismember(ports,'COM1'));
+%photon counter COM3
+if ismember('COM3',ports)
+    handles.photonCounterPopup.Value = find(ismember(ports,'COM3'));
 end
 
-%pump COM7
-if ismember('COM7',ports)
-    handles.pumpPopup.Value = find(ismember(ports,'COM7'));
+%pump COM9
+if ismember('COM9',ports)
+    handles.pumpPopup.Value = find(ismember(ports,'COM9'));
 end
 
-%pH meter COM13
-if ismember('COM13',ports)
-    handles.pHmeterPopup.Value = find(ismember(ports,'COM13'));
+%pH meter COM8
+if ismember('COM8',ports)
+    handles.pHmeterPopup.Value = find(ismember(ports,'COM8'));
 end
 
-
-%NIDAQ Dev1
-if ismember('Dev1',daqs)
-    handles.NIDAQpopup.Value = find(ismember(daqs,'Dev1'));
-end
 %******* end default values ******%
 
 % Choose default command line output for manageConnectionsGUI
@@ -156,6 +141,25 @@ handles.UserData.photonCounterCheckbox.Value = 1;
 daqParam = getappdata(0,'daqParam');
 daqParam.PhotonCounter = true;
 
+% --- Executes on button press in ADCconnect.
+function ADCconnect_Callback(hObject, eventdata, handles)
+% hObject    handle to ADCconnect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%create object
+labJack = LabJackADC();
+
+%save object
+setappdata(0,'labJack',labJack);
+
+%set checkbox to 1
+handles.ADCcheckbox.Value = 1;
+handles.UserData.ADCcheckbox.Value = 1;
+
+%set labjack connect status to 1
+daqParam = getappdata(0,'daqParam');
+daqParam.ADC = true;
 
 % --- Executes on button press in NIDAQconnect.
 function NIDAQconnect_Callback(hObject, eventdata, handles)
@@ -163,11 +167,8 @@ function NIDAQconnect_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%get name
-daqname = handles.NIDAQpopup.String{handles.NIDAQpopup.Value};
-
 %create object
-daqSession = DAQsession(daqname);
+daqSession = DAQsession();
 
 %save object
 setappdata(0,'daqSession',daqSession);
@@ -176,7 +177,7 @@ setappdata(0,'daqSession',daqSession);
 handles.NIDAQcheckbox.Value = 1;
 handles.UserData.NIDAQcheckbox.Value = 1;
 
-%set photon counter connect status to 1
+%set nidaq connect status to 1
 daqParam = getappdata(0,'daqParam');
 daqParam.NIDAQ = true;
 

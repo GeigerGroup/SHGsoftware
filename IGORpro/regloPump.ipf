@@ -1,8 +1,8 @@
 #pragma rtGlobals=1		// Use modern global access method.
 
 function COMMpump()
-	VDT2/P=COM7 baud=9600,stopbits=1,databits=8,parity=0
-	VDTOperationsPort2 COM7
+	VDT2/P=COM9 baud=9600,stopbits=1,databits=8,parity=0
+	VDTOperationsPort2 COM9
 	VDT2 KillIO
 end
 
@@ -16,6 +16,8 @@ function sendPump(command)
 end
 	
 function initPumpValveSettings()
+	initNIDAQ()
+
 	initDOChannels()
 
 	setAllChannels("J")	//set rotation to clockwise
