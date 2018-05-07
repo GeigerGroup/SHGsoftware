@@ -37,35 +37,12 @@ classdef PhotonCounter < handle
             end
         end
         
-        function startScan(obj)
-            fprintf(obj.Serial,'CS');
+        %helper functions
+        function sendCommand(obj,command)
+            fprintf(obj.Serial,command);
         end
         
-        function stopScan(obj)
-            fprintf(obj.Serial,'CH');
-        end
-        
-        function resetScan(obj)
-            fprintf(obj.Serial,'CR');
-        end
-        
-        function setScanLength(obj,length)
-            fprintf(obj.Serial,strcat('NP',num2str(length)));
-        end
-        
-        function setDwellTime(obj,dwellTime)
-            fprintf(obj.Serial,strcat('DT',num2str(dwellTime))); %dwell time in seconds
-            obj.DwellTime = dwellTime;
-        end
-        
-        function setInterval(obj,interval)
-            %in seconds, if timing off 10 Mhz (change 1e7 if otherwise)
-            fprintf(obj.Serial,strcat('CP2,',num2str(interval*1e7)));
-            obj.Interval = interval;
-        end
-        
-        function setDiscriminatorLevel(obj, channel, level)
-            
+        function character = channelCharacter(~,channel)
             %channel is 'A','B', or 'T'
             character = [];
             if strcmp(channel,'A')
@@ -75,15 +52,72 @@ classdef PhotonCounter < handle
             elseif strcmp(channel,'T')
                 character = '2';
             end
+        end
+        
+        
+        %actual functions
+        function startScan(obj)
+            obj.sendCommand('CS');
+        end
+        
+        function stopScan(obj)
+            obj.sendCommand('CH');
+        end
+        
+        function resetScan(obj)
+            obj.sendCommand('CR');
+        end
+        
+        function setScanLength(obj,length)
+            obj.sendCommand(strcat('NP',num2str(length)));
+        end
+        
+        function setDwellTime(obj,dwellTime)
+            obj.sendCommand(strcat('DT',num2str(dwellTime))); %dwell time in seconds
+            obj.DwellTime = dwellTime;
+        end
+        
+        function setInterval(obj,interval)
+            %in seconds, if timing off 10 Mhz (change 1e7 if otherwise)
+            obj.sendCommand(strcat('CP2,',num2str(interval*1e7)));
+            obj.Interval = interval;
+        end
+        
+        function setCW(obj,channel)  
+            %channel is 'A','B'
+            character = obj.channelCharacter(channel);
+            
+            obj.sendCommand(strcat('GM',character,',0'));
+        end
+        
+        function setGated(obj,channel)
+            %channel is 'A','B'
+            character = obj.channelCharacter(channel);
+ 
+            obj.sendCommand(strcat('GM',character,',1'));
+        end
+        
+        function setGateDelay(obj,channel,delay)
+            %channel is 'A','B'
+            character = obj.channelCharacter(channel);
+            
+            obj.sendCommand(strcat('GD',character,',',num2str(delay)));
+        end
+        
+        function setGateWidth(obj,channel,width)
+            %channel is 'A','B'
+            character = obj.channelCharacter(channel);
+            
+            obj.sendCommand(strcat('GW',character,',',num2str(width)));
+        end
+              
+        function setDiscriminatorLevel(obj, channel, level)   
+            %channel is 'A','B','T'
+            character = obj.channelCharacter(channel);
             
             fprintf(obj.Serial,strcat('DL',character,',',num2str(level)));
         end
-            
-            
-                
-            
 
-        
         function data = getData(obj)          
             %channel is either A or B
             
@@ -95,7 +129,7 @@ classdef PhotonCounter < handle
             
             %ask if data is ready
             fprintf(obj.Serial,'SS1');
-            if str2double(fscanf(obj.Serial));
+            if str2double(fscanf(obj.Serial))
                 fprintf(obj.Serial,strcat('Q',obj.ChannelEnabled)); %ask for data
                 data = str2double(fscanf(obj.Serial)); %receive data
             else
