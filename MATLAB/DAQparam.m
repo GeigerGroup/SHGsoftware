@@ -10,16 +10,16 @@ classdef DAQparam < handle
         %parameters for photon counter
         ScanLength = Inf;
         Interval = 1;
-        DwellTime = 0.02;
+        DwellTime = 0.002;
+        Channel = 'A';
         
         %booleans of if enabled for an acquisition
         PhotonCounterEnabled = true;
-        ADCenabled = true;
+        ADCpowerEnabled = false;
 
       
         %parameters for flow control
         FlowControl = false;
-        ADCpowerEnabled = false;
         PHmeterEnabled = false;
         FlowConcentrationPoint;
         FlowConcentrationValue;

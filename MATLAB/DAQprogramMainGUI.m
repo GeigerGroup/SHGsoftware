@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 03-May-2018 16:32:45
+% Last Modified by GUIDE v2.5 09-May-2018 11:49:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -118,6 +118,13 @@ function solutionGUI_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 solutionGUI;
+
+% --- Executes on button press in photonCounterPush.
+function photonCounterPush_Callback(hObject, eventdata, handles)
+% hObject    handle to photonCounterPush (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+configurePhotonCounterGUI;
 
 % --- Executes on button press in configureMeasurement.
 function configureMeasurement_Callback(hObject, eventdata, handles)
