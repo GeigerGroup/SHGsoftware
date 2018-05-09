@@ -58,12 +58,6 @@ daqParam = getappdata(0,'daqParam');
 %set initial ScanLength
 handles.scanLengthEdit.String = num2str(daqParam.ScanLength);
 
-%set initial Interval
-handles.intervalEdit.String = num2str(daqParam.Interval);
-
-%set initial DwellTime
-handles.dwellTimeEdit.String = num2str(daqParam.DwellTime);
-
 %set whether to communicate with the photon counter
 handles.photonCounterCheck.Value = daqParam.PhotonCounterEnabled;
 
@@ -108,8 +102,6 @@ daqParam = getappdata(0,'daqParam');
 
 %convert to numbers and set numeric parameters
 daqParam.ScanLength = str2double(handles.scanLengthEdit.String);
-daqParam.Interval = str2double(handles.intervalEdit.String);
-daqParam.DwellTime = str2double(handles.dwellTimeEdit.String);
 
 %set boolean parameters
 daqParam.PhotonCounterEnabled = handles.photonCounterCheck.Value;
