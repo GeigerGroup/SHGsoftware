@@ -39,7 +39,7 @@ classdef LabJackADC < handle
             settling = 0;
             binary = 0;
             
-            %create array to store 200 readings
+            %create array to store 20 readings
             tempArray = zeros(20,1);
             for i = 1:20
                 %take individual readings
