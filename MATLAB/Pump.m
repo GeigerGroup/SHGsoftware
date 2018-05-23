@@ -27,7 +27,7 @@ classdef Pump < handle
                     %initialize certain settings
                     
                     for i = 1:4
-                        fprintf(obj.Serial,strcat(num2str(i),'+0',num2str(str2num(obj.TubeID)*100))); %set tube ID
+                        obj.setTubeID(i,obj.TubeID); %set tube ID
                         fprintf(obj.Serial,strcat(num2str(i),'J')); % set rotation to clockwise,
                         fprintf(obj.Serial,strcat(num2str(i),'M')); % set to flowrate
                         setFlowRate(obj,i,20); % flowrate to 20
@@ -175,7 +175,26 @@ classdef Pump < handle
                 disp('Flow settings out of bounds')
             end
             
-        end                
+        end
+        
+        function setTubeID(obj,channel,ID)
+            fprintf(obj.Serial,strcat(num2str(channel),'+',...
+                num2str(str2num(ID)*100,'%04.f'))); %set tube ID
+        end
+        
+        function setTubeIDs(obj,ID)
+            for i = 1:4
+                obj.setTubeID(i,ID)
+            end
+        end
+        
+        function getTubeID(obj)
+            fread(obj.Serial,obj.Serial.BytesAvailable);%read out any left over characters
+            for i = 1:4
+                fprintf(obj.Serial,strcat(num2str(i),'+'));
+                disp(fscanf(obj.Serial));
+            end
+        end
         
         function setFlowRate(obj,channel,rate)     
             %convert flow rate to pump format

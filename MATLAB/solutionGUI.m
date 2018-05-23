@@ -153,6 +153,8 @@ pump.TotalFlow = str2double(handles.totalFlowEdit.String);
 
 %set tubeID
 pump.TubeID = handles.tubeIDpopup.String{handles.tubeIDpopup.Value};
+pump.setTubeIDs(pump.TubeID); %set tube ID
+
 
 %set check marks
 for i = 1:4
