@@ -34,6 +34,30 @@ classdef PhotonCounter < handle
             end
         end
         
+        function setPharosSettings(obj)
+            
+            %set both to input 1
+            obj.setInput('A',1);
+            obj.setInput('B',1);
+            
+            %set input discriminator to -40 mV
+            obj.setDiscriminatorLevel('A',-0.04);
+            obj.setDiscriminatorLevel('B',-0.04);
+            
+            %set gate settings
+            obj.setGateMode('A','FIXED');
+            obj.setGateMode('B','FIXED');
+            
+            %set gate width
+            obj.setGateWidth('A',1e-7);
+            obj.setGateWidth('B',1e-7);
+            
+            %set gate delay
+            obj.setGateDelay('A',350e-9);
+            obj.setGateDelay('B',0);
+            
+        end
+        
         %scan functions
         function startScan(obj)
             obj.sendCommand('CS');
