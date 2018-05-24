@@ -20,16 +20,18 @@ classdef DAQsession
                 obj.Session.outputSingleScan(states); % set all to zero
         end
         
-        function setValveStates(obj,state)
-            obj.Session.outputSingleScan(state)
+        function setValveStates(obj,states)
+            obj.Session.outputSingleScan(states)
             
             %update GUI if it exists
             solGUI = getappdata(0,'solGUI');
             if ~isempty(solGUI)
                 for i = 1:5
-                    solGUI.Children(i).Value = state(i);
+                    solGUI.Children(i).Value = states(i);
                 end
-            end     
+            end
+            disp('Valve States:')
+            disp(states)
         end
     end
 end

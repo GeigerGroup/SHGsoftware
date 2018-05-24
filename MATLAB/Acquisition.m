@@ -142,7 +142,7 @@ classdef Acquisition < handle
                     end
                     %adc plot for power data
                     if obj.ADCpowerEnabled 
-                        subplot(4,1,plotIndex)                      
+                        subplot(numplots,1,plotIndex)                      
                         %create line object with temp point then delete
                         obj.LineHandlePower = plot(0,0);
                         obj.LineHandlePower.XData = [];
@@ -153,7 +153,7 @@ classdef Acquisition < handle
                     %pH plots                    
                     if obj.PHmeterEnabled
                         %plot for pH data
-                        subplot(4,1,plotIndex)
+                        subplot(numplots,1,plotIndex)
                         %create line object with temp point then delete
                         obj.LineHandlepH = plot(0,0);
                         obj.LineHandlepH.XData = [];
@@ -162,7 +162,7 @@ classdef Acquisition < handle
                         plotIndex = plotIndex + 1;
 
                         %plot for cond data
-                        subplot(4,1,plotIndex)
+                        subplot(numplots,1,plotIndex)
                         %create line object with temp point then delete
                         obj.LineHandleCond = plot(0,0);
                         obj.LineHandleCond.XData = [];
@@ -270,24 +270,15 @@ classdef Acquisition < handle
                         
                         %calculate flow rates for two reservoir salt
                         rates = obj.Pump.calculateRates(obj.FlowConcentrationValue(obj.FlowIndex));
-                        disp(rates)
                         
-                        %calculate solenoid state
-                        states = rates > 0; %set solenoid valve to on if rate > 0
-                        %states =[states any(states)]; %set valve 5 to on if any of others are on
-                        states = [states 0]; %keep 5 always off
-                        disp(states)
-                        
-                        %save solenoid states
-                        obj.SolStates = states;
+                        %save current rates
+                        daqParam = getappdata(0,'daqParam');
+                        daqParam.PumpStates = rates;
                         
                         %set flow rates and start flow
                         obj.Pump.setFlowRates(rates);
-                        obj.Pump.startFlows;
-                        
-                        %set solenoid state
-                        obj.DAQsession.setValveStates(states);
-                        
+                        obj.Pump.startFlowOpenValves();
+
                         %increment flow index
                         obj.FlowIndex = obj.FlowIndex + 1;
                     end
@@ -330,8 +321,7 @@ classdef Acquisition < handle
             
             %close valves and stop pump
             if (obj.FlowControl)
-                obj.DAQsession.setValveStates([0 0 0 0 0]);
-                obj.Pump.stopFlows
+                obj.Pump.stopFlowCloseValves();
             end             
         end
         
@@ -346,8 +336,7 @@ classdef Acquisition < handle
             
             %open valves and start pump
             if (obj.FlowControl)
-                obj.DAQsession.setValveStates(obj.SolStates);
-                obj.Pump.startFlows
+                obj.Pump.startFlowCloseValves();
             end      
         end
 
@@ -363,8 +352,7 @@ classdef Acquisition < handle
             
             %close valves and stop pump
             if (obj.FlowControl)
-                obj.DAQsession.setValveStates([0 0 0 0 0]);
-                obj.Pump.stopFlows
+                obj.Pump.stopFlowCloseValves();
             end
             
             %save data in a file
@@ -380,16 +368,16 @@ classdef Acquisition < handle
                 header = strcat(header,obj.Name,'_countsB\t');
             end
             %then adc data
-            if obj.DataADCpower
+            if ~isempty(obj.DataADCpower)
                 header = strcat(header,obj.Name,'_power_time\t',...
                     obj.Name,'_power\t');
             end
             %then pH data
-            if obj.DataCond
+            if ~isempty(obj.DataCond)
                 header = strcat(header,obj.Name,'_phmeter_time\t',...
                     obj.Name,'_phmeter_cond\t',obj.Name,'_phmeter_pH\t');
             end
-            header = strcat(header,'\n');
+            header = strcat(header,'\r\n');
             
             %then, create file and write to it
             filename = strcat(obj.Name,'.txt');
@@ -412,12 +400,12 @@ classdef Acquisition < handle
                     size(obj.DataPhotonCounterB.YData,1)];
             end 
             %adc vector
-            if obj.DataADCpower
+            if ~isempty(obj.DataADCpower)
                 nR = horzcat(nR,[size(obj.DataADCpower.XData,1) ...
                     size(obj.DataADCpower.YData,1)]);
             end
             %pH meter vectors
-            if obj.DataCond
+            if ~isempty(obj.DataCond)
                 nR = horzcat(nR, [size(obj.DataCond.XData,1) ...
                 size(obj.DataCond.YData,1) ...
                 size(obj.DatapH.YData,1)]);
@@ -442,13 +430,13 @@ classdef Acquisition < handle
                 index = 4;
             end 
             %adc vector
-            if obj.DataADCpower
+            if ~isempty(obj.DataADCpower)
                 data = horzcat(data,[obj.DataADCpower.XData;nan(dR(index),1)],...
                     [obj.DataADCpower.YData;nan(dR(index+1),1)]);
                 index = index + 2;
             end
             %pH meter vectors
-            if obj.DataCond
+            if ~isempty(obj.DataCond)
                 data = horzcat(data,[obj.DataCond.XData;nan(dR(index),1)],...
                     [obj.DataCond.YData;nan(dR(index+1),1)],...
                     [obj.DatapH.YData;nan(dR(index+2),1)]);

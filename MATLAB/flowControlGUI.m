@@ -22,7 +22,7 @@ function varargout = flowControlGUI(varargin)
 
 % Edit the above text to modify the response to help flowControlGUI
 
-% Last Modified by GUIDE v2.5 24-May-2018 12:16:54
+% Last Modified by GUIDE v2.5 24-May-2018 12:42:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -58,13 +58,12 @@ handles.output = hObject;
 %get daqParam
 daqParam = getappdata(0,'daqParam');
 
-for i = 1:5
+for i = 1:4
     str = strcat('checkbox',num2str(i)); %valve number
     handles.(str).Value = daqParam.SolStates(i); %set value from solstates
 end
     
-%rearrange items in hObject.Children so checkboxes are 1-5
-uistack(hObject.Children(8),'up',8)
+%rearrange items in hObject.Children so checkboxes are 1-4
 uistack(hObject.Children(9),'up',9)
 uistack(hObject.Children(10),'up',10)
 uistack(hObject.Children(11),'up',11)
@@ -73,10 +72,6 @@ uistack(hObject.Children(12),'up',12)
 
 % Update handles structure
 guidata(hObject, handles);
-
-% UIWAIT makes flowControlGUI wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = flowControlGUI_OutputFcn(hObject, eventdata, handles) 
@@ -88,22 +83,60 @@ function varargout = flowControlGUI_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-% --- Executes on button press in pushbutton1.
+% --- Executes on button press in pushbutton.
 function pushbutton_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
+% hObject    handle to pushbutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 %get daqParam
 daqParam = getappdata(0,'daqParam');
 
-%change SolStates in daqParam
-daqParam.SolStates(str2num(hObject.String)) = ...
-    ~daqParam.SolStates(str2num(hObject.String));
+%get pump
+pump = getappdata(0,'pump');
 
-%send to SolenoidValve to change
-daqSession = getappdata(0,'daqSession');
-daqSession.setValveStates(daqParam.SolStates);
+%if pump flow rate is set greater than 0
+if daqParam.PumpStates(str2num(hObject.String)) > 0
+    
+    %change SolStates in daqParam
+    daqParam.SolStates(str2num(hObject.String)) = ...
+        ~daqParam.SolStates(str2num(hObject.String));
+    
+    %send to SolenoidValve to change
+    daqSession = getappdata(0,'daqSession');
+    daqSession.setValveStates(daqParam.SolStates);
+    
+    handles.output.Children(str2num(hObject.String)).Value = ...
+        ~handles.output.Children(str2num(hObject.String)).Value;
+    
+   
+    if daqParam.SolStates(str2num(hObject.String))
+         %if you just turned it on
+        pump.startFlow(str2num(hObject.String));
+    else
+         %if you just turned it off
+        pump.stopFlow(str2num(hObject.String));
+    end
+end
+
+
+% --- Executes on button press in startAllButton.
+function startAllButton_Callback(hObject, eventdata, handles)
+% hObject    handle to startAllButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+pump = getappdata(0,'pump');
+pump.startFlowOpenValves();
+
+% --- Executes on button press in stopAllButton.
+function stopAllButton_Callback(hObject, eventdata, handles)
+% hObject    handle to stopAllButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+pump = getappdata(0,'pump');
+pump.stopFlowCloseValves();
 
 
 % --- Executes on button press in pushbuttonClose.
@@ -113,7 +146,8 @@ function pushbuttonClose_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %delete handle to figure
-setappdata(0,'solGUI',[]);
+setappdata(0,'flowGUI',[]);
 
 %close window
 close
+

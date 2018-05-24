@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 24-May-2018 12:19:21
+% Last Modified by GUIDE v2.5 24-May-2018 16:45:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -62,6 +62,8 @@ handles.ADCcheckbox.Value = daqParam.ADC;
 handles.pHmeterCheckbox.Value = daqParam.PHmeter;
 handles.pumpCheckbox.Value = daqParam.Pump;
 
+handles.targetConcEdit.String = num2str(daqParam.TargetConc);
+
 % Choose default command line output for DAQprogramMainGUI
 handles.output = hObject;
 
@@ -89,7 +91,14 @@ function manageConnections_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-manageConnectionsGUI(handles)
+manageConnectionsGUI(handles);
+
+% --- Executes on button press in photonCounterPush.
+function photonCounterPush_Callback(hObject, eventdata, handles)
+% hObject    handle to photonCounterPush (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+configurePhotonCounterGUI;
 
 
 % --- Executes on button press in flowControl.
@@ -109,7 +118,7 @@ function setFlowRate_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 flowRateGUI = setFlowRateGUI;
-setappdata(0,'pumpGUI',flowRateGUI);
+setappdata(0,'flowRateGUI',flowRateGUI);
 
 % --- Executes on button press in solutionGUI.
 function solutionGUI_Callback(hObject, eventdata, handles)
@@ -119,12 +128,42 @@ function solutionGUI_Callback(hObject, eventdata, handles)
 
 solutionGUI;
 
-% --- Executes on button press in photonCounterPush.
-function photonCounterPush_Callback(hObject, eventdata, handles)
-% hObject    handle to photonCounterPush (see GCBO)
+function targetConcEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to targetConcEdit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-configurePhotonCounterGUI;
+
+%set TargetConc from edit
+daqParam = getappdata(0,'daqParam');
+daqParam.TargetConc = str2double(hObject.String);
+
+
+% --- Executes on button press in flowTargetConcButton.
+function flowTargetConcButton_Callback(hObject, eventdata, handles)
+% hObject    handle to flowTargetConcButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%calculate rates
+pump = getappdata(0,'pump');
+daqParam = getappdata(0,'daqParam');
+rates = pump.calculateRates(daqParam.TargetConc);
+
+%set rates
+pump.setFlowRates(rates);
+
+%start flow
+pump.startFlowOpenValves();
+
+% --- Executes on button press in stopFlowButton.
+function stopFlowButton_Callback(hObject, eventdata, handles)
+% hObject    handle to stopFlowButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+pump = getappdata(0,'pump');
+pump.stopFlowCloseValves();
+
 
 % --- Executes on button press in configureMeasurement.
 function configureMeasurement_Callback(hObject, eventdata, handles)
@@ -132,7 +171,7 @@ function configureMeasurement_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-configureAcqGUI
+configureAcqGUI;
 
 
 % --- Executes on button press in configureControl.
@@ -141,7 +180,7 @@ function configureControl_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-configureFlowControlGUI
+configureFlowControlGUI;
 
 
 % --- Executes on button press in startExperiment.
@@ -174,7 +213,7 @@ function resumeExperiment_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 acquisition = getappdata(0,handles.acqNameEdit.String);
-acquisition.resumeAcquisition
+acquisition.resumeAcquisition;
 
 
 % --- Executes on button press in stopExperiment.

@@ -177,6 +177,9 @@ classdef Pump < handle
             
         end
         
+        
+        
+        %tube ID functions
         function setTubeID(obj,channel,ID)
             fprintf(obj.Serial,strcat(num2str(channel),'+',...
                 num2str(str2num(ID)*100,'%04.f'))); %set tube ID
@@ -196,6 +199,9 @@ classdef Pump < handle
             end
         end
         
+        
+        
+        %flow rate functions
         function setFlowRate(obj,channel,rate)     
             %convert flow rate to pump format
             string = sprintf('%.3e', rate);
@@ -203,15 +209,6 @@ classdef Pump < handle
             
             %send to pump
             fprintf(obj.Serial,strcat(num2str(channel),'f',string));      
-        end
-        
-        
-        function startFlow(obj,channel)
-            fprintf(obj.Serial,strcat(num2str(channel),'H'));
-        end
-        
-        function stopFlow(obj,channel)
-            fprintf(obj.Serial,strcat(num2str(channel),'I'));
         end
         
         
@@ -225,11 +222,24 @@ classdef Pump < handle
                 obj.setFlowRate(i,rates(i));
                 
                 %update GUI if open
-                pumpGUI = getappdata(0,'pumpGUI');
-                if ~isempty(pumpGUI)
-                    pumpGUI.Children(i).String = num2str(rates(i));
+                flowRateGUI = getappdata(0,'flowRateGUI');
+                if ~isempty(flowRateGUI)
+                    flowRateGUI.Children(i).String = num2str(rates(i));
                 end
-            end 
+            end
+            disp('Flow Rates:')
+            disp(rates)
+        end
+        
+        
+        
+        %starting/stopping flow functions
+        function startFlow(obj,channel)
+            fprintf(obj.Serial,strcat(num2str(channel),'H'));
+        end
+        
+        function stopFlow(obj,channel)
+            fprintf(obj.Serial,strcat(num2str(channel),'I'));
         end
         
         function startFlows(obj)
@@ -244,10 +254,69 @@ classdef Pump < handle
             end
         end
         
+        function startFlowOpenValves(obj)
+            %get daqParam
+            daqParam = getappdata(0,'daqParam');
+            flowGUI = getappdata(0,'flowGUI');
+            
+            %iterate through each channel
+            for i = 1:4
+                %if channel flow rate is greater than 0
+                if daqParam.PumpStates(i) > 0
+                    
+                    %mark solenoid for opening
+                    daqParam.SolStates(i) = 1;
+                    
+                    %update GUI if exists
+                    if (~isempty(flowGUI))
+                        flowGUI.Children(i).Value = 1;
+                    end
+                    
+                else
+                    %if pump flow rate is 0 mark solenoid for closing
+                    daqParam.SolStates(i) = 0;
+                    
+                    %update GUI if exists
+                    if (~isempty(flowGUI))
+                        flowGUI.Children(i).Value = 0;
+                    end
+                end
+            end
+            
+            %send to SolenoidValve to change
+            daqSession = getappdata(0,'daqSession');
+            daqSession.setValveStates(daqParam.SolStates);
+            
+            for i = 1:4
+                if daqParam.SolStates(i)
+                    %if you just turned it on
+                    obj.startFlow(i);
+                else
+                    %if you just turned it off
+                    obj.stopFlow(i);
+                end
+            end
+            
+        end
+        
+        function stopFlowCloseValves(obj)
+            %turn off flow
+            obj.stopFlows();
+            
+            %close valves
+            daqSession = getappdata(0,'daqSession');
+            daqSession.setValveStates([0 0 0 0 0]);
+            %update daqParam for solenoid states
+            daqParam = getappdata(0,'daqParam');
+            daqParam.SolStates = [0 0 0 0 0];
+            
+            flowGUI = getappdata(0,'flowGUI');
+            if ~isempty(flowGUI)
+                for i = 1:4
+                    flowGUI.Children(i).Value = 0;
+                end
+            end
+
+        end
     end
 end
-
-
-
-
-

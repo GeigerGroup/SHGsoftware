@@ -24,6 +24,9 @@ classdef DAQparam < handle
         FlowConcentrationPoint;
         FlowConcentrationValue;
         
+        %target concentration
+        TargetConc = 0;
+        
         %solenoid valves
         SolStates = false(1,5);
         

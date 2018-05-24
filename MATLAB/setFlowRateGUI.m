@@ -22,7 +22,7 @@ function varargout = setFlowRateGUI(varargin)
 
 % Edit the above text to modify the response to help setFlowRateGUI
 
-% Last Modified by GUIDE v2.5 24-May-2018 12:13:19
+% Last Modified by GUIDE v2.5 24-May-2018 12:35:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -65,17 +65,16 @@ for i = 1:4
 end
 
 %rearrange items in hObject.Children so edits are 1-4
+uistack(hObject.Children(7),'up',7)
 uistack(hObject.Children(8),'up',8)
 uistack(hObject.Children(9),'up',9)
 uistack(hObject.Children(10),'up',10)
-uistack(hObject.Children(11),'up',11)
 
 % Update handles structure
 guidata(hObject, handles);
 
 % UIWAIT makes setFlowRateGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = setFlowRateGUI_OutputFcn(hObject, eventdata, handles) 
@@ -87,38 +86,9 @@ function varargout = setFlowRateGUI_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-
-
-function flowEdit_Callback(hObject, eventdata, handles)
-% hObject    handle to flowEdit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of flowEdit1 as text
-%        str2double(get(hObject,'String')) returns contents of flowEdit1 as a double
-
-%get pump
-pump = getappdata(0,'pump');
-
-%rate from entered value
-rate = str2double(hObject.String);
-
-%channel from which box edited
-channel = str2double(hObject.Tag(end));
-
-%get daqParam
-daqParam = getappdata(0,'daqParam');
-
-%set flow rate in daqParam
-daqParam.PumpStates(channel) = rate;
-
-%set flow rate
-pump.setFlowRate(channel,rate);
-
-
-% --- Executes on button press in startButton.
-function startButton_Callback(hObject, eventdata, handles)
-% hObject    handle to startButton1 (see GCBO)
+% --- Executes on button press in updateButton.
+function updateButton_Callback(hObject, eventdata, handles)
+% hObject    handle to updateButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -127,23 +97,14 @@ pump = getappdata(0,'pump');
 
 %get daqParam
 daqParam = getappdata(0,'daqParam');
+
+%set edit strings from PumpStates from daqParam
+for i = 1:4
+    str = strcat('flowEdit',num2str(i));
+    daqParam.PumpStates(i) = str2double(handles.(str).String);
+end
+
 pump.setFlowRates(daqParam.PumpStates);
-
-%start flow
-pump.startFlows;
-
-
-% --- Executes on button press in stopButton.
-function stopButton_Callback(hObject, eventdata, handles)
-% hObject    handle to stopButton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-%get pump
-pump = getappdata(0,'pump');
-
-%stop flow
-pump.stopFlows;
 
 % --- Executes on button press in closeButton.
 function closeButton_Callback(hObject, eventdata, handles)
@@ -152,7 +113,10 @@ function closeButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %remove reference to pumpGUI
-setappdata(0,'pumpGUI',[]);
+setappdata(0,'flowRateGUI',[]);
 
 %close window
 close
+
+
+
