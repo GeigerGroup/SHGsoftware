@@ -1,35 +1,35 @@
-function varargout = controlPumpGUI(varargin)
-% CONTROLPUMPGUI MATLAB code for controlPumpGUI.fig
-%      CONTROLPUMPGUI, by itself, creates a new CONTROLPUMPGUI or raises the existing
+function varargout = setFlowRateGUI(varargin)
+% SETFLOWRATEGUI MATLAB code for setFlowRateGUI.fig
+%      SETFLOWRATEGUI, by itself, creates a new SETFLOWRATEGUI or raises the existing
 %      singleton*.
 %
-%      H = CONTROLPUMPGUI returns the handle to a new CONTROLPUMPGUI or the handle to
+%      H = SETFLOWRATEGUI returns the handle to a new SETFLOWRATEGUI or the handle to
 %      the existing singleton*.
 %
-%      CONTROLPUMPGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in CONTROLPUMPGUI.M with the given input arguments.
+%      SETFLOWRATEGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in SETFLOWRATEGUI.M with the given input arguments.
 %
-%      CONTROLPUMPGUI('Property','Value',...) creates a new CONTROLPUMPGUI or raises the
+%      SETFLOWRATEGUI('Property','Value',...) creates a new SETFLOWRATEGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before controlPumpGUI_OpeningFcn gets called.  An
+%      applied to the GUI before setFlowRateGUI_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to controlPumpGUI_OpeningFcn via varargin.
+%      stop.  All inputs are passed to setFlowRateGUI_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help controlPumpGUI
+% Edit the above text to modify the response to help setFlowRateGUI
 
-% Last Modified by GUIDE v2.5 08-Oct-2017 13:08:16
+% Last Modified by GUIDE v2.5 24-May-2018 12:13:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @controlPumpGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @controlPumpGUI_OutputFcn, ...
+                   'gui_OpeningFcn', @setFlowRateGUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @setFlowRateGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,15 +44,15 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before controlPumpGUI is made visible.
-function controlPumpGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before setFlowRateGUI is made visible.
+function setFlowRateGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to controlPumpGUI (see VARARGIN)
+% varargin   command line arguments to setFlowRateGUI (see VARARGIN)
 
-% Choose default command line output for controlPumpGUI
+% Choose default command line output for setFlowRateGUI
 handles.output = hObject;
 
 %get daqParam
@@ -73,12 +73,12 @@ uistack(hObject.Children(11),'up',11)
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes controlPumpGUI wait for user response (see UIRESUME)
+% UIWAIT makes setFlowRateGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = controlPumpGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = setFlowRateGUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB

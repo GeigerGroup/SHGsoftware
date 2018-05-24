@@ -1,35 +1,35 @@
-function varargout = controlSolenoidsGUI(varargin)
-% CONTROLSOLENOIDSGUI MATLAB code for controlSolenoidsGUI.fig
-%      CONTROLSOLENOIDSGUI, by itself, creates a new CONTROLSOLENOIDSGUI or raises the existing
+function varargout = flowControlGUI(varargin)
+% FLOWCONTROLGUI MATLAB code for flowControlGUI.fig
+%      FLOWCONTROLGUI, by itself, creates a new FLOWCONTROLGUI or raises the existing
 %      singleton*.
 %
-%      H = CONTROLSOLENOIDSGUI returns the handle to a new CONTROLSOLENOIDSGUI or the handle to
+%      H = FLOWCONTROLGUI returns the handle to a new FLOWCONTROLGUI or the handle to
 %      the existing singleton*.
 %
-%      CONTROLSOLENOIDSGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in CONTROLSOLENOIDSGUI.M with the given input arguments.
+%      FLOWCONTROLGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in FLOWCONTROLGUI.M with the given input arguments.
 %
-%      CONTROLSOLENOIDSGUI('Property','Value',...) creates a new CONTROLSOLENOIDSGUI or raises the
+%      FLOWCONTROLGUI('Property','Value',...) creates a new FLOWCONTROLGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before controlSolenoidsGUI_OpeningFcn gets called.  An
+%      applied to the GUI before flowControlGUI_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to controlSolenoidsGUI_OpeningFcn via varargin.
+%      stop.  All inputs are passed to flowControlGUI_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help controlSolenoidsGUI
+% Edit the above text to modify the response to help flowControlGUI
 
-% Last Modified by GUIDE v2.5 08-Oct-2017 11:47:25
+% Last Modified by GUIDE v2.5 24-May-2018 12:16:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @controlSolenoidsGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @controlSolenoidsGUI_OutputFcn, ...
+                   'gui_OpeningFcn', @flowControlGUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @flowControlGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,15 +44,15 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before controlSolenoidsGUI is made visible.
-function controlSolenoidsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before flowControlGUI is made visible.
+function flowControlGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to controlSolenoidsGUI (see VARARGIN)
+% varargin   command line arguments to flowControlGUI (see VARARGIN)
 
-% Choose default command line output for controlSolenoidsGUI
+% Choose default command line output for flowControlGUI
 handles.output = hObject;
 
 %get daqParam
@@ -74,12 +74,12 @@ uistack(hObject.Children(12),'up',12)
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes controlSolenoidsGUI wait for user response (see UIRESUME)
+% UIWAIT makes flowControlGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = controlSolenoidsGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = flowControlGUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB

@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 24-May-2018 12:06:12
+% Last Modified by GUIDE v2.5 24-May-2018 12:19:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -92,14 +92,14 @@ function manageConnections_Callback(hObject, eventdata, handles)
 manageConnectionsGUI(handles)
 
 
-% --- Executes on button press in startFlow.
-function startFlow_Callback(hObject, eventdata, handles)
-% hObject    handle to startFlow (see GCBO)
+% --- Executes on button press in flowControl.
+function flowControl_Callback(hObject, eventdata, handles)
+% hObject    handle to flowControl (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-solGUI = controlSolenoidsGUI;
-setappdata(0,'solGUI',solGUI);
+flowGUI = flowControlGUI;
+setappdata(0,'flowGUI',flowGUI);
 
 
 % --- Executes on button press in setFlowRate.
@@ -108,8 +108,8 @@ function setFlowRate_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-pumpGUI = controlPumpGUI;
-setappdata(0,'pumpGUI',pumpGUI);
+flowRateGUI = setFlowRateGUI;
+setappdata(0,'pumpGUI',flowRateGUI);
 
 % --- Executes on button press in solutionGUI.
 function solutionGUI_Callback(hObject, eventdata, handles)
