@@ -160,6 +160,9 @@ classdef Pump < handle
             elseif strcmp(obj.TubeID,'0.76')
                 flowMin = 0.036;
                 flowMax = 3.6;
+            elseif strcmp(obj.TubeID,'0.64')
+                flowMin = 0.026;
+                flowMax = 2.6;
             end
             
             flowCheck = ((flowMatrix < flowMin)|(flowMatrix > flowMax)) & (flowMatrix ~= 0);
