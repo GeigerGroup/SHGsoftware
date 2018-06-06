@@ -263,8 +263,8 @@ classdef Acquisition < handle
                 obj.LineHandleCond.YData = obj.DataCond; 
                 
                 %add data to output string
-                output = strcat(output,'\t',num2str(datapH),...
-                    '\t',num2str(dataCond));
+                output = strcat(output,'\t',num2str(dataCond),...
+                    '\t',num2str(datapH));
             end
             
             %flow control value
