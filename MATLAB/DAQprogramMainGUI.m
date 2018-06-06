@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 25-May-2018 11:27:23
+% Last Modified by GUIDE v2.5 06-Jun-2018 09:49:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -101,9 +101,9 @@ function photonCounterPush_Callback(hObject, eventdata, handles)
 configurePhotonCounterGUI;
 
 
-% --- Executes on button press in pHButton.
-function pHButton_Callback(hObject, eventdata, handles)
-% hObject    handle to pHButton (see GCBO)
+% --- Executes on button press in pHmeterGUIbutton.
+function pHmeterGUIbutton_Callback(hObject, eventdata, handles)
+% hObject    handle to pHmeterGUIbutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 pHGUI = pHmeterGUI;
@@ -256,4 +256,3 @@ delete(instrfind)
 
 %close window
 close
-
