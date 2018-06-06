@@ -22,7 +22,7 @@ function varargout = configureAcqGUI(varargin)
 
 % Edit the above text to modify the response to help configureAcqGUI
 
-% Last Modified by GUIDE v2.5 03-May-2018 16:50:20
+% Last Modified by GUIDE v2.5 30-May-2018 12:36:10
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,6 +70,9 @@ handles.flowControlCheck.Value = daqParam.FlowControl;
 %set whether pH meter monitoring is on or off
 handles.pHmeterCheck.Value = daqParam.PHmeterEnabled;
 
+%set autopause value
+handles.autoPauseEdit.String = num2str(daqParam.AutoPause);
+
 % Choose default command line output for configureAcqGUI
 handles.output = hObject;
 
@@ -100,7 +103,7 @@ function updateValues_Callback(hObject, eventdata, handles)
 %take in current DAQ parameters
 daqParam = getappdata(0,'daqParam');
 
-%convert to numbers and set numeric parameters
+%convert to numbers and set scan length
 daqParam.ScanLength = str2double(handles.scanLengthEdit.String);
 
 %set boolean parameters
@@ -108,6 +111,9 @@ daqParam.PhotonCounterEnabled = handles.photonCounterCheck.Value;
 daqParam.ADCpowerEnabled = handles.adcPowerCheck.Value;
 daqParam.FlowControl = handles.flowControlCheck.Value;
 daqParam.PHmeterEnabled = handles.pHmeterCheck.Value;
+
+%convert to number and set autopause
+daqParam.AutoPause = str2double(handles.autoPauseEdit.String);
 
 %close update values and close window
 close

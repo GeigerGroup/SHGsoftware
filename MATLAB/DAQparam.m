@@ -16,11 +16,10 @@ classdef DAQparam < handle
         %booleans of if enabled for an acquisition
         PhotonCounterEnabled = true;
         ADCpowerEnabled = false;
-
-      
-        %parameters for flow control
         FlowControl = false;
         PHmeterEnabled = false;
+
+        %parameters for flow control
         FlowConcentrationPoint;
         FlowConcentrationValue;
         
@@ -31,6 +30,9 @@ classdef DAQparam < handle
         SolStates = false(1,5);
         
         %pump flow rates
-        PumpStates = [0 0 0 0];       
+        PumpStates = [0 0 0 0];
+        
+        %automatic pause for acquisitions
+        AutoPause = 0;
     end
 end

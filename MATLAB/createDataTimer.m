@@ -15,7 +15,7 @@ end
 
 function dataTimerStart(timerobj,event)
 %function when timer started
-display('Acquisition started.')
+disp('Acquisition started.')
 %display(event.Type)
 %display(event.Data)
 end
@@ -29,7 +29,7 @@ end
 
 function dataTimerStop(timerobj,event)
 %function with timer stopped
-display('Acquisition stopped.')
+disp('Acquisition stopped.')
 %display(event.Type)
 %display(event.Data)
 end

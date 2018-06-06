@@ -13,6 +13,7 @@ classdef Acquisition < handle
         LineHandleCond
         
         %data
+        DataTime
         DataPhotonCounterA
         DataPhotonCounterB
         DataADCpower
@@ -26,24 +27,12 @@ classdef Acquisition < handle
         DAQsession
         Pump
         
-        %if objects enabled for this acquisition
-        PhotonCounterEnabled
-        ADCpowerEnabled
-        PHmeterEnabled
-        FlowControl
-        SolStates
-        
-        %parameters for photon counter
-        PointNumber
-        ScanLength
-        Interval
-        DwellTime
-        Channel
-        
-        %parameters for flow control
+        %point number for photon counter
+        PointNumber = 1;
+
+        %point number for flow control
         FlowIndex = 1;
-        FlowConcentrationPoint
-        FlowConcentrationValue
+        CurrentSolution
     end
     
     methods
@@ -61,67 +50,50 @@ classdef Acquisition < handle
                     %actually currently needs photonCounter for timing, so
                     %this must be true, but future version could time
                     %itself
-                    obj.PhotonCounterEnabled = daqParam.PhotonCounterEnabled;
-                    obj.ScanLength = daqParam.ScanLength;
-                    obj.Interval = daqParam.Interval;
-                    obj.DwellTime = daqParam.DwellTime;
-                    obj.Channel = daqParam.Channel;
-                    obj.PointNumber = 1;
-                    if obj.PhotonCounterEnabled
+                    if daqParam.PhotonCounterEnabled
                         %give reference to photon counter
                         obj.PhotonCounter = getappdata(0,'photonCounter');
-                        obj.DataPhotonCounterA = XYData;
-                        obj.DataPhotonCounterB = XYData;
                     end
                     
                     %if ADC power reading enabled
-                    obj.ADCpowerEnabled = daqParam.ADCpowerEnabled;
-                    if obj.ADCpowerEnabled
+                    if daqParam.ADCpowerEnabled
                         %give reference to labjack
                         obj.LabJack = getappdata(0,'labJack');
-                        obj.DataADCpower = XYData;
                     end
                     
                     %if flow control is enabled
-                    obj.FlowControl = daqParam.FlowControl;
-                    if obj.FlowControl             
+                    if daqParam.FlowControl             
                         %give reference to pump
                         obj.Pump = getappdata(0,'pump');
                         %give reference to DAQsession
                         obj.DAQsession = getappdata(0,'daqSession');
-                        obj.FlowConcentrationPoint = daqParam.FlowConcentrationPoint;
-                        obj.FlowConcentrationValue = daqParam.FlowConcentrationValue;
                     end
                     
                     %if pH meter is enabled
-                    obj.PHmeterEnabled = daqParam.PHmeterEnabled;
-                    if obj.PHmeterEnabled
+                    if daqParam.PHmeterEnabled
                         %give reference to pHmeter
                         obj.PHmeter = getappdata(0,'pHmeter');
-                        obj.DatapH = XYData;
-                        obj.DataCond = XYData;
                     end
                       
                     %create new figure to hold subplots handle
                     obj.FigureHandle = figure;
-                    
 
                     %number of plots from photon counter
                     multiple = 1;
-                    if strcmp(obj.Channel,'AB')
+                    if strcmp(daqParam.Channel,'AB')
                         multiple = 2;
                     end  
                     %number of plots total
-                    numplots = sum([obj.PhotonCounterEnabled*multiple ...
-                        obj.ADCpowerEnabled obj.PHmeterEnabled*2]);
+                    numplots = sum([daqParam.PhotonCounterEnabled*multiple ...
+                        daqParam.ADCpowerEnabled daqParam.PHmeterEnabled*2]);
                     
                     %index to iterate through  plots
                     plotIndex = 1;
                     
                     %check to see which plots are needed and build   
                     %photon counter plots
-                    if obj.PhotonCounterEnabled             
-                        if contains(obj.Channel,'A')
+                    if daqParam.PhotonCounterEnabled             
+                        if contains(daqParam.Channel,'A')
                             subplot(numplots,1,plotIndex)
                             %create line object with temp point then delete 
                             obj.LineHandlePhotonsA = plot(0,0);
@@ -130,7 +102,7 @@ classdef Acquisition < handle
                             ylabel('A Counts')
                             plotIndex = plotIndex + 1;
                         end
-                        if contains(obj.Channel,'B')
+                        if contains(daqParam.Channel,'B')
                             subplot(numplots,1,plotIndex)
                             %create line object with temp point then delete 
                             obj.LineHandlePhotonsB = plot(0,0);
@@ -141,7 +113,7 @@ classdef Acquisition < handle
                         end
                     end
                     %adc plot for power data
-                    if obj.ADCpowerEnabled 
+                    if daqParam.ADCpowerEnabled 
                         subplot(numplots,1,plotIndex)                      
                         %create line object with temp point then delete
                         obj.LineHandlePower = plot(0,0);
@@ -151,7 +123,7 @@ classdef Acquisition < handle
                         plotIndex = plotIndex + 1;
                     end
                     %pH plots                    
-                    if obj.PHmeterEnabled
+                    if daqParam.PHmeterEnabled
                         %plot for pH data
                         subplot(numplots,1,plotIndex)
                         %create line object with temp point then delete
@@ -169,6 +141,40 @@ classdef Acquisition < handle
                         obj.LineHandleCond.YData = [];
                         ylabel('Cond')
                     end
+                    
+                    %first, create header according to which data has been recorded
+                    %start with photon counter data
+                    header = 'time';
+                    if contains(daqParam.Channel,'A')
+                        header = strcat(header,'\tcountsA');
+                    end
+                    if contains(daqParam.Channel,'B')
+                        header = strcat(header,'\tcountsB');
+                    end
+                    %then adc data
+                    if daqParam.ADCpowerEnabled
+                        header = strcat(header,'\tpower');
+                    end
+                    %then pH data
+                    if daqParam.PHmeterEnabled
+                        header = strcat(header,'\tcond','\tpH');
+                    end
+                    %then target concentration
+                    if daqParam.FlowControl
+                        header = strcat(header,'\tsolution');
+                    end      
+                    header = strcat(header,'\r\n');
+                    
+                    %then, create file and write to it
+                    filename = strcat(obj.Name,'.txt');
+                    fileID = fopen(filename,'w');
+                    fprintf(fileID,header);
+                    fclose(fileID);
+                    
+                    %set solution condition to first value (SHOULD CHANGE)
+                    if daqParam.FlowControl
+                        obj.CurrentSolution = daqParam.FlowConcentrationValue(1);
+                    end
 
                     %create timer to time acquisition
                     obj.Timer = createDataTimer(obj);
@@ -183,34 +189,34 @@ classdef Acquisition < handle
         %check if data is ready and gets it if it is
         function  getData(obj)
             
+            %get parameters
+            daqParam = getappdata(0,'daqParam');
+            
+            output = num2str(obj.PointNumber);
             %photon counter data
-            if (obj.PhotonCounterEnabled)
+            if (daqParam.PhotonCounterEnabled)
                 [dataA,dataB] = obj.PhotonCounter.getData;
                 if ~isempty(dataA) %if it got something continue
-                    
-                    if contains(obj.Channel,'A')
-                        %add to x data
-                        obj.DataPhotonCounterA.XData = ...
-                            vertcat(obj.DataPhotonCounterA.XData,...
-                            obj.PointNumber*obj.Interval);
+                    %now timing runs off photon counter, should change
+                    obj.DataTime = vertcat(obj.DataTime,...
+                        obj.PointNumber*daqParam.Interval);
+                    if contains(daqParam.Channel,'A')
                         %add to y data
-                        obj.DataPhotonCounterA.YData = ...
-                            vertcat(obj.DataPhotonCounterA.YData,dataA);
+                        obj.DataPhotonCounterA = vertcat(obj.DataPhotonCounterA,dataA);
                         %update x and y data
-                        obj.LineHandlePhotonsA.XData = obj.DataPhotonCounterA.XData;
-                        obj.LineHandlePhotonsA.YData = obj.DataPhotonCounterA.YData;
+                        obj.LineHandlePhotonsA.XData = obj.DataTime;
+                        obj.LineHandlePhotonsA.YData = obj.DataPhotonCounterA;
+                        %add data to output string
+                        output = strcat(output,'\t',num2str(dataA));
                     end
-                    if contains(obj.Channel,'B')
-                        %add to x data
-                        obj.DataPhotonCounterB.XData = ...
-                            vertcat(obj.DataPhotonCounterB.XData,...
-                            obj.PointNumber*obj.Interval);
+                    if contains(daqParam.Channel,'B')
                         %add to y data
-                        obj.DataPhotonCounterB.YData = ...
-                            vertcat(obj.DataPhotonCounterB.YData,dataB);
+                        obj.DataPhotonCounterB = vertcat(obj.DataPhotonCounterB,dataB);
                         %update x and y data
-                        obj.LineHandlePhotonsB.XData = obj.DataPhotonCounterB.XData;
-                        obj.LineHandlePhotonsB.YData = obj.DataPhotonCounterB.YData;
+                        obj.LineHandlePhotonsB.XData = obj.DataTime;
+                        obj.LineHandlePhotonsB.YData = obj.DataPhotonCounterB;
+                        %add data to output string
+                        output = strcat(output,'\t',num2str(dataB));
                     end
                 else
                     %if no data ready, exit without checking
@@ -218,61 +224,88 @@ classdef Acquisition < handle
                 end
             end
          
-            
             %ADC power data
-            if (obj.ADCpowerEnabled)
-                obj.DataADCpower.XData = ...
-                    vertcat(obj.DataADCpower.XData,obj.PointNumber*obj.Interval);
-                obj.DataADCpower.YData = ...
-                    vertcat(obj.DataADCpower.YData,obj.LabJack.getReading);
+            if (daqParam.ADCpowerEnabled)
+                powerData = obj.LabJack.getReading;
+                obj.DataADCpower = vertcat(obj.DataADCpower,powerData);
                 
                 %update x and y data on plot
-                obj.LineHandlePower.XData = obj.DataADCpower.XData;
-                obj.LineHandlePower.YData = obj.DataADCpower.YData;
+                obj.LineHandlePower.XData = obj.DataTime;
+                obj.LineHandlePower.YData = obj.DataADCpower;
+                
+                %add data to output string
+                output = strcat(output,'\t',num2str(powerData));
             end
             
             %pH meter data
-            if (obj.PHmeterEnabled)
+            if (daqParam.PHmeterEnabled)
                 [pH, cond] = obj.PHmeter.getData;
                 
-                if ~isempty(pH) %if got the data add it
-                    obj.DatapH.XData = ...
-                        vertcat(obj.DatapH.XData,obj.PointNumber*obj.Interval);
-                    obj.DataCond.XData = ...
-                        vertcat(obj.DataCond.XData,obj.PointNumber*obj.Interval);
-                    obj.DatapH.YData = vertcat(obj.DatapH.YData,pH);
-                    obj.DataCond.YData = vertcat(obj.DataCond.YData,cond);
-                    
-                    %update x and y data on plot
-                    obj.LineHandlepH.XData = obj.DatapH.XData;
-                    obj.LineHandlepH.YData = obj.DatapH.YData;
-                    
-                    obj.LineHandleCond.XData = obj.DataCond.XData;
-                    obj.LineHandleCond.YData = obj.DataCond.YData;
+                if ~isempty(pH) %if got the data
+                    datapH = pH;
+                else
+                    datapH = NaN;
                 end
+                obj.DatapH = vertcat(obj.DatapH,datapH);
+                
+                if ~isempty(cond)
+                    dataCond = cond;
+                else
+                    dataCond = NaN;
+                end
+                obj.DataCond = vertcat(obj.DataCond,dataCond);
+
+                %update x and y data on plot
+                obj.LineHandlepH.XData = obj.DataTime;
+                obj.LineHandlepH.YData = obj.DatapH;
+                
+                obj.LineHandleCond.XData = obj.DataTime;
+                obj.LineHandleCond.YData = obj.DataCond; 
+                
+                %add data to output string
+                output = strcat(output,'\t',num2str(datapH),...
+                    '\t',num2str(dataCond));
             end
+            
+            %flow control value
+            if (daqParam.FlowControl)
+                output = strcat(output,'\t',num2str(obj.CurrentSolution));
+            end
+            
+            %write line of data to file
+            output = strcat(output,'\r\n');
+            filename = strcat(obj.Name,'.txt');
+            %open file in append mode
+            fileID = fopen(filename,'a');
+            fprintf(fileID,output);
+            fclose(fileID);
             
             %if data received, check acquisition for flow control, 
             %end of scan, etc.
             obj.checkAcquisition
         end
         
-        %checks f or flow control, end of scan, etc.
+        %checks for flow control, end of scan, etc.
         function checkAcquisition(obj)
             
+            %get daq parameters
+            daqParam = getappdata(0,'daqParam');
+            
             %check if flow control should occur
-            if obj.FlowControl 
+            if daqParam.FlowControl 
                 %check if that all flow changes haven't happened
-                if obj.FlowIndex <= length(obj.FlowConcentrationPoint)
+                if obj.FlowIndex <= length(daqParam.FlowConcentrationPoint)
                     %if at point where change should ocurr
-                    if obj.PointNumber == obj.FlowConcentrationPoint(obj.FlowIndex)
+                    if obj.PointNumber == daqParam.FlowConcentrationPoint(obj.FlowIndex)
                         disp(strcat('Flow change at point:  ',num2str(obj.PointNumber)))
                         
                         %calculate flow rates for two reservoir salt
-                        rates = obj.Pump.calculateRates(obj.FlowConcentrationValue(obj.FlowIndex));
+                        rates = obj.Pump.calculateRates(daqParam.FlowConcentrationValue(obj.FlowIndex));
+                        
+                        %set current condition for writing to file
+                        obj.CurrentSolution = daqParam.FlowConcentrationValue(obj.FlowIndex);
                         
                         %save current rates
-                        daqParam = getappdata(0,'daqParam');
                         daqParam.PumpStates = rates;
                         
                         %set flow rates and start flow
@@ -284,23 +317,35 @@ classdef Acquisition < handle
                     end
                 end
             end
-                    
-            %increment point number in acquisition
-            obj.PointNumber = obj.PointNumber + 1;
             
             %check if have exceeded scan length and then stop
-            if obj.PointNumber > obj.ScanLength
+            if obj.PointNumber >= daqParam.ScanLength
                 obj.stopAcquisition
+                return
             end
+            
+            %check if should pause because of automatic next pause
+            if (daqParam.AutoPause > 0)
+                if (rem(obj.PointNumber,daqParam.AutoPause) == 0)
+                    obj.pauseAcquisition
+                end
+            end
+            
+            %increment point number in acquisition
+            obj.PointNumber = obj.PointNumber + 1;
         end
         
         %start the acquisition
-        function startAcquisition(obj)     
+        function startAcquisition(obj)
+            
             %start timer
             start(obj.Timer);
             
+            %get current parameters
+            daqParam = getappdata(0,'daqParam');
+            
             %start photon counter
-            if (obj.PhotonCounterEnabled)
+            if (daqParam.PhotonCounterEnabled)
                 obj.PhotonCounter.resetScan
                 obj.PhotonCounter.startScan
                 
@@ -313,14 +358,17 @@ classdef Acquisition < handle
             %stop timer
             stop(obj.Timer);
             
+            %get current parameters
+            daqParam = getappdata(0,'daqParam');
+            
             %stop photon counter
-            if (obj.PhotonCounterEnabled)
+            if (daqParam.PhotonCounterEnabled)
                 obj.PhotonCounter.stopScan
                 disp('Photon counter paused.')
             end
             
             %close valves and stop pump
-            if (obj.FlowControl)
+            if (daqParam.FlowControl)
                 obj.Pump.stopFlowCloseValves();
             end             
         end
@@ -329,13 +377,16 @@ classdef Acquisition < handle
             %start timer
             start(obj.Timer);
             
+            %get current parameters
+            daqParam = getappdata(0,'daqParam');
+            
             %start photon counter
-            if (obj.PhotonCounterEnabled)
+            if (daqParam.PhotonCounterEnabled)
                 obj.PhotonCounter.startScan
             end
             
             %open valves and start pump
-            if (obj.FlowControl)
+            if (daqParam.FlowControl)
                 obj.Pump.startFlowCloseValves();
             end      
         end
@@ -345,105 +396,18 @@ classdef Acquisition < handle
             stop(obj.Timer);
             delete(obj.Timer);
             
+            %get current parameters
+            daqParam = getappdata(0,'daqParam');
+            
             %reset photon counter
-            if (obj.PhotonCounterEnabled)
+            if (daqParam.PhotonCounterEnabled)
                 obj.PhotonCounter.stopScan
             end
             
             %close valves and stop pump
-            if (obj.FlowControl)
+            if (daqParam.FlowControl)
                 obj.Pump.stopFlowCloseValves();
             end
-            
-            %save data in a file
-            %currently, only saves data at the end of the acquisition. 
-               
-            %first, create header according to which data has been recorded
-            %start with photon counter data
-            header = strcat(obj.Name,'_counts_time\t');
-            if contains(obj.Channel,'A')
-                header = strcat(header,obj.Name,'_countsA\t');
-            end
-            if contains(obj.Channel,'B')
-                header = strcat(header,obj.Name,'_countsB\t');
-            end
-            %then adc data
-            if ~isempty(obj.DataADCpower)
-                header = strcat(header,obj.Name,'_power_time\t',...
-                    obj.Name,'_power\t');
-            end
-            %then pH data
-            if ~isempty(obj.DataCond)
-                header = strcat(header,obj.Name,'_phmeter_time\t',...
-                    obj.Name,'_phmeter_cond\t',obj.Name,'_phmeter_pH\t');
-            end
-            header = strcat(header,'\r\n');
-            
-            %then, create file and write to it
-            filename = strcat(obj.Name,'.txt');
-            fileID = fopen(filename,'w');
-            fprintf(fileID,header);
-            fclose(fileID);
-            
-            %then write data. first turn recorded data into square array
-            %to do that, build matrix to find length of each vector
-            %photon counter vectors
-            if strcmp(obj.Channel,'A')
-                nR = [size(obj.DataPhotonCounterA.XData,1) ...
-                    size(obj.DataPhotonCounterA.YData,1)];
-            elseif strcmp(obj.Channel,'B')
-                nR = [size(obj.DataPhotonCounterB.XData,1) ...
-                    size(obj.DataPhotonCounterB.YData,1)];
-            elseif strcmp(obj.Channel,'AB')
-                nR = [size(obj.DataPhotonCounterA.XData,1) ...
-                    size(obj.DataPhotonCounterA.YData,1) ...
-                    size(obj.DataPhotonCounterB.YData,1)];
-            end 
-            %adc vector
-            if ~isempty(obj.DataADCpower)
-                nR = horzcat(nR,[size(obj.DataADCpower.XData,1) ...
-                    size(obj.DataADCpower.YData,1)]);
-            end
-            %pH meter vectors
-            if ~isempty(obj.DataCond)
-                nR = horzcat(nR, [size(obj.DataCond.XData,1) ...
-                size(obj.DataCond.YData,1) ...
-                size(obj.DatapH.YData,1)]);
-            end
-            %calculate number needed to pad with nan to turn into square
-            dR = max(nR) - nR;
-            
-            %then actually combine recorded vectors together and pad
-            %photoncounter data
-            if strcmp(obj.Channel,'A')
-                data = horzcat([obj.DataPhotonCounterA.XData;nan(dR(1),1)],...
-                    [obj.DataPhotonCounterA.YData;nan(dR(2),1)]);
-                index = 3;
-            elseif strcmp(obj.Channel,'B')
-                data = horzcat([obj.DataPhotonCounterB.XData;nan(dR(1),1)],...
-                    [obj.DataPhotonCounterB.YData;nan(dR(2),1)]);
-                index = 3;
-            elseif strcmp(obj.Channel,'AB')
-                data = horzcat([obj.DataPhotonCounterA.XData;nan(dR(1),1)],...
-                    [obj.DataPhotonCounterA.YData;nan(dR(2),1)],...
-                    [obj.DataPhotonCounterB.YData;nan(dR(3),1)]);
-                index = 4;
-            end 
-            %adc vector
-            if ~isempty(obj.DataADCpower)
-                data = horzcat(data,[obj.DataADCpower.XData;nan(dR(index),1)],...
-                    [obj.DataADCpower.YData;nan(dR(index+1),1)]);
-                index = index + 2;
-            end
-            %pH meter vectors
-            if ~isempty(obj.DataCond)
-                data = horzcat(data,[obj.DataCond.XData;nan(dR(index),1)],...
-                    [obj.DataCond.YData;nan(dR(index+1),1)],...
-                    [obj.DatapH.YData;nan(dR(index+2),1)]);
-            end
-            
-            %write them to file
-            dlmwrite(filename,data,'-append','delimiter','\t','newline','pc');
         end
     end
 end
