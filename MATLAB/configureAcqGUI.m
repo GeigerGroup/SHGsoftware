@@ -22,7 +22,7 @@ function varargout = configureAcqGUI(varargin)
 
 % Edit the above text to modify the response to help configureAcqGUI
 
-% Last Modified by GUIDE v2.5 30-May-2018 12:36:10
+% Last Modified by GUIDE v2.5 07-Oct-2018 16:20:22
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,6 +70,9 @@ handles.flowControlCheck.Value = daqParam.FlowControl;
 %set whether pH meter monitoring is on or off
 handles.pHmeterCheck.Value = daqParam.PHmeterEnabled;
 
+%set whether stage control is on or off
+handles.stageCheck.Value = daqParam.StageControlEnabled;
+
 %set autopause value
 handles.autoPauseEdit.String = num2str(daqParam.AutoPause);
 
@@ -111,6 +114,7 @@ daqParam.PhotonCounterEnabled = handles.photonCounterCheck.Value;
 daqParam.ADCpowerEnabled = handles.adcPowerCheck.Value;
 daqParam.FlowControl = handles.flowControlCheck.Value;
 daqParam.PHmeterEnabled = handles.pHmeterCheck.Value;
+daqParam.StageControlEnabled = handles.stageCheck.Value;
 
 %convert to number and set autopause
 daqParam.AutoPause = str2double(handles.autoPauseEdit.String);

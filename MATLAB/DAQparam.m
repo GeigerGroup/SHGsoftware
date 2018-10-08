@@ -1,11 +1,12 @@
 classdef DAQparam < handle
     properties
-        %booleans of if hardware is enabled
+        %booleans of if hardware is connected
         PhotonCounter = false;
         NIDAQ = false;
         ADC = false;
         Pump = false;
         PHmeter = false;
+        Stage = false;
              
         %parameters for photon counter
         ScanLength = Inf;
@@ -18,10 +19,22 @@ classdef DAQparam < handle
         ADCpowerEnabled = false;
         FlowControl = false;
         PHmeterEnabled = false;
+        StageControlEnabled = false;
 
         %parameters for flow control
         FlowConcentrationPoint;
         FlowConcentrationValue;
+        
+        %parameters for stage control
+        StageScanNumPoints = 0;
+        StageScanCurrentPositionNumber = 1;
+        StageScanPeakFind = false;
+        StageScanPositions;
+        StageScanPeakFindPositions;
+        
+        %name
+        Name
+        
         
         %target concentration
         TargetConc = 0;

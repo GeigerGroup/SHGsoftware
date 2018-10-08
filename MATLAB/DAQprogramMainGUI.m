@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 06-Jun-2018 09:49:24
+% Last Modified by GUIDE v2.5 07-Oct-2018 18:41:25
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -45,10 +45,9 @@ end
 
 
 % --- Executes just before DAQprogramMainGUI is made visible.
-function DAQprogramMainGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+function DAQprogramMainGUI_OpeningFcn(hObject,~, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to DAQprogramMainGUI (see VARARGIN)
 
@@ -61,6 +60,7 @@ handles.NIDAQcheckbox.Value = daqParam.NIDAQ;
 handles.ADCcheckbox.Value = daqParam.ADC;
 handles.pHmeterCheckbox.Value = daqParam.PHmeter;
 handles.pumpCheckbox.Value = daqParam.Pump;
+handles.stageCheckbox.Value = daqParam.Stage;
 
 handles.targetConcEdit.String = num2str(daqParam.TargetConc);
 
@@ -75,84 +75,48 @@ guidata(hObject, handles);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = DAQprogramMainGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = DAQprogramMainGUI_OutputFcn(~,~,handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-
 % --- Executes on button press in manageConnections.
-function manageConnections_Callback(hObject, eventdata, handles)
-% hObject    handle to manageConnections (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
+function manageConnections_Callback(~,~, handles)
 % handles    structure with handles and user data (see GUIDATA)
-
 manageConnectionsGUI(handles);
 
 % --- Executes on button press in photonCounterPush.
-function photonCounterPush_Callback(hObject, eventdata, handles)
-% hObject    handle to photonCounterPush (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function photonCounterPush_Callback(~,~,~)
 configurePhotonCounterGUI;
 
-
 % --- Executes on button press in pHmeterGUIbutton.
-function pHmeterGUIbutton_Callback(hObject, eventdata, handles)
-% hObject    handle to pHmeterGUIbutton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function pHmeterGUIbutton_Callback(~,~,~)
 pHGUI = pHmeterGUI;
 setappdata(0,'pHGUI',pHGUI);
 
-
 % --- Executes on button press in flowControl.
-function flowControl_Callback(hObject, eventdata, handles)
-% hObject    handle to flowControl (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+function flowControl_Callback(~,~,~)
 flowGUI = flowControlGUI;
 setappdata(0,'flowGUI',flowGUI);
 
-
 % --- Executes on button press in setFlowRate.
-function setFlowRate_Callback(hObject, eventdata, handles)
-% hObject    handle to setFlowRate (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+function setFlowRate_Callback(~,~,~)
 flowRateGUI = setFlowRateGUI;
 setappdata(0,'flowRateGUI',flowRateGUI);
 
 % --- Executes on button press in solutionGUI.
-function solutionGUI_Callback(hObject, eventdata, handles)
-% hObject    handle to solutionGUI (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+function solutionGUI_Callback(~,~,~)
 solutionGUI;
 
-function targetConcEdit_Callback(hObject, eventdata, handles)
+function targetConcEdit_Callback(hObject,~,~)
 % hObject    handle to targetConcEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
 %set TargetConc from edit
 daqParam = getappdata(0,'daqParam');
 daqParam.TargetConc = str2double(hObject.String);
 
-
 % --- Executes on button press in flowTargetConcButton.
-function flowTargetConcButton_Callback(hObject, eventdata, handles)
-% hObject    handle to flowTargetConcButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+function flowTargetConcButton_Callback(~,~,~)
 %calculate rates
 pump = getappdata(0,'pump');
 daqParam = getappdata(0,'daqParam');
@@ -165,82 +129,62 @@ pump.setFlowRates(rates);
 pump.startFlowOpenValves();
 
 % --- Executes on button press in stopFlowButton.
-function stopFlowButton_Callback(hObject, eventdata, handles)
-% hObject    handle to stopFlowButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+function stopFlowButton_Callback(~,~,~)
 pump = getappdata(0,'pump');
 pump.stopFlowCloseValves();
 
-
 % --- Executes on button press in configureMeasurement.
-function configureMeasurement_Callback(hObject, eventdata, handles)
-% hObject    handle to configureMeasurement (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+function configureMeasurement_Callback(~,~,~)
 configureAcqGUI;
 
-
-% --- Executes on button press in configureControl.
-function configureControl_Callback(hObject, eventdata, handles)
-% hObject    handle to configureControl (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+% --- Executes on button press in configureFlowControl.
+function configureFlowControl_Callback(~,~,~)
 configureFlowControlGUI;
 
+% --- Executes on button press in configureStageControl.
+function configureStageControl_Callback(~,~,~)
+configureStageControlGUI;
+
+function acqNameEdit_Callback(hObject,~,~)
+% hObject    handle to acqNameEdit (see GCBO)
+%get daqParam, set the name
+daqParam = getappdata(0,'daqParam');
+daqParam.Name = hObject.String;
 
 % --- Executes on button press in startExperiment.
-function startExperiment_Callback(hObject, eventdata, handles)
-% hObject    handle to startExperiment (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
+function startExperiment_Callback(~,~,~)
 % handles    structure with handles and user data (see GUIDATA)
-
+%get daqParam for name
+daqParam = getappdata(0,'daqParam');
 %initialize acquisition with name from edit box
-acquisition = Acquisition(handles.acqNameEdit.String);
-setappdata(0,handles.acqNameEdit.String,acquisition);
-
+acquisition = Acquisition(daqParam.Name);
+setappdata(0,daqParam.Name,acquisition);
 acquisition.startAcquisition;
 
-
 % --- Executes on button press in pauseExperiment.
-function pauseExperiment_Callback(hObject, eventdata, handles)
-% hObject    handle to pauseExperiment (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-acquisition = getappdata(0,handles.acqNameEdit.String);
+function pauseExperiment_Callback(~,~,~)
+%get daqParam for name
+daqParam = getappdata(0,'daqParam');
+acquisition = getappdata(0,daqParam.Name);
 acquisition.pauseAcquisition;
 
-
 % --- Executes on button press in resumeExperiment.
-function resumeExperiment_Callback(hObject, eventdata, handles)
-% hObject    handle to resumeExperiment (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
+function resumeExperiment_Callback(~,~, handles)
 % handles    structure with handles and user data (see GUIDATA)
-
-acquisition = getappdata(0,handles.acqNameEdit.String);
+%get daqParam for name
+daqParam = getappdata(0,'daqParam');
+acquisition = getappdata(0,daqParam.Name);
 acquisition.resumeAcquisition;
 
-
 % --- Executes on button press in stopExperiment.
-function stopExperiment_Callback(hObject, eventdata, handles)
-% hObject    handle to stopExperiment (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-acquisition = getappdata(0,handles.acqNameEdit.String);
+function stopExperiment_Callback(~,~,~)
+%get daqParam for name
+daqParam = getappdata(0,'daqParam');
+acquisition = getappdata(0,daqParam.Name);
 acquisition.stopAcquisition;
 
-
 % --- Executes on button press in closeProgram.
-function closeProgram_Callback(hObject, eventdata, handles)
-% hObject    handle to closeProgram (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+function closeProgram_Callback(~,~,~)
 daqParam = getappdata(0,'daqParam');
 
 %delete NIDAQ session
@@ -249,6 +193,12 @@ if daqParam.NIDAQ
     release(daqSession.Session)
     delete(daqSession.Session)
     daqreset
+end
+
+%release stage
+if daqParam.Stage
+    stage = getappdata(0,'stage');
+    stage.close()
 end
 
 %delete serial instruments

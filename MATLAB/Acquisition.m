@@ -26,6 +26,7 @@ classdef Acquisition < handle
         PHmeter
         DAQsession
         Pump
+        Stage
         
         %point number for photon counter
         PointNumber = 1;
@@ -73,6 +74,14 @@ classdef Acquisition < handle
                     if daqParam.PHmeterEnabled
                         %give reference to pHmeter
                         obj.PHmeter = getappdata(0,'pHmeter');
+                    end
+                    
+                    %if stage control is enabled
+                    if daqParam.StageControlEnabled
+                        %give reference to stage
+                        obj.Stage = getappdata(0,'stage');
+                        obj.Stage.goTo(0); %go to position 0
+                        daqParam.StageScanCurrentPositionNumber = 1;
                     end
                       
                     %create new figure to hold subplots handle
@@ -327,7 +336,25 @@ classdef Acquisition < handle
             %check if should pause because of automatic next pause
             if (daqParam.AutoPause > 0)
                 if (rem(obj.PointNumber,daqParam.AutoPause) == 0)
-                    obj.pauseAcquisition
+                    if daqParam.StageControlEnabled
+                        %iterate position
+                        daqParam.StageScanCurrentPositionNumber = ...
+                            daqParam.StageScanCurrentPositionNumber + 1;
+                        if (daqParam.StageScanCurrentPositionNumber > ...
+                                length(daqParam.StageScanPositions))
+                            obj.stopAcquisition
+                            return
+                        else
+                            %pause photonCounter
+                            obj.PhotonCounter.stopScan()
+                            %change stage position
+                            obj.Stage.goTo(daqParam.StageScanPositions(daqParam.StageScanCurrentPositionNumber));
+                            %resume photonCounter
+                            obj.PhotonCounter.startScan()
+                        end
+                    else
+                        obj.pauseAcquisition;
+                    end
                 end
             end
             

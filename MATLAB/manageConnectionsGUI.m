@@ -22,7 +22,7 @@ function varargout = manageConnectionsGUI(varargin)
 
 % Edit the above text to modify the response to help manageConnectionsGUI
 
-% Last Modified by GUIDE v2.5 03-May-2018 16:29:49
+% Last Modified by GUIDE v2.5 06-Oct-2018 15:35:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,6 +60,7 @@ handles.NIDAQcheckbox.Value = daqParam.NIDAQ;
 handles.ADCcheckbox.Value = daqParam.ADC;
 handles.pHmeterCheckbox.Value = daqParam.PHmeter;
 handles.pumpCheckbox.Value = daqParam.Pump;
+handles.stageCheckbox.Value = daqParam.Stage;
 
 %get in handles to master figure to output checkbox values
 handles.UserData = varargin{1};
@@ -230,8 +231,25 @@ daqParam = getappdata(0,'daqParam');
 daqParam.Pump = true;
 
 
+% --- Executes on button press in stageConnect.
+function stageConnect_Callback(hObject, eventdata, handles)
+% hObject    handle to stageConnect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
+%create object
+stage = Stage();
 
+%save object
+setappdata(0,'stage',stage);
+
+%set checkbox to 1
+handles.stageCheckbox.Value = 1;
+handles.UserData.stageCheckbox.Value = 1;
+
+%set labjack connect status to 1
+daqParam = getappdata(0,'daqParam');
+daqParam.Stage = true;
 
 % --- Executes on button press in closeWindow.
 function closeWindow_Callback(hObject, eventdata, handles)
