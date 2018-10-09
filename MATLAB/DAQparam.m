@@ -1,6 +1,6 @@
 classdef DAQparam < handle
     properties
-        %booleans of if hardware is connected
+        %references of physical objects
         PhotonCounter = false;
         NIDAQ = false;
         ADC = false;
@@ -27,14 +27,12 @@ classdef DAQparam < handle
         
         %parameters for stage control
         StageScanNumPoints = 0;
-        StageScanCurrentPositionNumber = 1;
         StageScanPeakFind = false;
         StageScanPositions;
         StageScanPeakFindPositions;
         
         %name
         Name
-        
         
         %target concentration
         TargetConc = 0;

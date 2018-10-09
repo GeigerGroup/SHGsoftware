@@ -11,6 +11,7 @@ classdef Acquisition < handle
         LineHandlePower
         LineHandlepH
         LineHandleCond
+        LineHandleStage
         
         %data
         DataTime
@@ -19,6 +20,7 @@ classdef Acquisition < handle
         DataADCpower
         DatapH
         DataCond
+        DataStage
         
         %hardware objects
         PhotonCounter
@@ -34,6 +36,11 @@ classdef Acquisition < handle
         %point number for flow control
         FlowIndex = 1;
         CurrentSolution
+        
+        %point number for stage control
+        StageIndex = 1;
+        CurrentStagePosition
+        
     end
     
     methods
@@ -81,7 +88,8 @@ classdef Acquisition < handle
                         %give reference to stage
                         obj.Stage = getappdata(0,'stage');
                         obj.Stage.goTo(0); %go to position 0
-                        daqParam.StageScanCurrentPositionNumber = 1;
+                        obj.StageIndex = 1;
+                        obj.CurrentStagePosition = daqParam.StageScanPositions(obj.StageIndex);
                     end
                       
                     %create new figure to hold subplots handle
@@ -94,7 +102,8 @@ classdef Acquisition < handle
                     end  
                     %number of plots total
                     numplots = sum([daqParam.PhotonCounterEnabled*multiple ...
-                        daqParam.ADCpowerEnabled daqParam.PHmeterEnabled*2]);
+                        daqParam.ADCpowerEnabled ...
+                        daqParam.PHmeterEnabled*2 daqParam.StageControlEnabled]);
                     
                     %index to iterate through  plots
                     plotIndex = 1;
@@ -150,6 +159,17 @@ classdef Acquisition < handle
                         obj.LineHandleCond.YData = [];
                         ylabel('Cond')
                     end
+                    %stageplots
+                    if daqParam.StageControlEnabled
+                        %plot for stage position
+                        subplot(numplots,1,plotIndex)
+                        %create line object with temp point then delete
+                        obj.LineHandleStage = plot(0,0);
+                        obj.LineHandleStage.XData = [];
+                        obj.LineHandleStage.YData = [];
+                        ylabel('Stage')
+                    end
+                        
                     
                     %first, create header according to which data has been recorded
                     %start with photon counter data
@@ -171,7 +191,11 @@ classdef Acquisition < handle
                     %then target concentration
                     if daqParam.FlowControl
                         header = strcat(header,'\tsolution');
-                    end      
+                    end
+                    %then stage position
+                    if daqParam.StageControlEnabled
+                        header = strcat(header,'\tstage');
+                    end
                     header = strcat(header,'\r\n');
                     
                     %then, create file and write to it
@@ -281,6 +305,14 @@ classdef Acquisition < handle
                 output = strcat(output,'\t',num2str(obj.CurrentSolution));
             end
             
+            %stage position
+            if daqParam.StageControlEnabled
+                obj.DataStage = vertcat(obj.DataStage,obj.CurrentStagePosition);
+                obj.LineHandleStage.XData = obj.DataTime;
+                obj.LineHandleStage.YData = obj.DataStage;
+                output = strcat(output,'\t',num2str(daqParam.StageScanPositions(obj.StageIndex)));
+            end
+            
             %write line of data to file
             output = strcat(output,'\r\n');
             filename = strcat(obj.Name,'.txt');
@@ -338,9 +370,8 @@ classdef Acquisition < handle
                 if (rem(obj.PointNumber,daqParam.AutoPause) == 0)
                     if daqParam.StageControlEnabled
                         %iterate position
-                        daqParam.StageScanCurrentPositionNumber = ...
-                            daqParam.StageScanCurrentPositionNumber + 1;
-                        if (daqParam.StageScanCurrentPositionNumber > ...
+                        obj.StageIndex = obj.StageIndex + 1;
+                        if (obj.StageIndex > ...
                                 length(daqParam.StageScanPositions))
                             obj.stopAcquisition
                             return
@@ -348,7 +379,8 @@ classdef Acquisition < handle
                             %pause photonCounter
                             obj.PhotonCounter.stopScan()
                             %change stage position
-                            obj.Stage.goTo(daqParam.StageScanPositions(daqParam.StageScanCurrentPositionNumber));
+                            obj.Stage.goTo(daqParam.StageScanPositions(obj.StageIndex));
+                            obj.CurrentStagePosition = daqParam.StageScanPositions(obj.StageIndex);
                             %resume photonCounter
                             obj.PhotonCounter.startScan()
                         end
