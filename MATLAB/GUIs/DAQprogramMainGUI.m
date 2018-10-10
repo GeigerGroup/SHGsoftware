@@ -178,15 +178,13 @@ function closeProgram_Callback(~,~,~)
 daqParam = getappdata(0,'daqParam');
 %delete NIDAQ session
 if ~isempty(daqParam.NIDAQ)
-    daqSession = getappdata(0,'daqSession');
-    release(daqSession.Session)
-    delete(daqSession.Session)
+    release(daqParam.NIDAQ.Session)
+    delete(daqParam.NIDAQ.Session)
     daqreset
 end
 %release stage
 if ~isempty(daqParam.Stage)
-    stage = getappdata(0,'stage');
-    stage.close()
+    daqParam.Stage.close()
 end
 %delete serial instruments
 delete(instrfind)

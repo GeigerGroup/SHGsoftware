@@ -5,7 +5,13 @@ classdef Stage < handle
     
     properties
         ID
-    end
+        PointsPerPos = 0;
+        PosPerScan = 0;
+        
+        PeakFind = false;
+        PeakFindActive = false;
+        ScanPositions;
+    end 
     
     methods
         function obj = Stage()
@@ -58,18 +64,18 @@ classdef Stage < handle
             end
         end
         
-        function fineStagePos = calculateFineStagePos(obj,data)
+        function fineStagePos = calculateFineStagePos(~,data)
             %get daqParam
             daqParam = getappdata(0,'daqParam');
             
             %interval of autopause
-            interval = daqParam.AutoPause;
+            interval = daqParam.Stage.PointsPerPos;
             %calculate stage positions, average of counts
             pos = mean(reshape(data.Time,...
-                [interval,length(data.Stage)/interval]));
+                [interval,length(data.Time)/interval]))';
             counts = mean(reshape(data.PhotonCounterA,...
-                [interval,length(data.PhotonCounterA)/interval]));
-            
+                [interval,length(data.PhotonCounterA)/interval]))';
+
             % fit it with limit on period from ~2x above/below
             fo = fitoptions('sin1');
             fo.Lower = [0,0.02,-Inf];

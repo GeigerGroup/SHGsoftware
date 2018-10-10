@@ -25,12 +25,6 @@ classdef DAQparam < handle
         FlowConcentrationPoint;
         FlowConcentrationValue;
         
-        %parameters for stage control
-        StageScanNumPoints = 0;
-        StageScanPeakFind = false;
-        StageScanPositions;
-        StageScanPeakFindPositions;
-        
         %name
         Name
         

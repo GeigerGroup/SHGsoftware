@@ -22,7 +22,7 @@ function varargout = configureStageControlGUI(varargin)
 
 % Edit the above text to modify the response to help configureStageControlGUI
 
-% Last Modified by GUIDE v2.5 07-Oct-2018 18:05:30
+% Last Modified by GUIDE v2.5 10-Oct-2018 13:00:50
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -58,9 +58,11 @@ handles.output = hObject;
 %get daqParam
 daqParam = getappdata(0,'daqParam');
 
-%set edit string from daqParam
-handles.pointsEdit.String = num2str(daqParam.StageScanNumPoints);
-handles.peakFindCheck.Value = daqParam.StageScanPeakFind;
+%set edit strings from stage
+handles.posEdit.String = num2str(daqParam.Stage.PosPerScan);
+handles.pointsEdit.String = num2str(daqParam.Stage.PointsPerPos);
+%set value of peak find
+handles.peakFindCheck.Value = daqParam.Stage.PeakFind;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -81,22 +83,21 @@ varargout{1} = handles.output;
 
 
 % --- Executes on button press in updateClosePush.
-function updateClosePush_Callback(hObject, eventdata, handles)
-% hObject    handle to updateClosePush (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
+function updateClosePush_Callback(~,~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %get daqParam
 daqParam = getappdata(0,'daqParam');
 
 %update number of points in scan and whether peak find is on
-daqParam.StageScanNumPoints = str2double(handles.pointsEdit.String);
-daqParam.StageScanPeakFind = handles.peakFindCheck.Value;
+daqParam.Stage.PosPerScan = str2double(handles.posEdit.String);
+daqParam.Stage.PointsPerPos = str2double(handles.pointsEdit.String); 
+daqParam.Stage.PeakFind = handles.peakFindCheck.Value;
 
 %calculate positions to move stage to from number of points
 stageMin = 0;
 stageMax = 99.7;
-daqParam.StageScanPositions = linspace(stageMin,stageMax,str2double(handles.pointsEdit.String));
+daqParam.Stage.ScanPositions = linspace(stageMin,stageMax,str2double(handles.posEdit.String));
 
 %close
 close

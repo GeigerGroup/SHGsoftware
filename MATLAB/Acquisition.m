@@ -7,15 +7,8 @@ classdef Acquisition < handle
         %figure for plotting data
         Figure
         
-        %data
+        %data object to hold all data
         Data
-        DataTime
-        DataPhotonCounterA
-        DataPhotonCounterB
-        DataADCpower
-        DatapH
-        DataCond
-        DataStage
         
         %point number for photon counter
         PointNumber = 1;
@@ -27,7 +20,8 @@ classdef Acquisition < handle
         %point number for stage control
         StageIndex = 1;
         CurrentStagePosition
-        
+        PeakFindActive = false;
+        PeakFindPositions;
     end
     
     methods
@@ -38,6 +32,9 @@ classdef Acquisition < handle
                     %add name
                     obj.Name = name;
                     
+                    %create timer to time acquisition
+                    obj.Timer = createDataTimer(obj);
+                    
                     %get current daqParam
                     daqParam = getappdata(0,'daqParam');
                     
@@ -47,14 +44,9 @@ classdef Acquisition < handle
                     %create data structure to hold data
                     obj.Data = DAQdata();
 
-                    %write data to file
-                    %create header based on what is enabled
-                    header = obj.Figure.createHeader();
-
-                    %then, create file and write to it
-                    filename = strcat(obj.Name,'.txt');
-                    fileID = fopen(filename,'w');
-                    fprintf(fileID,header);
+                    %write header to file
+                    fileID = fopen(strcat(obj.Name,'.txt'),'w');
+                    fprintf(fileID,obj.Figure.createHeader());
                     fclose(fileID);
                     
                     %if flow control is enabled, set to first position
@@ -65,12 +57,9 @@ classdef Acquisition < handle
                     
                     %if stage control is enabled, go to initial position
                     if daqParam.StageControlEnabled
-                        obj.CurrentStagePosition = daqParam.StageScanPositions(obj.StageIndex);
+                        obj.CurrentStagePosition = daqParam.Stage.ScanPositions(1);
                         daqParam.Stage.goTo(obj.CurrentStagePosition);
                     end
-
-                    %create timer to time acquisition
-                    obj.Timer = createDataTimer(obj);
                 else
                     error('Input name must be char')
                 end
@@ -176,30 +165,70 @@ classdef Acquisition < handle
                 return
             end
             
-%             if daqParam.StageControlEnabled
-%                 if (rem(obj
+            %if stage control is on
+            if daqParam.StageControlEnabled
+                %check if its at the end of an interval
+                if (rem(obj.PointNumber,daqParam.Stage.PointsPerPos) == 0)
+                    %iterate index since interval is over
+                    obj.StageIndex = obj.StageIndex + 1;
+                    %if peak find is active (i.e. it has already done a
+                    %rough scan and peak find is enabled
+                    if obj.PeakFindActive
+                        %check if peak find has scanned all positions, if
+                        %so, stop
+                        if (obj.StageIndex > length(obj.PeakFindPositions))
+                            daqParam.Stage.goTo(0);
+                            obj.stopAcquisition;
+                            return
+                        else
+                            %if it hasn't, pause photon coutner, iterate
+                            %position, resume scan
+                            daqParam.PhotonCounter.stopScan()
+                            obj.CurrentStagePosition = obj.PeakFindPositions(obj.StageIndex);
+                            daqParam.Stage.goTo(obj.CurrentStagePosition);
+                            daqParam.PhotonCounter.startScan();
+                        end
+                    else
+                        %if peak find isn't active, check if rough scan is
+                        %over
+                        if (obj.StageIndex > length(daqParam.Stage.ScanPositions))
+                            %if rough scan is over and peak find is enabled
+                            if daqParam.Stage.PeakFind
+                                %stop photon counter
+                                daqParam.PhotonCounter.stopScan()
+                                %turn on flag to enter peak find mode
+                                obj.PeakFindActive = true;
+                                %calculate peak fine positions with data
+                                obj.PeakFindPositions = daqParam.Stage.calculateFineStagePos(obj.Data);
+                                %reset stage index to 1
+                                obj.StageIndex = 1;
+                                %set first peak find position
+                                obj.CurrentStagePosition = obj.PeakFindPositions(obj.StageIndex);
+                                daqParam.Stage.goTo(obj.CurrentStagePosition);
+                                daqParam.PhotonCounter.startScan()
+                            else
+                                %if rough scan is over but peak find isn't
+                                %enabled, just end
+                                daqParam.Stage.goTo(0);
+                                obj.stopAcquisition;
+                                return
+                            end
+                        else
+                            %if peak scan isn't active and rough scan is
+                            %still continuing, just go to next point
+                            daqParam.PhotonCounter.stopScan();
+                            obj.CurrentStagePosition = daqParam.Stage.ScanPositions(obj.StageIndex);
+                            daqParam.Stage.goTo(obj.CurrentStagePosition);
+                            daqParam.PhotonCounter.startScan();
+                        end
+                    end
+                end
+            end
             
             %check if should pause because of automatic next pause
             if (daqParam.AutoPause > 0)
                 if (rem(obj.PointNumber,daqParam.AutoPause) == 0)
-                    if daqParam.StageControlEnabled
-                        %iterate position
-                        obj.StageIndex = obj.StageIndex + 1;
-                        if (obj.StageIndex > length(daqParam.StageScanPositions))
-                            obj.stopAcquisition
-                            return
-                        else
-                            %pause photonCounter
-                            daqParam.PhotonCounter.stopScan()
-                            %change stage position
-                            daqParam.Stage.goTo(daqParam.StageScanPositions(obj.StageIndex));
-                            obj.CurrentStagePosition = daqParam.StageScanPositions(obj.StageIndex);
-                            %resume photonCounter
-                            daqParam.PhotonCounter.startScan()
-                        end
-                    else
                         obj.pauseAcquisition;
-                    end
                 end
             end
             
