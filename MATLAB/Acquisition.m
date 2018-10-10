@@ -4,16 +4,11 @@ classdef Acquisition < handle
         Name
         Timer
         
-        %handles for plotting data
-        FigureHandle
-        LineHandlePhotonsA
-        LineHandlePhotonsB
-        LineHandlePower
-        LineHandlepH
-        LineHandleCond
-        LineHandleStage
+        %figure for plotting data
+        Figure
         
         %data
+        Data
         DataTime
         DataPhotonCounterA
         DataPhotonCounterB
@@ -21,14 +16,6 @@ classdef Acquisition < handle
         DatapH
         DataCond
         DataStage
-        
-        %hardware objects
-        PhotonCounter
-        LabJack
-        PHmeter
-        DAQsession
-        Pump
-        Stage
         
         %point number for photon counter
         PointNumber = 1;
@@ -54,159 +41,32 @@ classdef Acquisition < handle
                     %get current daqParam
                     daqParam = getappdata(0,'daqParam');
                     
-                    %if photon counter enabled
-                    %actually currently needs photonCounter for timing, so
-                    %this must be true, but future version could time
-                    %itself
-                    if daqParam.PhotonCounterEnabled
-                        %give reference to photon counter
-                        obj.PhotonCounter = getappdata(0,'photonCounter');
-                    end
+                    %create new figure based on what is enabled
+                    obj.Figure = DAQfigure();
                     
-                    %if ADC power reading enabled
-                    if daqParam.ADCpowerEnabled
-                        %give reference to labjack
-                        obj.LabJack = getappdata(0,'labJack');
-                    end
-                    
-                    %if flow control is enabled
-                    if daqParam.FlowControl             
-                        %give reference to pump
-                        obj.Pump = getappdata(0,'pump');
-                        %give reference to DAQsession
-                        obj.DAQsession = getappdata(0,'daqSession');
-                    end
-                    
-                    %if pH meter is enabled
-                    if daqParam.PHmeterEnabled
-                        %give reference to pHmeter
-                        obj.PHmeter = getappdata(0,'pHmeter');
-                    end
-                    
-                    %if stage control is enabled
-                    if daqParam.StageControlEnabled
-                        %give reference to stage
-                        obj.Stage = getappdata(0,'stage');
-                        obj.Stage.goTo(0); %go to position 0
-                        obj.StageIndex = 1;
-                        obj.CurrentStagePosition = daqParam.StageScanPositions(obj.StageIndex);
-                    end
-                      
-                    %create new figure to hold subplots handle
-                    obj.FigureHandle = figure;
+                    %create data structure to hold data
+                    obj.Data = DAQdata();
 
-                    %number of plots from photon counter
-                    multiple = 1;
-                    if strcmp(daqParam.Channel,'AB')
-                        multiple = 2;
-                    end  
-                    %number of plots total
-                    numplots = sum([daqParam.PhotonCounterEnabled*multiple ...
-                        daqParam.ADCpowerEnabled ...
-                        daqParam.PHmeterEnabled*2 daqParam.StageControlEnabled]);
-                    
-                    %index to iterate through  plots
-                    plotIndex = 1;
-                    
-                    %check to see which plots are needed and build   
-                    %photon counter plots
-                    if daqParam.PhotonCounterEnabled             
-                        if contains(daqParam.Channel,'A')
-                            subplot(numplots,1,plotIndex)
-                            %create line object with temp point then delete 
-                            obj.LineHandlePhotonsA = plot(0,0);
-                            obj.LineHandlePhotonsA.XData = [];
-                            obj.LineHandlePhotonsA.YData = [];
-                            ylabel('A Counts')
-                            plotIndex = plotIndex + 1;
-                        end
-                        if contains(daqParam.Channel,'B')
-                            subplot(numplots,1,plotIndex)
-                            %create line object with temp point then delete 
-                            obj.LineHandlePhotonsB = plot(0,0);
-                            obj.LineHandlePhotonsB.XData = [];
-                            obj.LineHandlePhotonsB.YData = [];
-                            ylabel('B Counts')
-                            plotIndex = plotIndex + 1;
-                        end
-                    end
-                    %adc plot for power data
-                    if daqParam.ADCpowerEnabled 
-                        subplot(numplots,1,plotIndex)                      
-                        %create line object with temp point then delete
-                        obj.LineHandlePower = plot(0,0);
-                        obj.LineHandlePower.XData = [];
-                        obj.LineHandlePower.YData = [];
-                        ylabel('Power')
-                        plotIndex = plotIndex + 1;
-                    end
-                    %pH plots                    
-                    if daqParam.PHmeterEnabled
-                        %plot for pH data
-                        subplot(numplots,1,plotIndex)
-                        %create line object with temp point then delete
-                        obj.LineHandlepH = plot(0,0);
-                        obj.LineHandlepH.XData = [];
-                        obj.LineHandlepH.YData = [];
-                        ylabel('pH')
-                        plotIndex = plotIndex + 1;
+                    %write data to file
+                    %create header based on what is enabled
+                    header = obj.Figure.createHeader();
 
-                        %plot for cond data
-                        subplot(numplots,1,plotIndex)
-                        %create line object with temp point then delete
-                        obj.LineHandleCond = plot(0,0);
-                        obj.LineHandleCond.XData = [];
-                        obj.LineHandleCond.YData = [];
-                        ylabel('Cond')
-                    end
-                    %stageplots
-                    if daqParam.StageControlEnabled
-                        %plot for stage position
-                        subplot(numplots,1,plotIndex)
-                        %create line object with temp point then delete
-                        obj.LineHandleStage = plot(0,0);
-                        obj.LineHandleStage.XData = [];
-                        obj.LineHandleStage.YData = [];
-                        ylabel('Stage')
-                    end
-                        
-                    
-                    %first, create header according to which data has been recorded
-                    %start with photon counter data
-                    header = 'time';
-                    if contains(daqParam.Channel,'A')
-                        header = strcat(header,'\tcountsA');
-                    end
-                    if contains(daqParam.Channel,'B')
-                        header = strcat(header,'\tcountsB');
-                    end
-                    %then adc data
-                    if daqParam.ADCpowerEnabled
-                        header = strcat(header,'\tpower');
-                    end
-                    %then pH data
-                    if daqParam.PHmeterEnabled
-                        header = strcat(header,'\tcond','\tpH');
-                    end
-                    %then target concentration
-                    if daqParam.FlowControl
-                        header = strcat(header,'\tsolution');
-                    end
-                    %then stage position
-                    if daqParam.StageControlEnabled
-                        header = strcat(header,'\tstage');
-                    end
-                    header = strcat(header,'\r\n');
-                    
                     %then, create file and write to it
                     filename = strcat(obj.Name,'.txt');
                     fileID = fopen(filename,'w');
                     fprintf(fileID,header);
                     fclose(fileID);
                     
-                    %set solution condition to first value (SHOULD CHANGE)
+                    %if flow control is enabled, set to first position
+                    %(should change)
                     if daqParam.FlowControl
                         obj.CurrentSolution = daqParam.FlowConcentrationValue(1);
+                    end
+                    
+                    %if stage control is enabled, go to initial position
+                    if daqParam.StageControlEnabled
+                        obj.CurrentStagePosition = daqParam.StageScanPositions(obj.StageIndex);
+                        daqParam.Stage.goTo(obj.CurrentStagePosition);
                     end
 
                     %create timer to time acquisition
@@ -221,104 +81,61 @@ classdef Acquisition < handle
         
         %check if data is ready and gets it if it is
         function  getData(obj)
-            
             %get parameters
             daqParam = getappdata(0,'daqParam');
-            
-            output = num2str(obj.PointNumber);
+                     
             %photon counter data
             if (daqParam.PhotonCounterEnabled)
-                [dataA,dataB] = obj.PhotonCounter.getData;
+                [dataA,dataB] = daqParam.PhotonCounter.getData();
                 if ~isempty(dataA) %if it got something continue
                     %now timing runs off photon counter, should change
-                    obj.DataTime = vertcat(obj.DataTime,...
-                        obj.PointNumber*daqParam.Interval);
+                    obj.Data.Time = vertcat(obj.Data.Time, obj.PointNumber*daqParam.Interval);
                     if contains(daqParam.Channel,'A')
-                        %add to y data
-                        obj.DataPhotonCounterA = vertcat(obj.DataPhotonCounterA,dataA);
-                        %update x and y data
-                        obj.LineHandlePhotonsA.XData = obj.DataTime;
-                        obj.LineHandlePhotonsA.YData = obj.DataPhotonCounterA;
-                        %add data to output string
-                        output = strcat(output,'\t',num2str(dataA));
+                        obj.Data.PhotonCounterA = vertcat(obj.Data.PhotonCounterA,dataA);
                     end
                     if contains(daqParam.Channel,'B')
-                        %add to y data
-                        obj.DataPhotonCounterB = vertcat(obj.DataPhotonCounterB,dataB);
-                        %update x and y data
-                        obj.LineHandlePhotonsB.XData = obj.DataTime;
-                        obj.LineHandlePhotonsB.YData = obj.DataPhotonCounterB;
-                        %add data to output string
-                        output = strcat(output,'\t',num2str(dataB));
+                        obj.Data.PhotonCounterB = vertcat(obj.Data.PhotonCounterB,dataB);
                     end
                 else
-                    %if no data ready, exit without checking
-                    return
+                    return %if no data ready, exit without checking
                 end
             end
-         
-            %ADC power data
+            %then ADC power data
             if (daqParam.ADCpowerEnabled)
-                powerData = obj.LabJack.getReading;
-                obj.DataADCpower = vertcat(obj.DataADCpower,powerData);
-                
-                %update x and y data on plot
-                obj.LineHandlePower.XData = obj.DataTime;
-                obj.LineHandlePower.YData = obj.DataADCpower;
-                
-                %add data to output string
-                output = strcat(output,'\t',num2str(powerData));
+                powerData = daqParam.ADC.getReading();
+                obj.Data.ADCpower = vertcat(obj.Data.ADCpower,powerData);
             end
-            
-            %pH meter data
+            %then pH meter data
             if (daqParam.PHmeterEnabled)
-                [pH, cond] = obj.PHmeter.getData;
-                
+                [pH, cond] = daqParam.PHmeter.getData;
                 if ~isempty(pH) %if got the data
                     datapH = pH;
                 else
                     datapH = NaN;
                 end
-                obj.DatapH = vertcat(obj.DatapH,datapH);
-                
+                obj.Data.pH = vertcat(obj.Data.pH,datapH);
                 if ~isempty(cond)
                     dataCond = cond;
                 else
                     dataCond = NaN;
                 end
-                obj.DataCond = vertcat(obj.DataCond,dataCond);
-
-                %update x and y data on plot
-                obj.LineHandlepH.XData = obj.DataTime;
-                obj.LineHandlepH.YData = obj.DatapH;
-                
-                obj.LineHandleCond.XData = obj.DataTime;
-                obj.LineHandleCond.YData = obj.DataCond; 
-                
-                %add data to output string
-                output = strcat(output,'\t',num2str(dataCond),...
-                    '\t',num2str(datapH));
+                obj.Data.Cond = vertcat(obj.Data.Cond,dataCond);
             end
-            
-            %flow control value
+            %then flow control value
             if (daqParam.FlowControl)
-                output = strcat(output,'\t',num2str(obj.CurrentSolution));
+                obj.Data.Solution = vertcat(obj.Data.Solution,obj.CurrentSolution);
             end
-            
             %stage position
             if daqParam.StageControlEnabled
-                obj.DataStage = vertcat(obj.DataStage,obj.CurrentStagePosition);
-                obj.LineHandleStage.XData = obj.DataTime;
-                obj.LineHandleStage.YData = obj.DataStage;
-                output = strcat(output,'\t',num2str(daqParam.StageScanPositions(obj.StageIndex)));
+                obj.Data.Stage = vertcat(obj.Data.Stage,obj.CurrentStagePosition);
             end
             
-            %write line of data to file
-            output = strcat(output,'\r\n');
-            filename = strcat(obj.Name,'.txt');
-            %open file in append mode
-            fileID = fopen(filename,'a');
-            fprintf(fileID,output);
+            %update plots
+            obj.Figure.updatePlots(obj.Data);
+            
+            %open file in append mode, write string to it
+            fileID = fopen(strcat(obj.Name,'.txt'),'a');
+            fprintf(fileID,obj.Data.getLastDataString());
             fclose(fileID);
             
             %if data received, check acquisition for flow control, 
@@ -328,7 +145,6 @@ classdef Acquisition < handle
         
         %checks for flow control, end of scan, etc.
         function checkAcquisition(obj)
-            
             %get daq parameters
             daqParam = getappdata(0,'daqParam');
             
@@ -339,20 +155,15 @@ classdef Acquisition < handle
                     %if at point where change should ocurr
                     if obj.PointNumber == daqParam.FlowConcentrationPoint(obj.FlowIndex)
                         disp(strcat('Flow change at point:  ',num2str(obj.PointNumber)))
-                        
                         %calculate flow rates for two reservoir salt
-                        rates = obj.Pump.calculateRates(daqParam.FlowConcentrationValue(obj.FlowIndex));
-                        
+                        rates = daqParam.Pump.calculateRates(daqParam.FlowConcentrationValue(obj.FlowIndex));
                         %set current condition for writing to file
                         obj.CurrentSolution = daqParam.FlowConcentrationValue(obj.FlowIndex);
-                        
                         %save current rates
                         daqParam.PumpStates = rates;
-                        
                         %set flow rates and start flow
-                        obj.Pump.setFlowRates(rates);
-                        obj.Pump.startFlowOpenValves();
-
+                        daqParam.Pump.setFlowRates(rates);
+                        daqParam.Pump.startFlowOpenValves();
                         %increment flow index
                         obj.FlowIndex = obj.FlowIndex + 1;
                     end
@@ -365,24 +176,26 @@ classdef Acquisition < handle
                 return
             end
             
+%             if daqParam.StageControlEnabled
+%                 if (rem(obj
+            
             %check if should pause because of automatic next pause
             if (daqParam.AutoPause > 0)
                 if (rem(obj.PointNumber,daqParam.AutoPause) == 0)
                     if daqParam.StageControlEnabled
                         %iterate position
                         obj.StageIndex = obj.StageIndex + 1;
-                        if (obj.StageIndex > ...
-                                length(daqParam.StageScanPositions))
+                        if (obj.StageIndex > length(daqParam.StageScanPositions))
                             obj.stopAcquisition
                             return
                         else
                             %pause photonCounter
-                            obj.PhotonCounter.stopScan()
+                            daqParam.PhotonCounter.stopScan()
                             %change stage position
-                            obj.Stage.goTo(daqParam.StageScanPositions(obj.StageIndex));
+                            daqParam.Stage.goTo(daqParam.StageScanPositions(obj.StageIndex));
                             obj.CurrentStagePosition = daqParam.StageScanPositions(obj.StageIndex);
                             %resume photonCounter
-                            obj.PhotonCounter.startScan()
+                            daqParam.PhotonCounter.startScan()
                         end
                     else
                         obj.pauseAcquisition;
@@ -396,7 +209,6 @@ classdef Acquisition < handle
         
         %start the acquisition
         function startAcquisition(obj)
-            
             %start timer
             start(obj.Timer);
             
@@ -405,11 +217,11 @@ classdef Acquisition < handle
             
             %start photon counter
             if (daqParam.PhotonCounterEnabled)
-                obj.PhotonCounter.resetScan
-                obj.PhotonCounter.startScan
+                daqParam.PhotonCounter.resetScan
+                daqParam.PhotonCounter.startScan
                 
                 %clear out first point?
-                obj.PhotonCounter.getData;
+                daqParam.PhotonCounter.getData;
             end
         end
         
@@ -422,13 +234,13 @@ classdef Acquisition < handle
             
             %stop photon counter
             if (daqParam.PhotonCounterEnabled)
-                obj.PhotonCounter.stopScan
+                daqParam.PhotonCounter.stopScan
                 disp('Photon counter paused.')
             end
             
             %close valves and stop pump
             if (daqParam.FlowControl)
-                obj.Pump.stopFlowCloseValves();
+                daqParam.Pump.stopFlowCloseValves();
             end             
         end
         
@@ -441,12 +253,12 @@ classdef Acquisition < handle
             
             %start photon counter
             if (daqParam.PhotonCounterEnabled)
-                obj.PhotonCounter.startScan
+                daqParam.PhotonCounter.startScan
             end
             
             %open valves and start pump
             if (daqParam.FlowControl)
-                obj.Pump.startFlowCloseValves();
+                daqParam.Pump.startFlowOpenValves();
             end      
         end
 
@@ -454,18 +266,15 @@ classdef Acquisition < handle
             %stop and delete timer
             stop(obj.Timer);
             delete(obj.Timer);
-            
             %get current parameters
             daqParam = getappdata(0,'daqParam');
-            
             %reset photon counter
             if (daqParam.PhotonCounterEnabled)
-                obj.PhotonCounter.stopScan
+                daqParam.PhotonCounter.stopScan
             end
-            
             %close valves and stop pump
             if (daqParam.FlowControl)
-                obj.Pump.stopFlowCloseValves();
+                daqParam.Pump.stopFlowCloseValves();
             end
         end
     end

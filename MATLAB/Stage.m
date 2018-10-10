@@ -9,7 +9,6 @@ classdef Stage < handle
     
     methods
         function obj = Stage()
-            
             % if library isn't loaded, load it
             if not(libisloaded('libximc'))
                 disp('Loading library...')
@@ -33,7 +32,7 @@ classdef Stage < handle
             %open device
             obj.ID = calllib('libximc','open_device', dev_name);
         end
-         
+        
         function goTo(obj,position)
             %put position in mm into steps
             if (position > 99.7 || position < 0)
@@ -59,18 +58,64 @@ classdef Stage < handle
             end
         end
         
-        function goHome(obj) 
-            %go home
-            disp('Going home...')
-            result = calllib('libximc', 'command_home', obj.ID);
-            if result ~= 0
-                disp(['Command failed with code', num2str(result)]);
+        function fineStagePos = calculateFineStagePos(obj,data)
+            %get daqParam
+            daqParam = getappdata(0,'daqParam');
+            
+            %interval of autopause
+            interval = daqParam.AutoPause;
+            %calculate stage positions, average of counts
+            pos = mean(reshape(data.Time,...
+                [interval,length(data.Stage)/interval]));
+            counts = mean(reshape(data.PhotonCounterA,...
+                [interval,length(data.PhotonCounterA)/interval]));
+            
+            % fit it with limit on period from ~2x above/below
+            fo = fitoptions('sin1');
+            fo.Lower = [0,0.02,-Inf];
+            fo.Upper = [Inf,0.1,Inf];
+            
+            %fit data to sin
+            sinfit = fit(pos,counts,'sin1',fo);
+            plot(sinfit,pos,counts)
+            
+            %evaluate fit over 1000 points in stage position
+            fineX = linspace(0,99.7,1000)';
+            fineYfit = feval(sinfit,fineX);
+            
+            %positive peak
+            [~,posloc] = findpeaks(fineYfit);
+            %if there is no positive peak take points at two edges of stage
+            if isempty(posloc)
+                fineStagePos = [97.7 95.7 93.7 91.7 10 8 6 4 2]';
+            else
+                fineStagePos = findPositions(fineX(posloc));
             end
             
-            %wait until it has stopped to return control
-            result = calllib('libximc','command_wait_for_stop', obj.ID, 10);
-            if result ~= 0
-                disp(['Command failed with code', num2str(result)]);
+            %negative positions
+            [~,negloc] = findpeaks(-fineYfit);
+            %if there is no negative peak take points at two edges of stage
+            if isempty(negloc)
+                fineStagePos = vertcat(fineStagePos,[97.7 95.7 93.7 91.7 10 8 6 4 2]');
+            else
+                fineStagePos = vertcat(fineStagePos,findPositions(fineX(negloc)));
+            end
+            
+            %put it in descending order
+            fineStagePos = sort(fineStagePos,1,'descend');
+            
+            
+            %function to find points around center
+            function positions = findPositions(centerPos)
+                %create 9 points, centered around center position
+                positions = [-8 -6 -4 -2 0 2 4 6 8]' + centerPos;
+                if min(positions) < 0
+                    %if any are below zero, move to edge
+                    positions = positions - min(positions);
+                elseif max(positions) > 99.7
+                    %if any are above 99.7, move to edge
+                    positions = positions - (max(positions)-99.7);
+                end
             end
         end
         

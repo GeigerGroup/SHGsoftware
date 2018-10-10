@@ -50,29 +50,21 @@ function DAQprogramMainGUI_OpeningFcn(hObject,~, handles, varargin)
 % hObject    handle to figure
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to DAQprogramMainGUI (see VARARGIN)
-
-%take in DAQ parameters
+%init DAQ parameters
 daqParam = DAQparam();
 setappdata(0,'daqParam',daqParam);
-
-handles.photonCounterCheckbox.Value = daqParam.PhotonCounter;
-handles.NIDAQcheckbox.Value = daqParam.NIDAQ;
-handles.ADCcheckbox.Value = daqParam.ADC;
-handles.pHmeterCheckbox.Value = daqParam.PHmeter;
-handles.pumpCheckbox.Value = daqParam.Pump;
-handles.stageCheckbox.Value = daqParam.Stage;
-
+%set checkbox values, target concentration edit
+handles.photonCounterCheckbox.Value = ~isempty(daqParam.PhotonCounter);
+handles.NIDAQcheckbox.Value = ~isempty(daqParam.NIDAQ);
+handles.ADCcheckbox.Value = ~isempty(daqParam.ADC);
+handles.pHmeterCheckbox.Value = ~isempty(daqParam.PHmeter);
+handles.pumpCheckbox.Value = ~isempty(daqParam.Pump);
+handles.stageCheckbox.Value = ~isempty(daqParam.Stage);
 handles.targetConcEdit.String = num2str(daqParam.TargetConc);
-
 % Choose default command line output for DAQprogramMainGUI
 handles.output = hObject;
-
 % Update handles structure
 guidata(hObject, handles);
-
-% UIWAIT makes DAQprogramMainGUI wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = DAQprogramMainGUI_OutputFcn(~,~,handles) 
@@ -121,10 +113,8 @@ function flowTargetConcButton_Callback(~,~,~)
 pump = getappdata(0,'pump');
 daqParam = getappdata(0,'daqParam');
 rates = pump.calculateRates(daqParam.TargetConc);
-
 %set rates
 pump.setFlowRates(rates);
-
 %start flow
 pump.startFlowOpenValves();
 
@@ -169,7 +159,7 @@ acquisition = getappdata(0,daqParam.Name);
 acquisition.pauseAcquisition;
 
 % --- Executes on button press in resumeExperiment.
-function resumeExperiment_Callback(~,~, handles)
+function resumeExperiment_Callback(~,~,~)
 % handles    structure with handles and user data (see GUIDATA)
 %get daqParam for name
 daqParam = getappdata(0,'daqParam');
@@ -186,23 +176,19 @@ acquisition.stopAcquisition;
 % --- Executes on button press in closeProgram.
 function closeProgram_Callback(~,~,~)
 daqParam = getappdata(0,'daqParam');
-
 %delete NIDAQ session
-if daqParam.NIDAQ
+if ~isempty(daqParam.NIDAQ)
     daqSession = getappdata(0,'daqSession');
     release(daqSession.Session)
     delete(daqSession.Session)
     daqreset
 end
-
 %release stage
-if daqParam.Stage
+if ~isempty(daqParam.Stage)
     stage = getappdata(0,'stage');
     stage.close()
 end
-
 %delete serial instruments
 delete(instrfind)
-
 %close window
 close

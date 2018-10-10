@@ -1,12 +1,12 @@
 classdef DAQparam < handle
     properties
         %references of physical objects
-        PhotonCounter = false;
-        NIDAQ = false;
-        ADC = false;
-        Pump = false;
-        PHmeter = false;
-        Stage = false;
+        PhotonCounter
+        NIDAQ
+        ADC
+        Pump
+        PHmeter
+        Stage
              
         %parameters for photon counter
         ScanLength = Inf;
