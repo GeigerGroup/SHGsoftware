@@ -71,18 +71,27 @@ classdef Stage < handle
             %interval of autopause
             interval = daqParam.Stage.PointsPerPos;
             %calculate stage positions, average of counts
-            pos = mean(reshape(data.Time,...
-                [interval,length(data.Time)/interval]))';
+            pos = mean(reshape(data.Stage,...
+                [interval,length(data.Stage)/interval]))';
             counts = mean(reshape(data.PhotonCounterA,...
                 [interval,length(data.PhotonCounterA)/interval]))';
 
-            % fit it with limit on period from ~2x above/below
-            fo = fitoptions('sin1');
-            fo.Lower = [0,0.02,-Inf];
-            fo.Upper = [Inf,0.1,Inf];
+            %fit it with sine function with offset            
+            ft = fittype('a*sin(b*x+c)+d');
+            %init guesses
+            aGuess = (max(counts)-min(counts))/2;
+            bGuess = 0.05;
+            cGuess = 0;
+            dGuess = mean(counts);
+            
+            fo = fitoptions(ft);
+            fo.StartPoint = [aGuess,bGuess,cGuess,dGuess];
+            fo.Lower = [0,0.02,-2*pi,0];
+            fo.Upper = [100000,0.1,2*pi,200000];
             
             %fit data to sin
-            sinfit = fit(pos,counts,'sin1',fo);
+            sinfit = fit(pos,counts,ft,fo)
+            figure
             plot(sinfit,pos,counts)
             
             %evaluate fit over 1000 points in stage position
