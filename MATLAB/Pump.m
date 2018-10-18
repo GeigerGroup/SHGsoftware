@@ -8,6 +8,8 @@ classdef Pump < handle
         Reservoirs = [true true true true];
         TotalFlow = 20;
         TubeID = '2.29';
+        FlowRates = [0 0 0 0];
+        TargetConc = 0;
     end
     
     methods
@@ -209,32 +211,20 @@ classdef Pump < handle
             %convert flow rate to pump format
             string = sprintf('%.3e', rate);
             string = strcat(string(1),string(3:5),string(7),string(9));
-            
             %send to pump
-            fprintf(obj.Serial,strcat(num2str(channel),'f',string));      
+            fprintf(obj.Serial,strcat(num2str(channel),'f',string));
+            obj.FlowRates(channel) = rate;
         end
         
         
         function setFlowRates(obj,rates)      
-            %get daqParam
-            daqParam = getappdata(0,'daqParam');
-            daqParam.PumpStates = rates;
-            
             for i = 1:4
                 %set flow rate
                 obj.setFlowRate(i,rates(i));
-                
-                %update GUI if open
-                flowRateGUI = getappdata(0,'flowRateGUI');
-                if ~isempty(flowRateGUI)
-                    flowRateGUI.Children(i).String = num2str(rates(i));
-                end
             end
             disp('Flow Rates:')
             disp(rates)
         end
-        
-        
         
         %starting/stopping flow functions
         function startFlow(obj,channel)
@@ -258,68 +248,26 @@ classdef Pump < handle
         end
         
         function startFlowOpenValves(obj)
-            %get daqParam
-            daqParam = getappdata(0,'daqParam');
-            flowGUI = getappdata(0,'flowGUI');
-            
+            daqParam = getappdata(0,'daqParam'); %get daqParam
             %iterate through each channel
             for i = 1:4
                 %if channel flow rate is greater than 0
-                if daqParam.PumpStates(i) > 0
-                    
-                    %mark solenoid for opening
-                    daqParam.SolStates(i) = 1;
-                    
-                    %update GUI if exists
-                    if (~isempty(flowGUI))
-                        flowGUI.Children(i).Value = 1;
-                    end
-                    
-                else
-                    %if pump flow rate is 0 mark solenoid for closing
-                    daqParam.SolStates(i) = 0;
-                    
-                    %update GUI if exists
-                    if (~isempty(flowGUI))
-                        flowGUI.Children(i).Value = 0;
-                    end
-                end
-            end
-            
-            %send to SolenoidValve to change
-            daqSession = getappdata(0,'daqSession');
-            daqSession.setValveStates(daqParam.SolStates);
-            
-            for i = 1:4
-                if daqParam.SolStates(i)
-                    %if you just turned it on
+                if obj.FlowRates(i) > 0
+                    %open solenoid, start flow
+                    daqParam.NIDAQ.setValveState(i,true);
                     obj.startFlow(i);
                 else
-                    %if you just turned it off
-                    obj.stopFlow(i);
+                    %or close solenoid, stop flow
+                    daqParam.NIDAQ.setValveState(i,false);
+                    obj.stopFlow(i)
                 end
             end
-            
         end
         
         function stopFlowCloseValves(obj)
-            %turn off flow
-            obj.stopFlows();
-            
-            %close valves
-            daqSession = getappdata(0,'daqSession');
-            daqSession.setValveStates([0 0 0 0 0]);
-            %update daqParam for solenoid states
-            daqParam = getappdata(0,'daqParam');
-            daqParam.SolStates = [0 0 0 0 0];
-            
-            flowGUI = getappdata(0,'flowGUI');
-            if ~isempty(flowGUI)
-                for i = 1:4
-                    flowGUI.Children(i).Value = 0;
-                end
-            end
-
+            daqParam = getappdata(0,'daqParam'); %get daqParam
+            obj.stopFlows(); %stop flow
+            daqParam.NIDAQ.setValveStates(false(1,5)); %close valves
         end
     end
 end

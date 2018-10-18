@@ -28,15 +28,6 @@ classdef DAQparam < handle
         %name
         Name
         
-        %target concentration
-        TargetConc = 0;
-        
-        %solenoid valves
-        SolStates = false(1,5);
-        
-        %pump flow rates
-        PumpStates = [0 0 0 0];
-        
         %automatic pause for acquisitions
         AutoPause = 0;
     end

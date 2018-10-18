@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 07-Oct-2018 18:41:25
+% Last Modified by GUIDE v2.5 16-Oct-2018 12:33:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,7 +60,7 @@ handles.ADCcheckbox.Value = ~isempty(daqParam.ADC);
 handles.pHmeterCheckbox.Value = ~isempty(daqParam.PHmeter);
 handles.pumpCheckbox.Value = ~isempty(daqParam.Pump);
 handles.stageCheckbox.Value = ~isempty(daqParam.Stage);
-handles.targetConcEdit.String = num2str(daqParam.TargetConc);
+handles.targetConcEdit.String = '0';
 % Choose default command line output for DAQprogramMainGUI
 handles.output = hObject;
 % Update handles structure
@@ -87,53 +87,49 @@ function pHmeterGUIbutton_Callback(~,~,~)
 pHGUI = pHmeterGUI;
 setappdata(0,'pHGUI',pHGUI);
 
-% --- Executes on button press in flowControl.
-function flowControl_Callback(~,~,~)
-flowGUI = flowControlGUI;
-setappdata(0,'flowGUI',flowGUI);
+% --- Executes on button press in individualChannelControl.
+function individualChannelControl_Callback(~,~,~)
+individualChannelControl = individualChannelControlGUI;
+setappdata(0,'individualChannelControl',individualChannelControl);
 
 % --- Executes on button press in setFlowRate.
 function setFlowRate_Callback(~,~,~)
 flowRateGUI = setFlowRateGUI;
 setappdata(0,'flowRateGUI',flowRateGUI);
 
-% --- Executes on button press in solutionGUI.
-function solutionGUI_Callback(~,~,~)
-solutionGUI;
+% --- Executes on button press in pumpAndSolutionGUI.
+function pumpAndSolutionGUI_Callback(~,~,~)
+configurePumpAndSolutionsGUI;
 
 function targetConcEdit_Callback(hObject,~,~)
-% hObject    handle to targetConcEdit (see GCBO)
+%hObject handle to targetConcEdit (see GCBO)
 %set TargetConc from edit
 daqParam = getappdata(0,'daqParam');
 daqParam.TargetConc = str2double(hObject.String);
 
-% --- Executes on button press in flowTargetConcButton.
-function flowTargetConcButton_Callback(~,~,~)
-%calculate rates
-pump = getappdata(0,'pump');
+% --- Executes on button press in startFlowButton.
+function startFlowButton_Callback(~,~,~)
 daqParam = getappdata(0,'daqParam');
-rates = pump.calculateRates(daqParam.TargetConc);
-%set rates
-pump.setFlowRates(rates);
-%start flow
-pump.startFlowOpenValves();
+rates = daqParam.Pump.calculateRates(daqParam.TargetConc); %calculate
+daqParam.Pump.setFlowRates(rates); %set rates
+daqParam.Pump.startFlowOpenValves(); %start flow
 
 % --- Executes on button press in stopFlowButton.
 function stopFlowButton_Callback(~,~,~)
-pump = getappdata(0,'pump');
-pump.stopFlowCloseValves();
+daqParam = getappdata(0,'daqParam');
+daqParam.Pump.stopFlowCloseValves();
 
-% --- Executes on button press in configureMeasurement.
-function configureMeasurement_Callback(~,~,~)
-configureAcqGUI;
-
-% --- Executes on button press in configureFlowControl.
-function configureFlowControl_Callback(~,~,~)
-configureFlowControlGUI;
+% --- Executes on button press in programmedPumpControl.
+function programmedPumpControl_Callback(~,~,~)
+programmedPumpControlGUI;
 
 % --- Executes on button press in configureStageControl.
 function configureStageControl_Callback(~,~,~)
 configureStageControlGUI;
+
+% --- Executes on button press in configureAcquisition.
+function configureAcquisition_Callback(~,~,~)
+configureAcqGUI;
 
 function acqNameEdit_Callback(hObject,~,~)
 % hObject    handle to acqNameEdit (see GCBO)
@@ -141,8 +137,8 @@ function acqNameEdit_Callback(hObject,~,~)
 daqParam = getappdata(0,'daqParam');
 daqParam.Name = hObject.String;
 
-% --- Executes on button press in startExperiment.
-function startExperiment_Callback(~,~,~)
+% --- Executes on button press in startAcquisition.
+function startAcquisition_Callback(~,~,~)
 % handles    structure with handles and user data (see GUIDATA)
 %get daqParam for name
 daqParam = getappdata(0,'daqParam');
@@ -151,23 +147,23 @@ acquisition = Acquisition(daqParam.Name);
 setappdata(0,daqParam.Name,acquisition);
 acquisition.startAcquisition;
 
-% --- Executes on button press in pauseExperiment.
-function pauseExperiment_Callback(~,~,~)
+% --- Executes on button press in pauseAcquisition.
+function pauseAcquisition_Callback(~,~,~)
 %get daqParam for name
 daqParam = getappdata(0,'daqParam');
 acquisition = getappdata(0,daqParam.Name);
 acquisition.pauseAcquisition;
 
-% --- Executes on button press in resumeExperiment.
-function resumeExperiment_Callback(~,~,~)
+% --- Executes on button press in resumeAcquisition.
+function resumeAcquisition_Callback(~,~,~)
 % handles    structure with handles and user data (see GUIDATA)
 %get daqParam for name
 daqParam = getappdata(0,'daqParam');
 acquisition = getappdata(0,daqParam.Name);
 acquisition.resumeAcquisition;
 
-% --- Executes on button press in stopExperiment.
-function stopExperiment_Callback(~,~,~)
+% --- Executes on button press in stopAcquisition.
+function stopAcquisition_Callback(~,~,~)
 %get daqParam for name
 daqParam = getappdata(0,'daqParam');
 acquisition = getappdata(0,daqParam.Name);

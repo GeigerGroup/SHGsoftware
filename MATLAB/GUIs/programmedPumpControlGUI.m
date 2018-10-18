@@ -1,27 +1,27 @@
-function varargout = configureFlowControlGUI(varargin)
-%CONFIGUREFLOWCONTROLGUI M-file for configureFlowControlGUI.fig
-%      CONFIGUREFLOWCONTROLGUI, by itself, creates a new CONFIGUREFLOWCONTROLGUI or raises the existing
+function varargout = programmedPumpControlGUI(varargin)
+%PROGRAMMEDPUMPCONTROLGUI M-file for programmedPumpControlGUI.fig
+%      PROGRAMMEDPUMPCONTROLGUI, by itself, creates a new PROGRAMMEDPUMPCONTROLGUI or raises the existing
 %      singleton*.
 %
-%      H = CONFIGUREFLOWCONTROLGUI returns the handle to a new CONFIGUREFLOWCONTROLGUI or the handle to
+%      H = PROGRAMMEDPUMPCONTROLGUI returns the handle to a new PROGRAMMEDPUMPCONTROLGUI or the handle to
 %      the existing singleton*.
 %
-%      CONFIGUREFLOWCONTROLGUI('Property','Value',...) creates a new CONFIGUREFLOWCONTROLGUI using the
+%      PROGRAMMEDPUMPCONTROLGUI('Property','Value',...) creates a new PROGRAMMEDPUMPCONTROLGUI using the
 %      given property value pairs. Unrecognized properties are passed via
-%      varargin to configureFlowControlGUI_OpeningFcn.  This calling syntax produces a
+%      varargin to programmedPumpControlGUI_OpeningFcn.  This calling syntax produces a
 %      warning when there is an existing singleton*.
 %
-%      CONFIGUREFLOWCONTROLGUI('CALLBACK') and CONFIGUREFLOWCONTROLGUI('CALLBACK',hObject,...) call the
-%      local function named CALLBACK in CONFIGUREFLOWCONTROLGUI.M with the given input
+%      PROGRAMMEDPUMPCONTROLGUI('CALLBACK') and PROGRAMMEDPUMPCONTROLGUI('CALLBACK',hObject,...) call the
+%      local function named CALLBACK in PROGRAMMEDPUMPCONTROLGUI.M with the given input
 %      arguments.
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help configureFlowControlGUI
+% Edit the above text to modify the response to help programmedPumpControlGUI
 
-% Last Modified by GUIDE v2.5 02-Oct-2017 17:42:08
+% Last Modified by GUIDE v2.5 16-Oct-2018 12:25:04
 
 % Menu for specifying the points and conditions for the flow system made up
 % of a pump and solenoid valve system, the data of which is stored in
@@ -33,8 +33,8 @@ function varargout = configureFlowControlGUI(varargin)
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @configureFlowControlGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @configureFlowControlGUI_OutputFcn, ...
+                   'gui_OpeningFcn', @programmedPumpControlGUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @programmedPumpControlGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [], ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -49,8 +49,8 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before configureFlowControlGUI is made visible.
-function configureFlowControlGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before programmedPumpControlGUI is made visible.
+function programmedPumpControlGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -58,18 +58,18 @@ function configureFlowControlGUI_OpeningFcn(hObject, eventdata, handles, varargi
 % varargin   unrecognized PropertyName/PropertyValue pairs from the
 %            command line (see VARARGIN)
 
-% Choose default command line output for configureFlowControlGUI
+% Choose default command line output for programmedPumpControlGUI
 handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes configureFlowControlGUI wait for user response (see UIRESUME)
+% UIWAIT makes programmedPumpControlGUI wait for user response (see UIRESUME)
 % uiwait(handles.configureFlowControl);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = configureFlowControlGUI_OutputFcn(hObject, eventdata, handles)
+function varargout = programmedPumpControlGUI_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB

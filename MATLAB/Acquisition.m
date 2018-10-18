@@ -149,7 +149,7 @@ classdef Acquisition < handle
                         %set current condition for writing to file
                         obj.CurrentSolution = daqParam.FlowConcentrationValue(obj.FlowIndex);
                         %save current rates
-                        daqParam.PumpStates = rates;
+                        daqParam.Pump.FlowRates = rates;
                         %set flow rates and start flow
                         daqParam.Pump.setFlowRates(rates);
                         daqParam.Pump.startFlowOpenValves();
