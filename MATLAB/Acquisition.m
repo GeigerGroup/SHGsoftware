@@ -33,7 +33,14 @@ classdef Acquisition < handle
                     obj.Name = name;
                     
                     %create timer to time acquisition
-                    obj.Timer = createDataTimer(obj);
+                    %repeatedly polls the photon counter every 400 ms
+                    %to see when data is ready, then gets other data
+                    obj.Timer = timer;
+                    obj.Timer.StartFcn = @(~,~) disp('Acquisition started.'); 
+                    obj.Timer.TimerFcn = {@(~,~,obj) obj.getData, obj}; 
+                    obj.Timer.StopFcn = @(~,~) disp('Acqusition stopped.'); 
+                    obj.Timer.Period = 0.4; obj.Timer.StartDelay = 0.1;
+                    obj.Timer.ExecutionMode = 'fixedRate';
                     
                     %get current daqParam
                     daqParam = getappdata(0,'daqParam');

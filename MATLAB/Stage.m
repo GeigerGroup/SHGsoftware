@@ -102,7 +102,7 @@ classdef Stage < handle
             [~,posloc] = findpeaks(fineYfit);
             %if there is no positive peak take points at two edges of stage
             if isempty(posloc)
-                fineStagePos = [97.7 95.7 93.7 91.7 10 8 6 4 2]';
+                fineStagePos = [95.7 91.7 8 4 0]';
             else
                 fineStagePos = findPositions(fineX(posloc));
             end
@@ -111,7 +111,7 @@ classdef Stage < handle
             [~,negloc] = findpeaks(-fineYfit);
             %if there is no negative peak take points at two edges of stage
             if isempty(negloc)
-                fineStagePos = vertcat(fineStagePos,[97.7 95.7 93.7 91.7 10 8 6 4 2]');
+                fineStagePos = vertcat(fineStagePos,[95.7 91.7 8 4 0]');
             else
                 fineStagePos = vertcat(fineStagePos,findPositions(fineX(negloc)));
             end
@@ -123,7 +123,7 @@ classdef Stage < handle
             %function to find points around center
             function positions = findPositions(centerPos)
                 %create 9 points, centered around center position
-                positions = [-8 -6 -4 -2 0 2 4 6 8]' + centerPos;
+                positions = [-8 -4 0 4 8]' + centerPos;
                 if min(positions) < 0
                     %if any are below zero, move to edge
                     positions = positions - min(positions);
