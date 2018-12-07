@@ -2,9 +2,8 @@ classdef DAQparam < handle
     properties
         %references of physical objects
         PhotonCounter
-        NIDAQ
-        ADC
-        Pump
+        FlowSystem
+        PowerADC
         PHmeter
         Stage
              
@@ -16,7 +15,7 @@ classdef DAQparam < handle
         
         %booleans of if enabled for an acquisition
         PhotonCounterEnabled = true;
-        ADCpowerEnabled = false;
+        PowerADCEnabled = false;
         FlowControl = false;
         PHmeterEnabled = false;
         StageControlEnabled = false;

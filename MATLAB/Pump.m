@@ -34,6 +34,14 @@ classdef Pump < handle
                         fprintf(obj.Serial,strcat(num2str(i),'M')); % set to flowrate
                         setFlowRate(obj,i,20); % flowrate to 20
                     end
+                    
+                    %set pump in flow system, create if needed
+                    daqParam = getappdata(0,'daqParam');
+                    if isempty(daqParam.FlowSystem)
+                        daqParam.FlowSystem = FlowSystem()
+                    end
+                    daqParam.FlowSystem.Pump = obj;
+                    
                 else
                     error('Input COM port must be char');
                 end

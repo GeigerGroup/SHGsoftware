@@ -56,10 +56,12 @@ function manageConnectionsGUI_OpeningFcn(hObject, ~, handles, varargin)
 daqParam = getappdata(0,'daqParam');
 
 handles.photonCounterCheckbox.Value = ~isempty(daqParam.PhotonCounter);
-handles.NIDAQcheckbox.Value = ~isempty(daqParam.NIDAQ);
 handles.ADCcheckbox.Value = ~isempty(daqParam.ADC);
+
+handles.valveControlCheckbox.Value = ~isempty(daqParam.FlowSystem.ValveControl);
+handles.pumpCheckbox.Value = ~isempty(daqParam.FlowSystem.Pump);
 handles.pHmeterCheckbox.Value = ~isempty(daqParam.PHmeter);
-handles.pumpCheckbox.Value = ~isempty(daqParam.Pump);
+
 handles.stageCheckbox.Value = ~isempty(daqParam.Stage);
 
 %get in handles to master figure to output checkbox values

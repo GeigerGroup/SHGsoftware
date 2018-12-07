@@ -28,6 +28,11 @@ classdef LabJackADC < handle
                 'LJ_ioPIN_CONFIGURATION_RESET', 0, 0, 0);
         end
         
+        %set labjack to be ADC
+        function setAsADC()
+            
+        end
+        
         function voltage = getReading(obj)
             voltage = 0.0;
             
@@ -52,5 +57,12 @@ classdef LabJackADC < handle
             voltage = mean(tempArray);
             return
         end
+        
+        %set labjack to be valve control
+        function setAsValveControl()
+            
+        end
+        
+
     end
 end
