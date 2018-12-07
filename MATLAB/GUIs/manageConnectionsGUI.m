@@ -22,7 +22,7 @@ function varargout = manageConnectionsGUI(varargin)
 
 % Edit the above text to modify the response to help manageConnectionsGUI
 
-% Last Modified by GUIDE v2.5 06-Oct-2018 15:35:33
+% Last Modified by GUIDE v2.5 07-Dec-2018 10:46:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,9 +56,9 @@ function manageConnectionsGUI_OpeningFcn(hObject, ~, handles, varargin)
 daqParam = getappdata(0,'daqParam');
 
 handles.photonCounterCheckbox.Value = ~isempty(daqParam.PhotonCounter);
-handles.ADCcheckbox.Value = ~isempty(daqParam.ADC);
+handles.powerADCcheckbox.Value = ~isempty(daqParam.PowerADC);
 
-handles.valveControlCheckbox.Value = ~isempty(daqParam.FlowSystem.ValveControl);
+handles.valveCheckbox.Value = ~isempty(daqParam.FlowSystem.Valve);
 handles.pumpCheckbox.Value = ~isempty(daqParam.FlowSystem.Pump);
 handles.pHmeterCheckbox.Value = ~isempty(daqParam.PHmeter);
 
@@ -137,34 +137,37 @@ handles.photonCounterCheckbox.Value = 1;
 handles.UserData.photonCounterCheckbox.Value = 1;
 
 
-% --- Executes on button press in ADCconnect.
-function ADCconnect_Callback(~,~, handles)
+% --- Executes on button press in powerADCconnect.
+function powerADCconnect_Callback(~,~, handles)
 % handles    structure with handles and user data (see GUIDATA)
-%create object
-labJack = LabJackADC();
+
+%create object according to device ID given
+lj = LabJackDev(handles.powerADCedit.String);
 
 %put object in daqParam
 daqParam = getappdata(0,'daqParam');
-daqParam.ADC = labJack;
+daqParam.PowerADC = lj;
 
 %set checkbox to 1
-handles.ADCcheckbox.Value = 1;
-handles.UserData.ADCcheckbox.Value = 1;
+handles.powerADCcheckbox.Value = 1;
+handles.UserData.powerADCcheckbox.Value = 1;
 
 
-% --- Executes on button press in NIDAQconnect.
-function NIDAQconnect_Callback(~,~,handles)
+% --- Executes on button press in valveConnect.
+function valveConnect_Callback(~,~,handles)
 % handles    structure with handles and user data (see GUIDATA)
-%create object
-daqSession = DAQsession();
+
+%create labjack according to device ID given
+lj = LabJackDev(handles.valveEdit.String);
+lj.initValveControl()
 
 %put object in daqParam
 daqParam = getappdata(0,'daqParam');
-daqParam.NIDAQ = daqSession;
+daqParam.FlowSystem.Valve = lj;
 
 %set checkbox to 1
-handles.NIDAQcheckbox.Value = 1;
-handles.UserData.NIDAQcheckbox.Value = 1;
+handles.valveCheckbox.Value = 1;
+handles.UserData.valveCheckbox.Value = 1;
 
 
 % --- Executes on button press in pHmeterConnect.

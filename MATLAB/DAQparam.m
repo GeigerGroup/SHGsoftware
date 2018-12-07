@@ -2,7 +2,7 @@ classdef DAQparam < handle
     properties
         %references of physical objects
         PhotonCounter
-        FlowSystem
+        FlowSystem = FlowSystem()
         PowerADC
         PHmeter
         Stage

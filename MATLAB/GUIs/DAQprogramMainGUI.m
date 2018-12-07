@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 16-Oct-2018 12:33:07
+% Last Modified by GUIDE v2.5 07-Dec-2018 10:30:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,12 +55,15 @@ daqParam = DAQparam();
 setappdata(0,'daqParam',daqParam);
 %set checkbox values, target concentration edit
 handles.photonCounterCheckbox.Value = ~isempty(daqParam.PhotonCounter);
-handles.NIDAQcheckbox.Value = ~isempty(daqParam.NIDAQ);
-handles.ADCcheckbox.Value = ~isempty(daqParam.ADC);
+handles.powerADCcheckbox.Value = ~isempty(daqParam.PowerADC);
+
+handles.valveCheckbox.Value = ~isempty(daqParam.FlowSystem.Valve);
+handles.pumpCheckbox.Value = ~isempty(daqParam.FlowSystem.Pump);
+
 handles.pHmeterCheckbox.Value = ~isempty(daqParam.PHmeter);
-handles.pumpCheckbox.Value = ~isempty(daqParam.Pump);
 handles.stageCheckbox.Value = ~isempty(daqParam.Stage);
 handles.targetConcEdit.String = '0';
+
 % Choose default command line output for DAQprogramMainGUI
 handles.output = hObject;
 % Update handles structure
@@ -172,12 +175,6 @@ acquisition.stopAcquisition;
 % --- Executes on button press in closeProgram.
 function closeProgram_Callback(~,~,~)
 daqParam = getappdata(0,'daqParam');
-%delete NIDAQ session
-if ~isempty(daqParam.NIDAQ)
-    release(daqParam.NIDAQ.Session)
-    delete(daqParam.NIDAQ.Session)
-    daqreset
-end
 %release stage
 if ~isempty(daqParam.Stage)
     daqParam.Stage.close()
