@@ -56,7 +56,7 @@ handles.output = hObject;
 guidata(hObject, handles);
 %get daqParam
 daqParam = getappdata(0,'daqParam');
-pump = daqParam.Pump;
+pump = daqParam.FlowSystem.Pump;
 % if no pump is connected, return without doing anything.
 if isempty(pump)
     disp('No pump connected.')
@@ -79,21 +79,21 @@ handles.tubeIDpopup.String = tubeIDs;
 %set default
 handles.tubeIDpopup.Value = find(ismember(tubeIDs,pump.TubeID));
 %set total flow
-handles.totalFlowEdit.String = num2str(pump.TotalFlow);
+handles.totalFlowEdit.String = num2str(daqParam.FlowSystem.TotalFlow);
 %set checkbox/editbox values
 for i = 1:4
     %set each of the reservoirs that is enabled
-    handles.(strcat('res',num2str(i),'check')).Value = pump.Reservoirs(i);
+    handles.(strcat('res',num2str(i),'check')).Value = daqParam.FlowSystem.Reservoirs(i);
     %if salt is enabled
     if handles.saltCheck.Value
         %set salt values and default pH to 0
         handles.(strcat('salt',num2str(i),'edit')).String = ...
-            num2str(pump.Concentrations(i));
+            num2str(daqParam.FlowSystem.Concentrations(i));
         handles.(strcat('pH',num2str(i),'edit')).String = '0';
     else
         %else set pH values and default salt to 0
         handles.(strcat('pH',num2str(i),'edit')).String = ...
-            num2str(pump.Concentrations(i));
+            num2str(daqParam.FlowSystem.Concentrations(i));
         handles.(strcat('salt',num2str(i),'edit')).String = '0';
     end
 end
@@ -132,25 +132,27 @@ function updateClose_Callback(~,~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %get pump object
 daqParam = getappdata(0,'daqParam');
-pump = daqParam.Pump;
+flowsystem = daqParam.FlowSystem;
+pump = flowsystem.Pump;
+
 %set mode
-pump.Mode = handles.saltCheck.Value;
+flowsystem.Mode = handles.saltCheck.Value;
 %set total flow
-pump.TotalFlow = str2double(handles.totalFlowEdit.String);
+flowsystem.TotalFlow = str2double(handles.totalFlowEdit.String);
 %set tubeID
 pump.TubeID = handles.tubeIDpopup.String{handles.tubeIDpopup.Value};
 pump.setTubeIDs(pump.TubeID); %set tube ID
 %set check marks
 for i = 1:4
-    pump.Reservoirs(i) = handles.(strcat('res',num2str(i),'check')).Value;
+    flowsystem.Reservoirs(i) = handles.(strcat('res',num2str(i),'check')).Value;
     %if salt is enabled
     if handles.saltCheck.Value
         %set pump concentrations to salt values
-        pump.Concentrations(i) = ...
+        flowsystem.Concentrations(i) = ...
             str2double(handles.(strcat('salt',num2str(i),'edit')).String);
     else
         %set pump concentrations to pH values
-        pump.Concentrations(i) = ...
+        flowsystem.Concentrations(i) = ...
             str2double(handles.(strcat('pH',num2str(i),'edit')).String);
     end
 end

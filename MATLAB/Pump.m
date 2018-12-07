@@ -3,13 +3,7 @@
 classdef Pump < handle
     properties
         Serial
-        Mode = true; %true is salt mode, false is pH mode
-        Concentrations = [0 0 0 0]; %one must hold water or most dilute sol
-        Reservoirs = [true true true true];
-        TotalFlow = 20;
-        TubeID = '2.29';
-        FlowRates = [0 0 0 0];
-        TargetConc = 0;
+        TubeID = '2.29'
     end
     
     methods
@@ -35,11 +29,8 @@ classdef Pump < handle
                         setFlowRate(obj,i,20); % flowrate to 20
                     end
                     
-                    %set pump in flow system, create if needed
+                    %set pump in flow system
                     daqParam = getappdata(0,'daqParam');
-                    if isempty(daqParam.FlowSystem)
-                        daqParam.FlowSystem = FlowSystem()
-                    end
                     daqParam.FlowSystem.Pump = obj;
                     
                 else
@@ -48,154 +39,11 @@ classdef Pump < handle
             end
         end
         
-        function rates = calculateRates(obj,conc)
-                   
-            %select which reservoir to mix to get value
-            res = [];
-            
-            %salt mode
-            if obj.Mode == true
-                %if reservoir 2 is enabled
-                if obj.Reservoirs(2)
-                    % if concentratrion <= reservoir 2, choose it
-                    if conc <= obj.Concentrations(2)
-                        res = 2;
-                    elseif obj.Reservoirs(3)
-                        %if concentration <= reservoir3, choose it
-                        if conc <= obj.Concentrations(3)
-                            res = 3;
-                        elseif obj.Reservoirs(4)
-                            if conc <= obj.Concentrations(4)
-                                res = 4;
-                            else
-                                disp('Concentration too high for res 4')
-                            end
-                        else
-                            disp('Concentration too high for res 3')
-                        end
-                    else
-                        disp('Concentration too high for res 2')
-                    end
-                else
-                    disp('Only one reservoir available?')
-                end
 
-                if isempty(res)
-                    disp('No flowrates found')
-                    rates = [];
-                    return
-                end
-
-                concMatrix = [obj.Concentrations(1) obj.Concentrations(res); 1 1];
-                solMatrix = [obj.TotalFlow*conc; obj.TotalFlow];
-
-                flowMatrix = inv(concMatrix)*solMatrix; %calculate rates
-            end
-            
-            %pH mode, can only go one direction from 7
-            if obj.Mode == false
-                %if reservoir 2 is enabled
-                if obj.Reservoirs(2)
-                    % if pH is closer to 7 than reservoir 2, choose it
-                    if abs(conc-7) <= abs(obj.Concentrations(2)-7)
-                        res = 2;
-                    elseif obj.Reservoirs(3)
-                        %if pH is closer to 7 than reservoir 3, choose it
-                        if abs(conc-7) <= abs(obj.Concentrations(3)-7)
-                            res = 3;
-                        elseif obj.Reservoirs(4)
-                            if abs(conc-7) <= abs(obj.Concentrations(4)-7)
-                                res = 4;
-                            else
-                                disp('pH too far from 7 for res 4')
-                            end
-                        else
-                            disp('pH too far from 7 for res 4')
-                        end
-                    else
-                        disp('pH too far from 7 for res 4')
-                    end
-                else
-                    disp('Only one reservoir available?')
-                end
-
-                if isempty(res)
-                    disp('No flowrates found')
-                    rates = [];
-                    return
-                end
-                
-                % if pH 7, only flow first reservoir
-                if conc == 7
-                    flowMatrix = [obj.TotalFlow 0 0 0];
-                end
-                        
-                % if going up 
-                if conc > 7
-                    concOHres = 10^-(14-obj.Concentrations(res));
-                    concOHwant = 10^-(14-conc);
-                    
-                    concMatrix = [0 concOHres; 1 1];
-                    solMatrix = [obj.TotalFlow*concOHwant; obj.TotalFlow];
-                    
-                    flowMatrix = inv(concMatrix)*solMatrix; %calculate rates
-                    flowMatrix = round(flowMatrix,4); %round to four decimal places
-                end
-                
-                % if going down
-                if conc < 7
-                    concHres = 10^-obj.Concentrations(res);
-                    concHwant = 10^-conc;
-                    
-                    concMatrix = [0 concHres; 1 1];
-                    solMatrix = [obj.TotalFlow*concHwant; obj.TotalFlow];
-                    
-                    flowMatrix = inv(concMatrix)*solMatrix; %calculate rates
-                    flowMatrix = round(flowMatrix,4);
-                end
-
-                
-            end
-
-            
-            disp(conc)
-            
-            %check rates
-            if strcmp(obj.TubeID,'3.17')
-                flowMin = 0.35;
-                flowMax = 35;
-            elseif strcmp(obj.TubeID,'2.29')
-                flowMin = 0.24;
-                flowMax = 24;
-            elseif strcmp(obj.TubeID,'0.76')
-                flowMin = 0.036;
-                flowMax = 3.6;
-            elseif strcmp(obj.TubeID,'0.64')
-                flowMin = 0.026;
-                flowMax = 2.6;
-            end
-            
-            flowCheck = ((flowMatrix < flowMin)|(flowMatrix > flowMax)) & (flowMatrix ~= 0);
-            
-            
-            rates = [0 0 0 0];
-            
-            if sum(flowCheck) == 0
-                rates(1) = flowMatrix(1);
-                rates(res) = flowMatrix(2);
-            else
-                rates = [];
-                disp('Flow settings out of bounds')
-            end
-            
-        end
-        
-        
-        
         %tube ID functions
         function setTubeID(obj,channel,ID)
             fprintf(obj.Serial,strcat(num2str(channel),'+',...
-                num2str(str2num(ID)*100,'%04.f'))); %set tube ID
+                num2str(str2double(ID)*100,'%04.f'))); %set tube ID
         end
         
         function setTubeIDs(obj,ID)
@@ -212,9 +60,7 @@ classdef Pump < handle
             end
         end
         
-        
-        
-        %flow rate functions
+        %set flow rate function
         function setFlowRate(obj,channel,rate)     
             %convert flow rate to pump format
             string = sprintf('%.3e', rate);
@@ -222,16 +68,6 @@ classdef Pump < handle
             %send to pump
             fprintf(obj.Serial,strcat(num2str(channel),'f',string));
             obj.FlowRates(channel) = rate;
-        end
-        
-        
-        function setFlowRates(obj,rates)      
-            for i = 1:4
-                %set flow rate
-                obj.setFlowRate(i,rates(i));
-            end
-            disp('Flow Rates:')
-            disp(rates)
         end
         
         %starting/stopping flow functions
@@ -243,39 +79,5 @@ classdef Pump < handle
             fprintf(obj.Serial,strcat(num2str(channel),'I'));
         end
         
-        function startFlows(obj)
-            for i = 1:4
-                obj.startFlow(i);
-            end
-        end
-        
-        function stopFlows(obj)
-            for i = 1:4
-                obj.stopFlow(i);
-            end
-        end
-        
-        function startFlowOpenValves(obj)
-            daqParam = getappdata(0,'daqParam'); %get daqParam
-            %iterate through each channel
-            for i = 1:4
-                %if channel flow rate is greater than 0
-                if obj.FlowRates(i) > 0
-                    %open solenoid, start flow
-                    daqParam.NIDAQ.setValveState(i,true);
-                    obj.startFlow(i);
-                else
-                    %or close solenoid, stop flow
-                    daqParam.NIDAQ.setValveState(i,false);
-                    obj.stopFlow(i)
-                end
-            end
-        end
-        
-        function stopFlowCloseValves(obj)
-            daqParam = getappdata(0,'daqParam'); %get daqParam
-            obj.stopFlows(); %stop flow
-            daqParam.NIDAQ.setValveStates(false(1,5)); %close valves
-        end
     end
 end

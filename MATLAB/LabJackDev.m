@@ -5,23 +5,22 @@ classdef LabJackDev < handle
     end
     
     methods
+        %initialize labjack device according to local ID number
         function obj = LabJackDev(IDnum) 
             % Make the UD .NET assembly visible in MATLAB.
             ljasm = NET.addAssembly('LJUDDotNet');
             ljudObj = LabJack.LabJackUD.LJUD;
-
-            
+    
             % Open the LabJack corresponding to the IDnum entered.
             [~, ljhandle] = ljudObj.OpenLabJackS('LJ_dtU3', 'LJ_ctUSB',IDnum, false, 0);
             
-            
+            %give object reference to labjack library and the device handle
             obj.udObj = ljudObj;
             obj.handle = ljhandle;
             
             % Start by using the pin_configuration_reset IOType so that all pin
             % assignments are in the factory default condition.
-            ljudObj.ePutS(ljhandle, ...
-                'LJ_ioPIN_CONFIGURATION_RESET', 0, 0, 0);
+            ljudObj.ePutS(ljhandle, 'LJ_ioPIN_CONFIGURATION_RESET', 0, 0, 0);
         end
         
         %function to set digital output to control valve states

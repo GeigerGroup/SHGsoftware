@@ -53,12 +53,13 @@ function individualChannelControlGUI_OpeningFcn(hObject,~, handles, varargin)
 % Choose default command line output for individualChannelControlGUI
 handles.output = hObject;
 daqParam = getappdata(0,'daqParam');
+fs = daqParam.FlowSystem;
 %set flow state check boxes and flow rate edits according to their values
 for i = 1:4
     str = strcat('checkbox',num2str(i)); %valve number
-    handles.(str).Value = daqParam.NIDAQ.SolStates(i); %set value from solstates
+    handles.(str).Value = fs.ValveStates(i); %set value from solstates
     str = strcat('flowEdit',num2str(i));
-    handles.(str).String = num2str(daqParam.Pump.FlowRates(i));
+    handles.(str).String = num2str(fs.FlowRates(i));
 end
 % Update handles structure
 guidata(hObject, handles);
@@ -70,59 +71,56 @@ function varargout = individualChannelControlGUI_OutputFcn(~,~, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-
 function flowEdit_Callback(hObject, eventdata, handles)
 % hObject    handle to flowEdit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 daqParam = getappdata(0,'daqParam');
 %set channel from which edit with the string from the edit
-daqParam.Pump.setFlowRate(str2double(hObject.Tag(end)),...
+daqParam.FlowSystem.setFlowRate(str2double(hObject.Tag(end)),...
     str2double(hObject.String));
 
 % --- Executes on button press in pushbutton.
 function flowbutton_Callback(hObject,~,handles)
 % hObject    handle to pushbutton (see GCBO)
 % handles    structure with handles and user data (see GUIDATA)
+%get flow system object
 daqParam = getappdata(0,'daqParam');
+fs = daqParam.FlowSystem;
+%channel according to which button is pressed
+channel = str2double(hObject.String);
 %if pump flow rate is set greater than 0
-if daqParam.Pump.FlowRates(str2num(hObject.String)) > 0
-    %get states, change this one to opposite
-    solstates = daqParam.NIDAQ.SolStates;
-    solstates(str2num(hObject.String)) = ~solstates(str2num(hObject.String));
-    %send to SolenoidValve to change
-    daqParam.NIDAQ.setValveStates(solstates);
+if fs.FlowRates(channel) > 0
+    % if it's currently off
+    if ~(handles.(strcat('checkbox',hObject.String)).Value)
+        fs.startFlow(channel)
+    else
+        % if it's currently on
+        fs.stopFlow(channel)
+    end
     %update checkbox
     str = strcat('checkbox',hObject.String); %valve number
-    handles.(str).Value = ~handles.(str).Value;    
-    %control pump
-    if solstates(str2num(hObject.String))
-         %if you just turned it on
-        daqParam.Pump.startFlow(str2num(hObject.String));
-    else
-         %if you just turned it off
-        daqParam.Pump.stopFlow(str2num(hObject.String));
-    end
+    handles.(str).Value = ~handles.(str).Value;
 end
 
 % --- Executes on button press in startAllButton.
 function startAllButton_Callback(~,~,handles)
 daqParam = getappdata(0,'daqParam');
-daqParam.Pump.startFlowOpenValves();
+fs = daqParam.FlowSystem;
+fs.startFlow([1 2 3 4]);
 %set flow state check boxes according to their values
 for i = 1:4
-    str = strcat('checkbox',num2str(i)); %valve number
-    handles.(str).Value = daqParam.NIDAQ.SolStates(i); %set value from solstates
+    handles.(strcat('checkbox',num2str(i))).Value = fs.ValveStates(i);
 end
 
 % --- Executes on button press in stopAllButton.
 function stopAllButton_Callback(~,~,handles)
 daqParam = getappdata(0,'daqParam');
-daqParam.Pump.stopFlowCloseValves();
-%set flow state check box according to their values
+fs = daqParam.FlowSystem;
+fs.stopFlow([1 2 3 4]);
+%set checkboxes off
 for i = 1:4
-    str = strcat('checkbox',num2str(i)); %valve number
-    handles.(str).Value = false; %set value from solstates
+    handles.(strcat('checkbox',num2str(i))).Value = false;
 end
 
 % --- Executes on button press in closeButton
