@@ -1,3 +1,6 @@
+%an acquisition is one set of acquired data from the photon counter, and
+%the associated other data that is collected with it.
+
 classdef Acquisition < handle
     properties
         %name of acquisition and timer
@@ -67,6 +70,9 @@ classdef Acquisition < handle
                         obj.CurrentStagePosition = daqParam.Stage.ScanPositions(1);
                         daqParam.Stage.goTo(obj.CurrentStagePosition);
                     end
+                    
+                    %start acquisition
+                    obj.startAcquisition()
                 else
                     error('Input name must be char')
                 end

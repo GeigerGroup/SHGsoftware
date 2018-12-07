@@ -6,7 +6,7 @@ classdef DAQdata
         Time
         PhotonCounterA
         PhotonCounterB
-        ADCpower
+        PowerADC
         pH
         Cond
         Solution
@@ -30,8 +30,8 @@ classdef DAQdata
             end
             
             %then adc data
-            if ~isempty(obj.ADCpower)
-                str = strcat(str,'\t',num2str(obj.ADCpower(end)));
+            if ~isempty(obj.PowerADC)
+                str = strcat(str,'\t',num2str(obj.PowerADC(end)));
             end
             
             %then pH meter data

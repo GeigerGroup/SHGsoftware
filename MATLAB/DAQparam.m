@@ -1,3 +1,8 @@
+%the key class of the entire software, that gets stored as 'daqParam' on
+%the base appdata of matlab and holds both references to physical objects
+%like the photon counter, pump, stage, etc. as well as parameters for the
+%scans
+
 classdef DAQparam < handle
     properties
         %references of physical objects
@@ -11,7 +16,7 @@ classdef DAQparam < handle
         ScanLength = Inf;
         Interval = 1;
         DwellTime = 0.002;
-        Channel = 'A';
+        Channel = 'AB';
         
         %booleans of if enabled for an acquisition
         PhotonCounterEnabled = true;

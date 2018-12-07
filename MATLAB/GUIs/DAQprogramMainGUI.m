@@ -148,7 +148,6 @@ daqParam = getappdata(0,'daqParam');
 %initialize acquisition with name from edit box
 acquisition = Acquisition(daqParam.Name);
 setappdata(0,daqParam.Name,acquisition);
-acquisition.startAcquisition;
 
 % --- Executes on button press in pauseAcquisition.
 function pauseAcquisition_Callback(~,~,~)

@@ -24,7 +24,7 @@ classdef DAQfigure
             end
             %number of plots total
             obj.NumPlots = sum([daqParam.PhotonCounterEnabled*multiple ...
-                daqParam.ADCpowerEnabled daqParam.PHmeterEnabled*2 ...
+                daqParam.PowerADCEnabled daqParam.PHmeterEnabled*2 ...
                 daqParam.FlowControl daqParam.StageControlEnabled]);
             
             %create list of strings to point to data
@@ -56,8 +56,8 @@ classdef DAQfigure
             end
             
             %adc plot for power data
-            if daqParam.ADCpowerEnabled
-                obj.DataPointers{plotIndex} = 'ADCpower';
+            if daqParam.PowerADCEnabled
+                obj.DataPointers{plotIndex} = 'PowerADC';
                 obj.Figure.Children(plotIndex).YLabel.String = 'Power';
                 plotIndex = plotIndex + 1;
             end
@@ -111,7 +111,7 @@ classdef DAQfigure
                 string = strcat(string,'\tcountsB');
             end
             %then adc data
-            if daqParam.ADCpowerEnabled
+            if daqParam.PowerADCEnabled
                 string = strcat(string,'\tpower');
             end
             %then pH data
