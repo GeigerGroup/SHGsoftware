@@ -62,7 +62,7 @@ handles.scanLengthEdit.String = num2str(daqParam.ScanLength);
 handles.photonCounterCheck.Value = daqParam.PhotonCounterEnabled;
 
 %set whether ADC power monitoring is on or off
-handles.adcPowerCheck.Value = daqParam.ADCpowerEnabled;
+handles.adcPowerCheck.Value = daqParam.PowerADCEnabled;
 
 %set whether flow control is on or off
 handles.flowControlCheck.Value = daqParam.FlowControl;
@@ -111,7 +111,7 @@ daqParam.ScanLength = str2double(handles.scanLengthEdit.String);
 
 %set boolean parameters
 daqParam.PhotonCounterEnabled = handles.photonCounterCheck.Value;
-daqParam.ADCpowerEnabled = handles.adcPowerCheck.Value;
+daqParam.PowerADCEnabled = handles.adcPowerCheck.Value;
 daqParam.FlowControl = handles.flowControlCheck.Value;
 daqParam.PHmeterEnabled = handles.pHmeterCheck.Value;
 daqParam.StageControlEnabled = handles.stageCheck.Value;

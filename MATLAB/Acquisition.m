@@ -103,8 +103,8 @@ classdef Acquisition < handle
                 end
             end
             %then ADC power data
-            if (daqParam.ADCpowerEnabled)
-                powerData = daqParam.ADC.getReading();
+            if (daqParam.PowerADCEnabled)
+                powerData = daqParam.PowerADC.getReading();
                 obj.Data.ADCpower = vertcat(obj.Data.ADCpower,powerData);
             end
             %then pH meter data
