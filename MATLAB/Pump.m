@@ -20,17 +20,20 @@ classdef Pump < handle
                     %open COMport
                     fopen(obj.Serial);
                                       
-                    %initialize certain settings
+                    %get flow system to get settings
+                    daqParam = getappdata(0,'daqParam');
+                    fs = daqParam.FlowSystem;
                     
+                    %initialize certain settings
                     for i = 1:4
                         obj.setTubeID(i,obj.TubeID); %set tube ID
                         fprintf(obj.Serial,strcat(num2str(i),'J')); % set rotation to clockwise,
                         fprintf(obj.Serial,strcat(num2str(i),'M')); % set to flowrate
-                        setFlowRate(obj,i,20); % flowrate to 20
+                        obj.setFlowRate(i,20); % flowrate to 20
                     end
                     
                     %set pump in flow system
-                    daqParam = getappdata(0,'daqParam');
+                    
                     daqParam.FlowSystem.Pump = obj;
                     
                 else
@@ -67,7 +70,6 @@ classdef Pump < handle
             string = strcat(string(1),string(3:5),string(7),string(9));
             %send to pump
             fprintf(obj.Serial,strcat(num2str(channel),'f',string));
-            obj.FlowRates(channel) = rate;
         end
         
         %starting/stopping flow functions

@@ -199,7 +199,7 @@ pump = Pump(COMport);
 
 %put object in daqParam
 daqParam = getappdata(0,'daqParam');
-daqParam.Pump = pump;
+daqParam.FlowSystem.Pump = pump;
 
 %set checkbox to 1
 handles.pumpCheckbox.Value = 1;

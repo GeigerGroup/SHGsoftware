@@ -113,7 +113,7 @@ daqParam.TargetConc = str2double(hObject.String);
 % --- Executes on button press in startFlowButton.
 function startFlowButton_Callback(~,~,~)
 daqParam = getappdata(0,'daqParam');
-rates = daqParam.Pump.calculateRates(daqParam.TargetConc); %calculate
+rates = daqParam.FlowSystem.calculateRates(daqParam.TargetConc); %calculate
 daqParam.Pump.setFlowRates(rates); %set rates
 daqParam.Pump.startFlowOpenValves(); %start flow
 
@@ -178,6 +178,8 @@ daqParam = getappdata(0,'daqParam');
 if ~isempty(daqParam.Stage)
     daqParam.Stage.close()
 end
+%make daqParam blank
+setappdata(0,'daqParam',[])
 %delete serial instruments
 delete(instrfind)
 %close window

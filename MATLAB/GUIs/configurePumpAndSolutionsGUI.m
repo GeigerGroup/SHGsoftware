@@ -56,14 +56,15 @@ handles.output = hObject;
 guidata(hObject, handles);
 %get daqParam
 daqParam = getappdata(0,'daqParam');
-pump = daqParam.FlowSystem.Pump;
+fs = daqParam.FlowSystem;
+pump = fs.Pump;
 % if no pump is connected, return without doing anything.
 if isempty(pump)
     disp('No pump connected.')
     return
 end
 %set whether pH or salt has been enabled
-if pump.Mode
+if fs.Mode
     %if salt mode
     handles.saltCheck.Value = true;
     handles.pHcheck.Value = false;
@@ -106,7 +107,7 @@ function varargout = configurePumpAndSolutionsGUI_OutputFcn(~,~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %if no pump is connnected, close
 daqParam = getappdata(0,'daqParam');
-if isempty(daqParam.Pump)
+if isempty(fs.Pump)
     close
     return
 end
@@ -132,27 +133,27 @@ function updateClose_Callback(~,~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %get pump object
 daqParam = getappdata(0,'daqParam');
-flowsystem = daqParam.FlowSystem;
-pump = flowsystem.Pump;
+fs = daqParam.FlowSystem;
+pump = fs.Pump;
 
 %set mode
-flowsystem.Mode = handles.saltCheck.Value;
+fs.Mode = handles.saltCheck.Value;
 %set total flow
-flowsystem.TotalFlow = str2double(handles.totalFlowEdit.String);
+fs.TotalFlow = str2double(handles.totalFlowEdit.String);
 %set tubeID
 pump.TubeID = handles.tubeIDpopup.String{handles.tubeIDpopup.Value};
 pump.setTubeIDs(pump.TubeID); %set tube ID
 %set check marks
 for i = 1:4
-    flowsystem.Reservoirs(i) = handles.(strcat('res',num2str(i),'check')).Value;
+    fs.Reservoirs(i) = handles.(strcat('res',num2str(i),'check')).Value;
     %if salt is enabled
     if handles.saltCheck.Value
         %set pump concentrations to salt values
-        flowsystem.Concentrations(i) = ...
+        fs.Concentrations(i) = ...
             str2double(handles.(strcat('salt',num2str(i),'edit')).String);
     else
         %set pump concentrations to pH values
-        flowsystem.Concentrations(i) = ...
+        fs.Concentrations(i) = ...
             str2double(handles.(strcat('pH',num2str(i),'edit')).String);
     end
 end
