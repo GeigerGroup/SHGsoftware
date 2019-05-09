@@ -20,10 +20,9 @@ classdef Queue < handle
         %add a certain number of acquisitions with basename, at the
         %timeinterval in minutes
         function addSequential(obj,basename,number, timeinterval)
-            %first one starts in 1 minute
+            %first one starts in 1 minute, then intervals after that
             times = datetime + minutes(1)+ minutes(0:timeinterval:number*timeinterval);
-           
-            %then all the rest start in intervals after that
+            
             for i = 1:number
                 obj.addEvent(strcat(basename,num2str(i)),times(i))
             end
