@@ -22,7 +22,7 @@ function varargout = configurePhotonCounterGUI(varargin)
 
 % Edit the above text to modify the response to help configurePhotonCounterGUI
 
-% Last Modified by GUIDE v2.5 09-May-2018 11:25:46
+% Last Modified by GUIDE v2.5 09-May-2019 12:09:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -160,6 +160,15 @@ end
 daqParam = getappdata(0,'daqParam');
 hObject.String = num2str(daqParam.DwellTime);
 
+
+% --- Executes on button press in setPharosButton.
+function setPharosButton_Callback(hObject, eventdata, handles)
+% hObject    handle to setPharosButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+daqParam = getappdata(0,'daqParam');
+pc = daqParam.PhotonCounter;
+pc.setPharosSettings();
 
 % --- Executes on button press in closeButton.
 function closeButton_Callback(hObject, eventdata, handles)

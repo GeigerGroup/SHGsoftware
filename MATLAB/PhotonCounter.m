@@ -40,9 +40,11 @@ classdef PhotonCounter < handle
             obj.setInput('A',1);
             obj.setInput('B',1);
             
-            %set input discriminator to -40 mV
-            obj.setDiscriminatorLevel('A',-0.025);
-            obj.setDiscriminatorLevel('B',-0.025);
+            %set input discriminator to +100 mV
+            obj.setDiscriminatorLevel('A',0.100);
+            obj.setDiscriminatorSlope('A','rise');
+            obj.setDiscriminatorLevel('B',0.100);
+            obj.setDiscriminatorSlope('B','rise');
             
             %set gate settings
             obj.setGateMode('A','FIXED');
@@ -53,7 +55,7 @@ classdef PhotonCounter < handle
             obj.setGateWidth('B',5e-8);
             
             %set gate delay
-            obj.setGateDelay('A',360e-9);
+            obj.setGateDelay('A',325e-9);
             obj.setGateDelay('B',0);
             
         end
@@ -144,6 +146,21 @@ classdef PhotonCounter < handle
             character = obj.channelCharacter(channel);
             
             obj.sendCommand(strcat('CI',character,',',num2str(input)));
+        end
+        
+        function setDiscriminatorSlope(obj,channel,slope)
+            %channel is 'A','B','T'
+            character = obj.channelCharacter(channel);
+            
+            if strcmp(slope,'rise')
+                slopenum = 0;
+            elseif strcmp(slope,'fall')
+                slopenum = 1;
+            else
+                slopenum = [];
+            end
+            
+            obj.sendCommand(strcat('DS',character,',',num2str(slopenum)))
         end
             
         
