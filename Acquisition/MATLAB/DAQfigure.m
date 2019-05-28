@@ -25,7 +25,7 @@ classdef DAQfigure
             %number of plots total
             obj.NumPlots = sum([daqParam.PhotonCounterEnabled*multiple ...
                 daqParam.PowerADCEnabled daqParam.PHmeterEnabled*2 ...
-                daqParam.FlowControl daqParam.StageControlEnabled]);
+                daqParam.FlowControl (daqParam.StageControlEnabled && (daqParam.Stage.ContMode == false))]);
             
             %create list of strings to point to data
             obj.DataPointers = cell(obj.NumPlots,1);
@@ -82,7 +82,7 @@ classdef DAQfigure
             end
             
             %stageplots
-            if daqParam.StageControlEnabled
+            if (daqParam.StageControlEnabled && (daqParam.Stage.ContMode == false))
                 %plot for stage position
                 obj.DataPointers{plotIndex} = 'Stage';
                 obj.Figure.Children(plotIndex).YLabel.String = 'Stage';
@@ -123,7 +123,7 @@ classdef DAQfigure
                 string = strcat(string,'\tsolution');
             end
             %then stage position
-            if daqParam.StageControlEnabled
+            if (daqParam.StageControlEnabled && (daqParam.Stage.ContMode == false))
                 string = strcat(string,'\tstage');
             end
             string = strcat(string,'\r\n');

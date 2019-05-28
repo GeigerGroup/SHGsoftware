@@ -22,7 +22,7 @@ function varargout = configureStageControlGUI(varargin)
 
 % Edit the above text to modify the response to help configureStageControlGUI
 
-% Last Modified by GUIDE v2.5 10-Oct-2018 13:00:50
+% Last Modified by GUIDE v2.5 28-May-2019 13:25:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -62,7 +62,7 @@ daqParam = getappdata(0,'daqParam');
 handles.posEdit.String = num2str(daqParam.Stage.PosPerScan);
 handles.pointsEdit.String = num2str(daqParam.Stage.PointsPerPos);
 %set value of peak find
-handles.peakFindCheck.Value = daqParam.Stage.PeakFind;
+handles.contModeCheck.Value = daqParam.Stage.ContMode;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -92,7 +92,7 @@ daqParam = getappdata(0,'daqParam');
 %update number of points in scan and whether peak find is on
 daqParam.Stage.PosPerScan = str2double(handles.posEdit.String);
 daqParam.Stage.PointsPerPos = str2double(handles.pointsEdit.String); 
-daqParam.Stage.PeakFind = handles.peakFindCheck.Value;
+daqParam.Stage.ContMode = handles.contModeCheck.Value;
 
 %calculate positions to move stage to from number of points
 stageMin = 0;

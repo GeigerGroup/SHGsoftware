@@ -65,10 +65,16 @@ classdef Acquisition < handle
                         obj.CurrentSolution = daqParam.FlowConcentrationValue(1);
                     end
                     
-                    %if stage control is enabled, go to initial position
+                    %if stage control is enabled, go to 0
                     if daqParam.StageControlEnabled
-                        obj.CurrentStagePosition = daqParam.Stage.ScanPositions(1);
-                        daqParam.Stage.goTo(obj.CurrentStagePosition);
+                        if daqParam.Stage.ContMode == false
+                            obj.CurrentStagePosition = daqParam.Stage.ScanPositions(1);
+                            daqParam.Stage.goTo(obj.CurrentStagePosition);
+                        else
+                            daqParam.Stage.goTo(0);
+                            %start continuous mode code
+                            daqParam.Stage.startContScan;
+                        end
                     end
                     
                     %start acquisition
@@ -180,60 +186,31 @@ classdef Acquisition < handle
             
             %if stage control is on
             if daqParam.StageControlEnabled
-                %check if its at the end of an interval
-                if (rem(obj.PointNumber,daqParam.Stage.PointsPerPos) == 0)
-                    %iterate index since interval is over
-                    obj.StageIndex = obj.StageIndex + 1;
-                    %if peak find is active (i.e. it has already done a
-                    %rough scan and peak find is enabled
-                    if obj.PeakFindActive
-                        %check if peak find has scanned all positions, if
-                        %so, stop
-                        if (obj.StageIndex > length(obj.PeakFindPositions))
+                if daqParam.Stage.ContMode == false
+                    %check if its at the end of an interval
+                    if (rem(obj.PointNumber,daqParam.Stage.PointsPerPos) == 0)
+                        %iterate index since interval is over
+                        obj.StageIndex = obj.StageIndex + 1;
+                        %if scan is over
+                        if (obj.StageIndex > length(daqParam.Stage.ScanPositions))
+                            %just end
                             daqParam.Stage.goTo(0);
                             obj.stopAcquisition;
                             return
                         else
-                            %if it hasn't, pause photon coutner, iterate
-                            %position, resume scan
-                            daqParam.PhotonCounter.stopScan()
-                            obj.CurrentStagePosition = obj.PeakFindPositions(obj.StageIndex);
-                            daqParam.Stage.goTo(obj.CurrentStagePosition);
-                            daqParam.PhotonCounter.startScan();
-                        end
-                    else
-                        %if peak find isn't active, check if rough scan is
-                        %over
-                        if (obj.StageIndex > length(daqParam.Stage.ScanPositions))
-                            %if rough scan is over and peak find is enabled
-                            if daqParam.Stage.PeakFind
-                                %stop photon counter
-                                daqParam.PhotonCounter.stopScan()
-                                %turn on flag to enter peak find mode
-                                obj.PeakFindActive = true;
-                                %calculate peak fine positions with data
-                                obj.PeakFindPositions = daqParam.Stage.calculateFineStagePos(obj.Data);
-                                %reset stage index to 1
-                                obj.StageIndex = 1;
-                                %set first peak find position
-                                obj.CurrentStagePosition = obj.PeakFindPositions(obj.StageIndex);
-                                daqParam.Stage.goTo(obj.CurrentStagePosition);
-                                daqParam.PhotonCounter.startScan()
-                            else
-                                %if rough scan is over but peak find isn't
-                                %enabled, just end
-                                daqParam.Stage.goTo(0);
-                                obj.stopAcquisition;
-                                return
-                            end
-                        else
-                            %if peak scan isn't active and rough scan is
-                            %still continuing, just go to next point
+                            %if scan is still continuing, just go to next point
                             daqParam.PhotonCounter.stopScan();
                             obj.CurrentStagePosition = daqParam.Stage.ScanPositions(obj.StageIndex);
                             daqParam.Stage.goTo(obj.CurrentStagePosition);
                             daqParam.PhotonCounter.startScan();
                         end
+                    end
+                else
+                    %continuous mode code
+                    reachedEnd = daqParam.Stage.checkContScan();
+                    if (reachedEnd)
+                        obj.stopAcquisition;
+                        daqParam.Stage.goTo(0);
                     end
                 end
             end

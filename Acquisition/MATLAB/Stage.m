@@ -5,12 +5,12 @@ classdef Stage < handle
     
     properties
         ID
+        
         PointsPerPos = 0;
         PosPerScan = 0;
-        
-        PeakFind = false;
-        PeakFindActive = false;
         ScanPositions;
+        
+        ContMode = false;
     end 
     
     methods
@@ -64,75 +64,43 @@ classdef Stage < handle
             end
         end
         
-        function fineStagePos = calculateFineStagePos(~,data)
-            %get daqParam
-            daqParam = getappdata(0,'daqParam');
+        function startContScan(obj)
+            %this function starts scan to 99.7 without pausing MATLAB
+            %to wait for the end
+            position = 99.7;
+            steps = int32(position*400);
+            %go to the position
+            disp(['Going to ' num2str(position) ' mm']);
             
-            %interval of autopause
-            interval = daqParam.Stage.PointsPerPos;
-            %calculate stage positions, average of counts
-            pos = mean(reshape(data.Stage,...
-                [interval,length(data.Stage)/interval]))';
-            counts = mean(reshape(data.PhotonCounterA,...
-                [interval,length(data.PhotonCounterA)/interval]))';
-
-            %fit it with sine function with offset            
-            ft = fittype('a*sin(b*x+c)+d');
-            %init guesses
-            aGuess = (max(counts)-min(counts))/2;
-            bGuess = 0.05;
-            cGuess = 0;
-            dGuess = mean(counts);
-            
-            fo = fitoptions(ft);
-            fo.StartPoint = [aGuess,bGuess,cGuess,dGuess];
-            fo.Lower = [0,0.02,-2*pi,0];
-            fo.Upper = [100000,0.1,2*pi,200000];
-            
-            %fit data to sin
-            sinfit = fit(pos,counts,ft,fo)
-            figure
-            plot(sinfit,pos,counts)
-            
-            %evaluate fit over 1000 points in stage position
-            fineX = linspace(0,99.7,1000)';
-            fineYfit = feval(sinfit,fineX);
-            
-            %positive peak
-            [~,posloc] = findpeaks(fineYfit);
-            %if there is no positive peak take points at two edges of stage
-            if isempty(posloc)
-                fineStagePos = [95.7 91.7 8 4 0]';
-            else
-                fineStagePos = findPositions(fineX(posloc));
-            end
-            
-            %negative positions
-            [~,negloc] = findpeaks(-fineYfit);
-            %if there is no negative peak take points at two edges of stage
-            if isempty(negloc)
-                fineStagePos = vertcat(fineStagePos,[95.7 91.7 8 4 0]');
-            else
-                fineStagePos = vertcat(fineStagePos,findPositions(fineX(negloc)));
-            end
-            
-            %put it in descending order
-            fineStagePos = sort(fineStagePos,1,'descend');
-            
-            
-            %function to find points around center
-            function positions = findPositions(centerPos)
-                %create 9 points, centered around center position
-                positions = [-8 -4 0 4 8]' + centerPos;
-                if min(positions) < 0
-                    %if any are below zero, move to edge
-                    positions = positions - min(positions);
-                elseif max(positions) > 99.7
-                    %if any are above 99.7, move to edge
-                    positions = positions - (max(positions)-99.7);
-                end
+            result = calllib('libximc','command_move', obj.ID, ...
+                steps, 0);
+            if result ~= 0
+                    disp(['Command failed with code', num2str(result)]);
             end
         end
+        
+        function reachedEnd = checkContScan(obj)
+            %this function checks if the scan has reached the end, and if
+            %so will stop the acquisition
+            
+            %derived from standa example matlab code
+            dummy_struct = struct('Flags',999);
+            parg_struct = libpointer('status_t', dummy_struct);
+            
+            [result, res_struct] = calllib('libximc','get_status', obj.ID, parg_struct);
+            clear parg_struct
+            if result ~= 0
+                disp(['Command failed with code', num2str(result)]);
+                res_struct = 0;
+            end
+            
+            if res_struct.CurPosition == 39880
+                reachedEnd = true;
+            else
+                reachedEnd = false;
+            end
+        end
+        
         
         function close(obj)
             device_id_ptr = libpointer('int32Ptr', obj.ID);
