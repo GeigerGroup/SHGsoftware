@@ -63,6 +63,8 @@ handles.posEdit.String = num2str(daqParam.Stage.PosPerScan);
 handles.pointsEdit.String = num2str(daqParam.Stage.PointsPerPos);
 %set value of peak find
 handles.contModeCheck.Value = daqParam.Stage.ContMode;
+%set value of speed
+handles.speedEdit.String = num2str(daqParam.Stage.ScanSpeed);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -89,10 +91,13 @@ function updateClosePush_Callback(~,~, handles)
 %get daqParam
 daqParam = getappdata(0,'daqParam');
 
-%update number of points in scan and whether peak find is on
+%update number of points in scan
 daqParam.Stage.PosPerScan = str2double(handles.posEdit.String);
 daqParam.Stage.PointsPerPos = str2double(handles.pointsEdit.String); 
+
+%update cont mode and speed
 daqParam.Stage.ContMode = handles.contModeCheck.Value;
+daqParam.Stage.ScanSpeed = str2double(handles.speedEdit.String);
 
 %calculate positions to move stage to from number of points
 stageMin = 0;

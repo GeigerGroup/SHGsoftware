@@ -11,6 +11,8 @@ classdef Stage < handle
         ScanPositions;
         
         ContMode = false;
+        NormalSpeed = 1000;
+        ScanSpeed = 1000;
     end 
     
     methods
@@ -37,6 +39,9 @@ classdef Stage < handle
             
             %open device
             obj.ID = calllib('libximc','open_device', dev_name);
+            
+            %set default speed
+            obj.setSpeed(1000);
         end
         
         function goTo(obj,position)
@@ -69,6 +74,10 @@ classdef Stage < handle
             %to wait for the end
             position = 99.7;
             steps = int32(position*400);
+            
+            %set stage speed to scan speed
+            obj.setSpeed(obj.ScanSpeed);
+            
             %go to the position
             disp(['Going to ' num2str(position) ' mm']);
             
@@ -87,7 +96,8 @@ classdef Stage < handle
             dummy_struct = struct('Flags',999);
             parg_struct = libpointer('status_t', dummy_struct);
             
-            [result, res_struct] = calllib('libximc','get_status', obj.ID, parg_struct);
+            [result, res_struct] = calllib('libximc','get_status', ...
+                obj.ID, parg_struct);
             clear parg_struct
             if result ~= 0
                 disp(['Command failed with code', num2str(result)]);
@@ -101,6 +111,63 @@ classdef Stage < handle
             end
         end
         
+        function speed = getSpeed(obj)
+            %derived from standa example matlab code
+            dummy_struct = struct('Speed',0);
+            parg_struct = libpointer('move_settings_t', dummy_struct);
+            
+            % read current engine settings from motor
+            [result, move_settings] = ...
+                calllib('libximc','get_move_settings', obj.ID, parg_struct);
+            
+            clear parg_struct
+            if result ~= 0
+                disp(['Command failed with code', num2str(result)]);
+            end
+            speed = move_settings.Speed;        
+        end
+        
+        function setSpeed(obj,speed)
+            %max speed is 4000 steps per second
+            %we're going to limit to 2000 here
+            %default accelaration is 2000 steps/s/s
+            %default decelaration is 4000 steps/s/s
+            
+            %check that its an integer
+            if ((floor(speed)~=speed) || ~isnumeric(speed))
+                disp('Speed must be integer')
+                return
+            else
+                %check that its in the correct range
+                if ((speed < 0) || (speed > 2000))
+                    disp('Speed must be between 0 and 2000 steps/s')
+                    return
+                else
+                    %derived from standa example matlab code
+                    dummy_struct = struct('Speed',0);
+                    parg_struct = libpointer('move_settings_t', dummy_struct);
+                    
+                    % read current engine settings from motor
+                    [result, move_settings] = calllib('libximc','get_move_settings',...
+                        obj.ID, parg_struct);
+                    
+                    clear parg_struct
+                    if result ~= 0
+                        disp(['Command failed with code', num2str(result)]);
+                    end
+                    
+                    move_settings.Speed = speed;
+                    move_settings.uSpeed = 0;
+                    
+                    % write engine settings to controller
+                    result = calllib('libximc', 'set_move_settings', ...
+                        obj.ID, move_settings);
+                    if result ~= 0
+                        disp(['Command failed with code', num2str(result)]);
+                    end
+                end
+            end
+        end
         
         function close(obj)
             device_id_ptr = libpointer('int32Ptr', obj.ID);

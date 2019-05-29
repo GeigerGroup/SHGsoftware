@@ -210,6 +210,8 @@ classdef Acquisition < handle
                     reachedEnd = daqParam.Stage.checkContScan();
                     if (reachedEnd)
                         obj.stopAcquisition;
+                        %set speed back to normal speed
+                        daqParam.Stage.setSpeed(daqParam.Stage.NormalSpeed);
                         daqParam.Stage.goTo(0);
                     end
                 end
