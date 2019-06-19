@@ -34,7 +34,7 @@ classdef PhotonCounter < handle
             end
         end
         
-        function setPharosSettings(obj)
+        function setPharosAmpSettings(obj)
             
             %set both to input 1
             obj.setInput('A',1);
@@ -58,6 +58,23 @@ classdef PhotonCounter < handle
             obj.setGateDelay('A',325e-9);
             obj.setGateDelay('B',0);
             
+        end
+        
+        function setPharosOscSettings(obj)
+            
+            %set both to input 1
+            obj.setInput('A',1);
+            obj.setInput('B',1);
+            
+            %set input discriminator to +100 mV
+            obj.setDiscriminatorLevel('A',0.100);
+            obj.setDiscriminatorSlope('A','rise');
+            obj.setDiscriminatorLevel('B',0.100);
+            obj.setDiscriminatorSlope('B','rise');
+            
+            %set gate settings
+            obj.setGateMode('A','CW');
+            obj.setGateMode('B','CW');            
         end
         
         %scan functions
