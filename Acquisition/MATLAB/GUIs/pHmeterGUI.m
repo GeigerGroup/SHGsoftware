@@ -78,7 +78,8 @@ function getReadingButton_Callback(hObject, eventdata, handles)
 % hObject    handle to getReadingButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-pHmeter = getappdata(0,'pHmeter');
+daqParam = getappdata(0,'daqParam');
+pHmeter = daqParam.PHmeter;
 [pH, cond] = pHmeter.getData();
 handles.pHtext.String = num2str(pH);
 handles.condText.String = num2str(cond);
