@@ -23,7 +23,13 @@ classdef DAQparam < handle
         PowerADCEnabled = false;
         FlowControl = false;
         PHmeterEnabled = false;
-        StageControlEnabled = false;
+        
+        %parameters for scan
+        PosPerScan = 10
+        PointsPerPos = 10
+        ContMode = false
+        ScanSpeed = 2000;
+        ScanPositions
 
         %parameters for flow control
         FlowConcentrationPoint;

@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 07-Dec-2018 10:30:46
+% Last Modified by GUIDE v2.5 29-Nov-2019 11:11:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -126,19 +126,39 @@ daqParam.Pump.stopFlowCloseValves();
 function programmedPumpControl_Callback(~,~,~)
 programmedPumpControlGUI;
 
-% --- Executes on button press in configureStageControl.
-function configureStageControl_Callback(~,~,~)
-configureStageControlGUI;
+
+function nameEdit_Callback(hObject,~,~)
+% hObject    handle to nameEdit (see GCBO)
+%get daqParam, set the name
+daqParam = getappdata(0,'daqParam');
+daqParam.Name = hObject.String;
+
+
+% --- Executes on button press in configureScan.
+function configureScan_Callback(~,~,~)
+configureScanGUI;
+
+% --- Executes on button press in startScan.
+function startScan_Callback(~,~,~)
+%get daqParam for name
+daqParam = getappdata(0,'daqParam');
+%initialize acquisition with name from edit box
+scan = Scan(daqParam.Name);
+setappdata(0,daqParam.Name,scan);
+
+
+% --- Executes on button press in stopScan.
+function stopScan_Callback(~,~,~)
+%get daqParam for name
+daqParam = getappdata(0,'daqParam');
+scan = getappdata(0,daqParam.Name);
+scan.stopScan;
+
 
 % --- Executes on button press in configureAcquisition.
 function configureAcquisition_Callback(~,~,~)
 configureAcqGUI;
 
-function acqNameEdit_Callback(hObject,~,~)
-% hObject    handle to acqNameEdit (see GCBO)
-%get daqParam, set the name
-daqParam = getappdata(0,'daqParam');
-daqParam.Name = hObject.String;
 
 % --- Executes on button press in startAcquisition.
 function startAcquisition_Callback(~,~,~)

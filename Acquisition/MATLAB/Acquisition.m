@@ -44,14 +44,14 @@ classdef Acquisition < handle
                     daqParam = getappdata(0,'daqParam');
                     
                     %create new figure based on what is enabled
-                    obj.Figure = DAQfigure();
+                    obj.Figure = AcqFigure();
                     
                     %create data structure to hold data
-                    obj.Data = DAQdata();
+                    obj.Data = AcqData();
 
                     %write header to file
                     fileID = fopen(strcat(obj.Name,'.txt'),'w');
-                    fprintf(fileID,obj.Figure.createHeader());
+                    fprintf(fileID,obj.Data.createHeader());
                     fclose(fileID);
                     
                     %if flow control is enabled, set to first position
@@ -60,19 +60,6 @@ classdef Acquisition < handle
                         obj.CurrentSolution = daqParam.FlowConcentrationValue(1);
                     end
                     
-                    %now we have to check Scan obj...
-                    %if stage control is enabled, go to 0
-%                     if daqParam.StageControlEnabled
-%                         if daqParam.Stage.ContMode == false
-%                             obj.CurrentStagePosition = daqParam.Stage.ScanPositions(1);
-%                             daqParam.Stage.goTo(obj.CurrentStagePosition);
-%                         else
-%                             daqParam.Stage.goTo(0);
-%                             %start continuous mode code
-%                             daqParam.Stage.startContScan;
-%                         end
-%                     end
-                    
                     %start acquisition
                     obj.startAcquisition()
                 else
@@ -80,6 +67,24 @@ classdef Acquisition < handle
                 end
             else
                 error('Acquisition needs a name')
+            end
+        end
+        
+        %start the acquisition
+        function startAcquisition(obj)
+            %start timer
+            start(obj.Timer);
+            
+            %get current parameters
+            daqParam = getappdata(0,'daqParam');
+            
+            %start photon counter
+            if (daqParam.PhotonCounterEnabled)
+                daqParam.PhotonCounter.resetScan
+                daqParam.PhotonCounter.startScan
+                
+                %clear out first point?
+                daqParam.PhotonCounter.getData;
             end
         end
         
@@ -129,10 +134,6 @@ classdef Acquisition < handle
             if (daqParam.FlowControl)
                 obj.Data.Solution = vertcat(obj.Data.Solution,obj.CurrentSolution);
             end
-            %stage position
-            if daqParam.StageControlEnabled
-                obj.Data.Stage = vertcat(obj.Data.Stage,obj.CurrentStagePosition);
-            end
             
             %update plots
             obj.Figure.updatePlots(obj.Data);
@@ -180,39 +181,6 @@ classdef Acquisition < handle
                 return
             end
             
-            %if stage control is on
-            if daqParam.StageControlEnabled
-                if daqParam.Stage.ContMode == false
-                    %check if its at the end of an interval
-                    if (rem(obj.PointNumber,daqParam.Stage.PointsPerPos) == 0)
-                        %iterate index since interval is over
-                        obj.StageIndex = obj.StageIndex + 1;
-                        %if scan is over
-                        if (obj.StageIndex > length(daqParam.Stage.ScanPositions))
-                            %just end
-                            daqParam.Stage.goTo(0);
-                            obj.stopAcquisition;
-                            return
-                        else
-                            %if scan is still continuing, just go to next point
-                            daqParam.PhotonCounter.stopScan();
-                            obj.CurrentStagePosition = daqParam.Stage.ScanPositions(obj.StageIndex);
-                            daqParam.Stage.goTo(obj.CurrentStagePosition);
-                            daqParam.PhotonCounter.startScan();
-                        end
-                    end
-                else
-                    %continuous mode code
-                    reachedEnd = daqParam.Stage.checkContScan();
-                    if (reachedEnd)
-                        obj.stopAcquisition;
-                        %set speed back to normal speed
-                        daqParam.Stage.setSpeed(daqParam.Stage.NormalSpeed);
-                        daqParam.Stage.goTo(0);
-                    end
-                end
-            end
-            
             %check if should pause because of automatic next pause
             if (daqParam.AutoPause > 0)
                 if (rem(obj.PointNumber,daqParam.AutoPause) == 0)
@@ -224,23 +192,7 @@ classdef Acquisition < handle
             obj.PointNumber = obj.PointNumber + 1;
         end
         
-        %start the acquisition
-        function startAcquisition(obj)
-            %start timer
-            start(obj.Timer);
-            
-            %get current parameters
-            daqParam = getappdata(0,'daqParam');
-            
-            %start photon counter
-            if (daqParam.PhotonCounterEnabled)
-                daqParam.PhotonCounter.resetScan
-                daqParam.PhotonCounter.startScan
-                
-                %clear out first point?
-                daqParam.PhotonCounter.getData;
-            end
-        end
+
         
         function pauseAcquisition(obj)        
             %stop timer

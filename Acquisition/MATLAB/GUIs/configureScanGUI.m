@@ -22,7 +22,7 @@ function varargout = configureScanGUI(varargin)
 
 % Edit the above text to modify the response to help configureScanGUI
 
-% Last Modified by GUIDE v2.5 20-Nov-2019 18:26:36
+% Last Modified by GUIDE v2.5 29-Nov-2019 10:43:40
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -52,13 +52,19 @@ function configureScanGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to configureScanGUI (see VARARGIN)
 
-%take in current DAQ parameters
-daqParam = getappdata(0,'daqParam');
-
-handles.stageCheck.value = daqParam.StageControlEnabled;
-
 % Choose default command line output for configureScanGUI
 handles.output = hObject;
+
+%get daqParam
+daqParam = getappdata(0,'daqParam');
+
+%set edit strings from stage
+handles.posEdit.String = num2str(daqParam.PosPerScan);
+handles.pointsEdit.String = num2str(daqParam.PointsPerPos);
+%set value of peak find
+handles.contModeCheck.Value = daqParam.ContMode;
+%set value of speed
+handles.speedEdit.String = num2str(daqParam.ScanSpeed);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -78,20 +84,25 @@ function varargout = configureScanGUI_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
-% --- Executes on button press in updateValues.
-function updateValues_Callback(hObject, eventdata, handles)
-% hObject    handle to updateValues (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
+% --- Executes on button press in updateClosePush.
+function updateClosePush_Callback(~,~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
-%take in current DAQ parameters
+%get daqParam
 daqParam = getappdata(0,'daqParam');
 
-%convert to numbers and set scan length
-daqParam.ScanLength = str2double(handles.scanLengthEdit.String);
+%update number of points in scan
+daqParam.PosPerScan = str2double(handles.posEdit.String);
+daqParam.PointsPerPos = str2double(handles.pointsEdit.String); 
 
-%set boolean parameters
-daqParam.StageControlEnabled = handles.stageCheck.Value;
+%update cont mode and speed
+daqParam.ContMode = handles.contModeCheck.Value;
+daqParam.ScanSpeed = str2double(handles.speedEdit.String);
 
-%close update values and close window
+%calculate positions to move stage to from number of points
+stageMin = 0;
+stageMax = 99.7;
+daqParam.ScanPositions = linspace(stageMin,stageMax,str2double(handles.posEdit.String));
+
+%close
 close

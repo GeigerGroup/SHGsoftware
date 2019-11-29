@@ -5,14 +5,6 @@ classdef Stage < handle
     
     properties
         ID
-        
-        PointsPerPos = 0;
-        PosPerScan = 0;
-        ScanPositions;
-        
-        ContMode = false;
-        NormalSpeed = 4000;
-        ScanSpeed = 1000;
     end 
     
     methods
@@ -45,6 +37,8 @@ classdef Stage < handle
         end
         
         function goTo(obj,position)
+            %this function goes to a position and doesn't return until
+            %it has reached there
             %put position in mm into steps
             if (position > 99.7 || position < 0)
                 disp('Position out of range')
@@ -69,18 +63,10 @@ classdef Stage < handle
             end
         end
         
-        function startContScan(obj)
-            %this function starts scan to 99.7 without pausing MATLAB
-            %to wait for the end
-            position = 99.7;
-            steps = int32(position*400);
-            
-            %set stage speed to scan speed
-            obj.setSpeed(obj.ScanSpeed);
-            
+        function goToContinuous(obj,position)            
+            %this function goes to a position and immediately returns
             %go to the position
-            disp(['Going to ' num2str(position) ' mm']);
-            
+            disp(['Going to ' num2str(position) ' mm']);        
             result = calllib('libximc','command_move', obj.ID, ...
                 steps, 0);
             if result ~= 0
@@ -88,9 +74,8 @@ classdef Stage < handle
             end
         end
         
-        function reachedEnd = checkContScan(obj)
-            %this function checks if the scan has reached the end, and if
-            %so will stop the acquisition
+        function position = getCurrentPosition(obj)
+        %this function returns the current position
             
             %derived from standa example matlab code
             dummy_struct = struct('Flags',999);
@@ -104,13 +89,9 @@ classdef Stage < handle
                 res_struct = 0;
             end
             
-            if res_struct.CurPosition == 39880
-                reachedEnd = true;
-            else
-                reachedEnd = false;
-            end
+            position = res_struct.CurPosition;
         end
-        
+              
         function speed = getSpeed(obj)
             %derived from standa example matlab code
             dummy_struct = struct('Speed',0);
@@ -129,7 +110,6 @@ classdef Stage < handle
         
         function setSpeed(obj,speed)
             %max speed is 4000 steps per second
-            %we're going to limit to 2000 here
             %default accelaration is 2000 steps/s/s
             %default decelaration is 4000 steps/s/s
             

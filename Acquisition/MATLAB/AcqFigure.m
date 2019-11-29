@@ -1,4 +1,4 @@
-classdef DAQfigure
+classdef AcqFigure
     %UNTITLED2 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -9,7 +9,7 @@ classdef DAQfigure
     end
     
     methods
-        function obj = DAQfigure()
+        function obj = AcqFigure()
             %create figure
             obj.Figure = figure;
             
@@ -25,7 +25,7 @@ classdef DAQfigure
             %number of plots total
             obj.NumPlots = sum([daqParam.PhotonCounterEnabled*multiple ...
                 daqParam.PowerADCEnabled daqParam.PHmeterEnabled*2 ...
-                daqParam.FlowControl (daqParam.StageControlEnabled && (daqParam.Stage.ContMode == false))]);
+                daqParam.FlowControl]);
             
             %create list of strings to point to data
             obj.DataPointers = cell(obj.NumPlots,1);
@@ -80,13 +80,6 @@ classdef DAQfigure
                 obj.Figure.Children(plotIndex).YLabel.String = 'Solution';
                 plotIndex = plotIndex + 1;
             end
-            
-            %stageplots
-            if (daqParam.StageControlEnabled && (daqParam.Stage.ContMode == false))
-                %plot for stage position
-                obj.DataPointers{plotIndex} = 'Stage';
-                obj.Figure.Children(plotIndex).YLabel.String = 'Stage';
-            end
         end
         
         function updatePlots(obj,data)
@@ -96,38 +89,7 @@ classdef DAQfigure
             end
         end
         
-        function string = createHeader(obj)
-            %creates header based on the plots included in the figure
-            %get parameters
-            daqParam = getappdata(0,'daqParam');
-            
-            %create header according to which data will be recorded
-            %start with photon counter data
-            string = 'time';
-            if contains(daqParam.Channel,'A')
-                string = strcat(string,'\tcountsA');
-            end
-            if contains(daqParam.Channel,'B')
-                string = strcat(string,'\tcountsB');
-            end
-            %then adc data
-            if daqParam.PowerADCEnabled
-                string = strcat(string,'\tpower');
-            end
-            %then pH data
-            if daqParam.PHmeterEnabled
-                string = strcat(string,'\tcond','\tpH');
-            end
-            %then target concentration
-            if daqParam.FlowControl
-                string = strcat(string,'\tsolution');
-            end
-            %then stage position
-            if (daqParam.StageControlEnabled && (daqParam.Stage.ContMode == false))
-                string = strcat(string,'\tstage');
-            end
-            string = strcat(string,'\r\n');
-        end
+
             
     end
 end
