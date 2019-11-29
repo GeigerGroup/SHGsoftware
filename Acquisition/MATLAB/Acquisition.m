@@ -20,11 +20,6 @@ classdef Acquisition < handle
         FlowIndex = 1;
         CurrentSolution
         
-        %point number for stage control
-        StageIndex = 1;
-        CurrentStagePosition
-        PeakFindActive = false;
-        PeakFindPositions;
     end
     
     methods
@@ -65,17 +60,18 @@ classdef Acquisition < handle
                         obj.CurrentSolution = daqParam.FlowConcentrationValue(1);
                     end
                     
+                    %now we have to check Scan obj...
                     %if stage control is enabled, go to 0
-                    if daqParam.StageControlEnabled
-                        if daqParam.Stage.ContMode == false
-                            obj.CurrentStagePosition = daqParam.Stage.ScanPositions(1);
-                            daqParam.Stage.goTo(obj.CurrentStagePosition);
-                        else
-                            daqParam.Stage.goTo(0);
-                            %start continuous mode code
-                            daqParam.Stage.startContScan;
-                        end
-                    end
+%                     if daqParam.StageControlEnabled
+%                         if daqParam.Stage.ContMode == false
+%                             obj.CurrentStagePosition = daqParam.Stage.ScanPositions(1);
+%                             daqParam.Stage.goTo(obj.CurrentStagePosition);
+%                         else
+%                             daqParam.Stage.goTo(0);
+%                             %start continuous mode code
+%                             daqParam.Stage.startContScan;
+%                         end
+%                     end
                     
                     %start acquisition
                     obj.startAcquisition()

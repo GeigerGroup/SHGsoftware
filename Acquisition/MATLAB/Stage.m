@@ -11,7 +11,7 @@ classdef Stage < handle
         ScanPositions;
         
         ContMode = false;
-        NormalSpeed = 1000;
+        NormalSpeed = 4000;
         ScanSpeed = 1000;
     end 
     
@@ -139,7 +139,7 @@ classdef Stage < handle
                 return
             else
                 %check that its in the correct range
-                if ((speed < 0) || (speed > 2000))
+                if ((speed < 0) || (speed > 4000))
                     disp('Speed must be between 0 and 2000 steps/s')
                     return
                 else
