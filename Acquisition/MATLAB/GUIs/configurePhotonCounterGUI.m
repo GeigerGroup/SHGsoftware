@@ -108,13 +108,10 @@ hObject.Value = find(ismember(hObject.String,daqParam.Channel));
 
 
 function intervalEdit_Callback(hObject, eventdata, handles)
-% hObject    handle to intervalEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+daqParam = getappdata(0,'daqParam');
+daqParam.PhotonCounter.setInterval(str2double(hObject.String));
 
-%change setting in photon counter, that also updates daqParam
-photonCounter = getappdata(0,'photonCounter');
-photonCounter.setInterval(str2double(hObject.String));
+
 
 
 % --- Executes during object creation, after setting all properties.
@@ -137,12 +134,9 @@ hObject.String = num2str(daqParam.Interval);
 
 function dwellTimeEdit_Callback(hObject, eventdata, handles)
 % hObject    handle to dwellTimeEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
 %change setting in photon counter, that also edits daqParam
-photonCounter = getappdata(0,'photonCounter');
-photonCounter.setDwellTime(str2double(hObject.String));
+daqParam = getappdata(0,'daqParam');
+daqParam.PhotonCounter.setDwellTime(str2double(hObject.String))
 
 % --- Executes during object creation, after setting all properties.
 function dwellTimeEdit_CreateFcn(hObject, eventdata, handles)

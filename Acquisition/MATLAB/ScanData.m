@@ -47,10 +47,10 @@ classdef ScanData
             if contains(daqParam.Channel,'B')
                 string = strcat(string,'\tcountsB');
             end
+            
             %then stage position
-            if (daqParam.ContMode == false)
-                string = strcat(string,'\tstage');
-            end
+            string = strcat(string,'\tstage');
+
             string = strcat(string,'\r\n');
         end
     end

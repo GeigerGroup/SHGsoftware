@@ -57,9 +57,20 @@ classdef Scan < handle
                         obj.CurrentStagePosition = daqParam.ScanPositions(1);
                         daqParam.Stage.goTo(obj.CurrentStagePosition);
                     else
-                        daqParam.Stage.goTo(0);
-                        %start continuous mode code
-                        daqParam.Stage.startContScan;
+                        %if continuous mode
+                        %if not at either end, go to 0
+                        if obj.checkAtEnd == false
+                            daqParam.Stage.goTo(0);
+                        else
+                            %If at start, go to end
+                            if daqParam.Stage.getCurrentPosition == 0
+                                daqParam.Stage.goToCont(99.7)
+                            %if at end, go to start
+                            elseif daqParam.Stage.getCurrentPosition == 39880
+                                daqParam.Stage.goToCont(0)
+                            end
+                        end
+
                     end
                     
                     obj.startScan()
@@ -111,9 +122,7 @@ classdef Scan < handle
                 end
             end
             %stage position
-            if daqParam.ContMode == false
-                obj.Data.Stage = vertcat(obj.Data.Stage,obj.CurrentStagePosition);
-            end
+            obj.Data.Stage = vertcat(obj.Data.Stage,daqParam.Stage.getCurrentPosition/400);
 
             %update plots
             obj.Figure.updatePlots(obj.Data);
@@ -141,10 +150,17 @@ classdef Scan < handle
                     obj.StageIndex = obj.StageIndex + 1;
                     %if scan is over
                     if (obj.StageIndex > length(daqParam.ScanPositions))
-                        %just end
-                        daqParam.Stage.goTo(0);
                         obj.stopScan;
-                        return
+                        daqParam.Stage.goTo(0);
+                        if daqParam.IndefiniteScans == true
+                            %start new scan
+                            daqParam.ScanNumber = daqParam.ScanNumber + 1;
+                            name = strcat(daqParam.Name,'_',num2str(daqParam.ScanNumber));
+                            scan = Scan(name);
+                            setappdata(0,name,scan);
+                        else
+                            return
+                        end
                     else
                         %if scan is still continuing, just go to next point
                         daqParam.PhotonCounter.stopScan();
@@ -155,12 +171,18 @@ classdef Scan < handle
                 end
             else
                 %continuous mode code
-                reachedEnd = daqParam.Stage.checkContScan();
-                if (reachedEnd)
-                    obj.stopScan;
-                    %set speed back to normal speed
-                    daqParam.Stage.setSpeed(daqParam.Stage.NormalSpeed);
-                    daqParam.Stage.goTo(0);
+                atEnd = obj.checkAtEnd();
+                if (atEnd)
+                    obj.stopScan;     
+                    if daqParam.IndefiniteScans == true 
+                        %start new scan
+                        daqParam.ScanNumber = daqParam.ScanNumber + 1;
+                        name = strcat(daqParam.Name,'_',num2str(daqParam.ScanNumber));
+                        scan = Scan(name);
+                        setappdata(0,name,scan);
+                    else
+                        daqParam.Stage.goTo(0);
+                    end
                 end
             end
             
@@ -174,9 +196,6 @@ classdef Scan < handle
             position = 99.7;
             steps = int32(position*400);
             
-            %set stage speed to scan speed
-            obj.setSpeed(obj.ScanSpeed);
-            
             %go to the position
             disp(['Going to ' num2str(position) ' mm']);
             
@@ -187,13 +206,17 @@ classdef Scan < handle
             end
         end
         
-        function reachedEnd = checkContScan(obj)
-
+        function atEnd = checkAtEnd(obj)
+            %get current parameters
+            daqParam = getappdata(0,'daqParam');
+            %get current position
+            position = daqParam.Stage.getCurrentPosition();
             
-            if res_struct.CurPosition == 39880
-                reachedEnd = true;
+            %check if at beginning or end
+            if ((position == 39880)||(position == 0))
+                atEnd = true;
             else
-                reachedEnd = false;
+                atEnd = false;
             end
         end
         

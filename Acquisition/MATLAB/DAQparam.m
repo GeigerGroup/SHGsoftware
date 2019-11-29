@@ -25,9 +25,12 @@ classdef DAQparam < handle
         PHmeterEnabled = false;
         
         %parameters for scan
-        PosPerScan = 10
-        PointsPerPos = 10
-        ContMode = false
+        PosPerScan = 10;
+        PointsPerPos = 10;
+        
+        ContMode = false;
+        IndefiniteScans = false;
+        ScanNumber = 1;
         ScanSpeed = 2000;
         ScanPositions
 

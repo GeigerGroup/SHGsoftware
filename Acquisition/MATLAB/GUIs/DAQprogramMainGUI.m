@@ -22,7 +22,7 @@ function varargout = DAQprogramMainGUI(varargin)
 
 % Edit the above text to modify the response to help DAQprogramMainGUI
 
-% Last Modified by GUIDE v2.5 29-Nov-2019 11:11:16
+% Last Modified by GUIDE v2.5 29-Nov-2019 13:29:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -143,16 +143,34 @@ function startScan_Callback(~,~,~)
 %get daqParam for name
 daqParam = getappdata(0,'daqParam');
 %initialize acquisition with name from edit box
+daqParam.IndefiniteScans = false;
 scan = Scan(daqParam.Name);
 setappdata(0,daqParam.Name,scan);
-
 
 % --- Executes on button press in stopScan.
 function stopScan_Callback(~,~,~)
 %get daqParam for name
 daqParam = getappdata(0,'daqParam');
-scan = getappdata(0,daqParam.Name);
-scan.stopScan;
+%if indefinite scans are ongoing, set to false so stops after this scan
+if daqParam.IndefiniteScans
+    daqParam.IndefiniteScans = false;
+else
+    %if its only one scan, immediately stop
+    scan = getappdata(0,daqParam.Name);
+    scan.stopScan;
+end
+
+% --- Executes on button press in startIndefiniteScans.
+function startIndefiniteScans_Callback(~,~,~)
+%get daqParam for name
+daqParam = getappdata(0,'daqParam');
+%set it so its ongoing
+daqParam.IndefiniteScans = true;
+daqParam.ScanNumber = 1;
+%start scan
+name = strcat(daqParam.Name,'_',num2str(daqParam.ScanNumber));
+scan = Scan(name);
+setappdata(0,name,scan);
 
 
 % --- Executes on button press in configureAcquisition.
@@ -204,3 +222,6 @@ setappdata(0,'daqParam',[])
 delete(instrfind)
 %close window
 close
+
+
+

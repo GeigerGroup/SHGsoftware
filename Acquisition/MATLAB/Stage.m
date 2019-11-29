@@ -63,16 +63,25 @@ classdef Stage < handle
             end
         end
         
-        function goToContinuous(obj,position)            
+        function goToCont(obj,position)
             %this function goes to a position and immediately returns
+            %put position in mm into steps
+            if (position > 99.7 || position < 0)
+                disp('Position out of range')
+                return
+            else
+                steps = int32(position*400);
+            end
+            
             %go to the position
-            disp(['Going to ' num2str(position) ' mm']);        
+            disp(['Going to ' num2str(position) ' mm']);
             result = calllib('libximc','command_move', obj.ID, ...
                 steps, 0);
             if result ~= 0
-                    disp(['Command failed with code', num2str(result)]);
+                disp(['Command failed with code', num2str(result)]);
             end
         end
+        
         
         function position = getCurrentPosition(obj)
         %this function returns the current position

@@ -23,8 +23,7 @@ classdef ScanFigure
                 multiple = 2;
             end
             %number of plots total
-            obj.NumPlots = sum([daqParam.PhotonCounterEnabled*multiple ...
-                (daqParam.ContMode == false)]);
+            obj.NumPlots = sum([daqParam.PhotonCounterEnabled*multiple 1]);
             
             %create list of strings to point to data
             obj.DataPointers = cell(obj.NumPlots,1);
@@ -54,12 +53,11 @@ classdef ScanFigure
                 end
             end
             
-            %stageplots
-            if (daqParam.ContMode == false)
-                %plot for stage position
-                obj.DataPointers{plotIndex} = 'Stage';
-                obj.Figure.Children(plotIndex).YLabel.String = 'Stage';
-            end
+
+            %plot for stage position
+            obj.DataPointers{plotIndex} = 'Stage';
+            obj.Figure.Children(plotIndex).YLabel.String = 'Stage';
+
         end
         
         function updatePlots(obj,data)

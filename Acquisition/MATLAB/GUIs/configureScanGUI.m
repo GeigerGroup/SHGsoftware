@@ -98,6 +98,7 @@ daqParam.PointsPerPos = str2double(handles.pointsEdit.String);
 %update cont mode and speed
 daqParam.ContMode = handles.contModeCheck.Value;
 daqParam.ScanSpeed = str2double(handles.speedEdit.String);
+daqParam.Stage.setSpeed(daqParam.ScanSpeed)
 
 %calculate positions to move stage to from number of points
 stageMin = 0;
