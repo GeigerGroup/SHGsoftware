@@ -49,7 +49,7 @@ classdef Queue < handle
             for i=1:length(obj.Names)
                 %create timer, set it to trigger from times
                 t = timer;
-                t.TimerFcn = {@(~,~) Acquisition(obj.Names{i})};
+                t.TimerFcn = {@(~,~) Scan(obj.Names{i})};
                 startat(t,obj.Times{i})
                 obj.TimerObjs{i} = t;
                 str = [obj.Names{i} ' programmed for ' datestr(obj.Times{i})];
